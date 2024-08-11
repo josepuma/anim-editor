@@ -22,6 +22,22 @@
 		59B86FF72C65644A001D0DC1 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B86FD12C656448001D0DC1 /* GameScene.swift */; };
 		59B86FF82C65644A001D0DC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 59B86FD22C65644A001D0DC1 /* Assets.xcassets */; };
 		59B86FF92C65644A001D0DC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 59B86FD22C65644A001D0DC1 /* Assets.xcassets */; };
+		59B870042C65648E001D0DC1 /* SpriteParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B870032C65648E001D0DC1 /* SpriteParser.swift */; };
+		59B870052C65648E001D0DC1 /* SpriteParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B870032C65648E001D0DC1 /* SpriteParser.swift */; };
+		59B870072C65649D001D0DC1 /* SpriteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B870062C65649D001D0DC1 /* SpriteManager.swift */; };
+		59B870082C65649D001D0DC1 /* SpriteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B870062C65649D001D0DC1 /* SpriteManager.swift */; };
+		59B8700A2C6564A8001D0DC1 /* Sprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B870092C6564A8001D0DC1 /* Sprite.swift */; };
+		59B8700B2C6564A8001D0DC1 /* Sprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B870092C6564A8001D0DC1 /* Sprite.swift */; };
+		59B8700D2C6564B4001D0DC1 /* Origin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B8700C2C6564B4001D0DC1 /* Origin.swift */; };
+		59B8700E2C6564B4001D0DC1 /* Origin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B8700C2C6564B4001D0DC1 /* Origin.swift */; };
+		59B870102C6564BE001D0DC1 /* Easing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B8700F2C6564BE001D0DC1 /* Easing.swift */; };
+		59B870112C6564BE001D0DC1 /* Easing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B8700F2C6564BE001D0DC1 /* Easing.swift */; };
+		59B870132C6564CB001D0DC1 /* TweenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B870122C6564CB001D0DC1 /* TweenManager.swift */; };
+		59B870142C6564CB001D0DC1 /* TweenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B870122C6564CB001D0DC1 /* TweenManager.swift */; };
+		59B870192C6564F6001D0DC1 /* Texture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B870182C6564F6001D0DC1 /* Texture.swift */; };
+		59B8701A2C6564F6001D0DC1 /* Texture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B870182C6564F6001D0DC1 /* Texture.swift */; };
+		59B8702F2C66A533001D0DC1 /* TextInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B8702E2C66A533001D0DC1 /* TextInput.swift */; };
+		59B870302C66A533001D0DC1 /* TextInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B8702E2C66A533001D0DC1 /* TextInput.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +55,15 @@
 		59B86FEC2C65644A001D0DC1 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		59B86FEF2C65644A001D0DC1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		59B86FF12C65644A001D0DC1 /* anim_editor_macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = anim_editor_macOS.entitlements; sourceTree = "<group>"; };
+		59B870032C65648E001D0DC1 /* SpriteParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteParser.swift; sourceTree = "<group>"; };
+		59B870062C65649D001D0DC1 /* SpriteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteManager.swift; sourceTree = "<group>"; };
+		59B870092C6564A8001D0DC1 /* Sprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sprite.swift; sourceTree = "<group>"; };
+		59B8700C2C6564B4001D0DC1 /* Origin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Origin.swift; sourceTree = "<group>"; };
+		59B8700F2C6564BE001D0DC1 /* Easing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Easing.swift; sourceTree = "<group>"; };
+		59B870122C6564CB001D0DC1 /* TweenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweenManager.swift; sourceTree = "<group>"; };
+		59B870182C6564F6001D0DC1 /* Texture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Texture.swift; sourceTree = "<group>"; };
+		59B8702B2C669CE0001D0DC1 /* anim-editor macOSDebug.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "anim-editor macOSDebug.entitlements"; sourceTree = "<group>"; };
+		59B8702E2C66A533001D0DC1 /* TextInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInput.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,10 +97,18 @@
 		59B86FCE2C656448001D0DC1 /* anim-editor Shared */ = {
 			isa = PBXGroup;
 			children = (
+				59B8702C2C66A505001D0DC1 /* UI */,
 				59B86FCF2C656448001D0DC1 /* Actions.sks */,
 				59B86FD02C656448001D0DC1 /* GameScene.sks */,
 				59B86FD12C656448001D0DC1 /* GameScene.swift */,
 				59B86FD22C65644A001D0DC1 /* Assets.xcassets */,
+				59B870032C65648E001D0DC1 /* SpriteParser.swift */,
+				59B870062C65649D001D0DC1 /* SpriteManager.swift */,
+				59B870092C6564A8001D0DC1 /* Sprite.swift */,
+				59B8700C2C6564B4001D0DC1 /* Origin.swift */,
+				59B8700F2C6564BE001D0DC1 /* Easing.swift */,
+				59B870122C6564CB001D0DC1 /* TweenManager.swift */,
+				59B870182C6564F6001D0DC1 /* Texture.swift */,
 			);
 			path = "anim-editor Shared";
 			sourceTree = "<group>";
@@ -103,12 +136,29 @@
 		59B86FE92C65644A001D0DC1 /* anim-editor macOS */ = {
 			isa = PBXGroup;
 			children = (
+				59B8702B2C669CE0001D0DC1 /* anim-editor macOSDebug.entitlements */,
 				59B86FEA2C65644A001D0DC1 /* AppDelegate.swift */,
 				59B86FEC2C65644A001D0DC1 /* GameViewController.swift */,
 				59B86FEE2C65644A001D0DC1 /* Main.storyboard */,
 				59B86FF12C65644A001D0DC1 /* anim_editor_macOS.entitlements */,
 			);
 			path = "anim-editor macOS";
+			sourceTree = "<group>";
+		};
+		59B8702C2C66A505001D0DC1 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				59B8702D2C66A50B001D0DC1 /* Components */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		59B8702D2C66A50B001D0DC1 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				59B8702E2C66A533001D0DC1 /* TextInput.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -217,8 +267,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				59B86FF62C65644A001D0DC1 /* GameScene.swift in Sources */,
+				59B8702F2C66A533001D0DC1 /* TextInput.swift in Sources */,
+				59B870192C6564F6001D0DC1 /* Texture.swift in Sources */,
+				59B870072C65649D001D0DC1 /* SpriteManager.swift in Sources */,
+				59B870042C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				59B86FDD2C65644A001D0DC1 /* GameViewController.swift in Sources */,
+				59B8700A2C6564A8001D0DC1 /* Sprite.swift in Sources */,
 				59B86FDB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
+				59B870102C6564BE001D0DC1 /* Easing.swift in Sources */,
+				59B8700D2C6564B4001D0DC1 /* Origin.swift in Sources */,
+				59B870132C6564CB001D0DC1 /* TweenManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,8 +285,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				59B86FF72C65644A001D0DC1 /* GameScene.swift in Sources */,
+				59B870302C66A533001D0DC1 /* TextInput.swift in Sources */,
+				59B8701A2C6564F6001D0DC1 /* Texture.swift in Sources */,
+				59B870082C65649D001D0DC1 /* SpriteManager.swift in Sources */,
+				59B870052C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				59B86FED2C65644A001D0DC1 /* GameViewController.swift in Sources */,
+				59B8700B2C6564A8001D0DC1 /* Sprite.swift in Sources */,
 				59B86FEB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
+				59B870112C6564BE001D0DC1 /* Easing.swift in Sources */,
+				59B8700E2C6564B4001D0DC1 /* Origin.swift in Sources */,
+				59B870142C6564CB001D0DC1 /* TweenManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -442,11 +508,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "anim-editor macOS/anim_editor_macOS.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "anim-editor macOS/anim-editor macOSDebug.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QKH3GHQ7MS;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -476,6 +543,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QKH3GHQ7MS;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
