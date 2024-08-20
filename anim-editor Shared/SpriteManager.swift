@@ -9,6 +9,10 @@ class SpriteManager {
         sprites.append(sprite)
         currentZPosition += 1
     }
+    
+    func addSprites(_ spritesList: [Sprite]){
+        sprites.append(contentsOf: spritesList)
+    }
 
     func addToScene(scene: SKScene) {
         for sprite in sprites {
