@@ -47,7 +47,7 @@ enum Easing : String, CaseIterable {
         case .sineInOut:
             return progress
         case .expoIn:
-            return progress
+            return pow(2, 10 * (progress - 1));
         case .expoOut:
             return progress
         case .expoInOut:
@@ -61,7 +61,7 @@ enum Easing : String, CaseIterable {
         case .elasticIn:
             return progress
         case .elasticOut:
-            return progress
+            return pow(2, -10 * progress) * sin((progress - 0.075) * (2 * Double.pi) / 0.3) + 1
         case .elasticHalfOut:
             return progress
         case .elasticQuarterOut:

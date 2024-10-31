@@ -18,7 +18,7 @@ class GameViewController: NSViewController {
         
         // Present the scene
         let skView = self.view as! SKView
-        scene.scaleMode = .aspectFill
+        //scene.scaleMode = .aspectFill
         skView.presentScene(scene)
         
         skView.ignoresSiblingOrder = false

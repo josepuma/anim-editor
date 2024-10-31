@@ -24,93 +24,40 @@ class GameScene: SKScene {
             abort()
         }
         
-        // Set the scale mode to scale to fit the window
-        
         return scene
     }
-    let path = "/Users/josepuma/Downloads/Baracuda - I Will Love Again (Nightcore Mix) (osuplayer111)/"
+    
+    let path = "/Users/josepuma/Downloads/179323 Sakamoto Maaya - Okaerinasai (tomatomerde Remix)"
     override func didMove(to view: SKView) {
+        super.didMove(to: view)
         backgroundColor = .black
-        //let fm = FileManager.default
-        
 
-        //print()
-        let audioFilePath = "/Users/josepuma/Documents/Swtoard/Mr Dj - Baby Alice/audio.mp3"
+        let audioFilePath = "/Users/josepuma/Downloads/179323 Sakamoto Maaya - Okaerinasai (tomatomerde Remix)/okaeri.mp3"
         setupAudio(filePath: audioFilePath)
  
-        //spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Quinn Karter - Living in a Dream (feat. Natalie Major) (Feint Remix) (Asphyxia).osb")
-        //spriteParser.parseSprites()
-        
-        let totalBars = 65
-        analyzer = AudioFFTAnalyzer(audioURL: URL(fileURLWithPath: audioFilePath))!
-        var startX = -320
-        for _ in 0...totalBars{
-            let bar = SKSpriteNode(color: .green, size: CGSize(width: 2, height: 5))
-            bar.position = CGPoint(x: startX, y: 0)
-            bar.anchorPoint = CGPoint(x: 0.5, y: 0)
-            barsFFT.append(bar)
-            addChild(bar)
-            startX += 10
-        }
-            //var times : [AudioFFT] = []
-            /*for audioPosition in stride(from: 1178, to: 60000, by: 50) {
-                if let audioFFT = analyzer.getFFTBars(atTime: audioPosition, barCount: totalBars) {
-                    times.append(audioFFT)
-                    //print(times)
-                }
-            }
-            
-            addFFTBars(total: totalBars, times: times)*/
-             
-        
+        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "/Sakamoto Maaya - Okaerinasai (tomatomerde Remix) (Azer).osb")
+        spriteParser.parseSprites()
         
         spriteManager.addToScene(scene: self)
-    
-    }
-    
-    func addFFTBars(total: Int, times: [AudioFFT]){
-        var startX : CGFloat = 0.0
-        for barIndex in 0...total - 1{
-            let sprite = Sprite(texture: Texture.textureFromLocalPath(path + "sb/pixel.png")!, origin: .centre)
-            sprite.addMoveTween(startTime: 0, endTime: 0, startValue: CGPoint(x: startX, y: 240), endValue: CGPoint(x: startX, y: 240))
-            
-            
-            for timeIndex in times.indices{
-                if timeIndex < times.count - 1{
-                    let startScaleY = (CGFloat(times[timeIndex].bars[barIndex]) * 60) + 2
-                    let endScaleY = (CGFloat(times[timeIndex + 1].bars[barIndex]) * 60) + 2
-                    sprite.addScaleVecTween(easing: .linear, startTime: times[timeIndex].startTime, endTime: times[timeIndex + 1].startTime, startValue: CGPoint(x: 5, y: startScaleY), endValue: CGPoint(x: 5, y: endScaleY))
-                }
-            }
-            
-            spriteManager.addSprite(sprite)
-            startX += 10
+        
+        let container = Container(alignment: .topLeft,  scene: self, nodeAlignment: .left){
+            SKNode.label("Score: 100 y muchas más cosas que no tengo ni idea jeje")
+            SKNode.label("Lives: 3")
         }
-        /*for bar in bars{
-            let sprite = Sprite(texture: Texture.textureFromLocalPath(path + "sb/8.png")!, origin: .centre)
-            sprite.addMoveTween(startTime: 0, endTime: 10000, startValue: CGPoint(x: startX, y: 370), endValue: CGPoint(x: startX, y: 370))
-            sprite.addScaleVecTween(startTime: 0, endTime: 10000, startValue: CGPoint(x: 1, y: CGFloat(bar)), endValue: CGPoint(x: 1, y: CGFloat(bar)))
-            spriteManager.addSprite(sprite)
-            startX += 10
-        }*/
+        
+        addChild(container)
     }
-
+    
+    override func didChangeSize(_ oldSize: CGSize) {
+       super.didChangeSize(oldSize)
+        updateContainerLayouts()
+   }
     
     override func update(_ currentTime: TimeInterval) {
         super.update(currentTime)
         if audioPlayer != nil{
             let gameTime = Int(audioPlayer.currentTime * 1000) // Convert to milliseconds or your desired unit
             spriteManager.updateAll(currentTime: gameTime)
-            if let audioFFT = analyzer?.getFFTBars(atTime: gameTime, barCount: barsFFT.count) {
-                var index = 0
-                for bar in barsFFT{
-                    let value = audioFFT.bars[index]
-                    bar.yScale = CGFloat(value * 20) + 0.1
-                    index += 1
-                }
-            }
-            
-            
         }
     }
     
@@ -121,8 +68,7 @@ class GameScene: SKScene {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             totalDuration = audioPlayer.duration
             audioPlayer.play()
-            //audioPlayer.volume = 0.1
-            //audioPlayer.play()
+            audioPlayer.currentTime = 20
         } catch {
             print("Error loading audio file: \(error)")
         }
