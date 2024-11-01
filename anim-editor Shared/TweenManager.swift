@@ -282,7 +282,7 @@ class TweenManager {
         latestEndTime = endTimes.max()
     }
 
-    func updateTexture(currentTime: Int, textureNode: SKSpriteNode) {
+    func updateTexture(currentTime: Int, textureNode: SKSpriteNode, scaleSize: CGFloat) {
         var blendMode: SKBlendMode = .alpha
         var scale : CGPoint = CGPoint(x: 1, y: 1)
         var alpha = CGFloat(0)
@@ -334,14 +334,16 @@ class TweenManager {
         // Apply properties to the texture node
         
         if moveTweens.count > 0{
-            textureNode.position = calculate2DValue(currentTime: currentTime, tweens: moveTweens, defaultValue: textureNode.position)
+            let pos = calculate2DValue(currentTime: currentTime, tweens: moveTweens, defaultValue: textureNode.position)
+            textureNode.position.x = pos.x / scaleSize
+            textureNode.position.y = pos.y / scaleSize
         }else{
-            textureNode.position.x = calculateValue(currentTime: currentTime, tweens: moveXTweens, defaultValue: textureNode.position.x)
-            textureNode.position.y = calculateValue(currentTime: currentTime, tweens: moveYTweens, defaultValue: textureNode.position.y)
+            textureNode.position.x = calculateValue(currentTime: currentTime, tweens: moveXTweens, defaultValue: textureNode.position.x) / scaleSize
+            textureNode.position.y = calculateValue(currentTime: currentTime, tweens: moveYTweens, defaultValue: textureNode.position.y) / scaleSize
         }
         textureNode.alpha = alpha
-        textureNode.xScale = scale.x
-        textureNode.yScale = scale.y
+        textureNode.xScale = scale.x / scaleSize
+        textureNode.yScale = scale.y / scaleSize
         textureNode.zRotation = calculateValue(currentTime: currentTime, tweens: rotateTweens, defaultValue: 0) * -1
         textureNode.blendMode = blendMode
         textureNode.colorBlendFactor = 1

@@ -1,8 +1,10 @@
 import SpriteKit
 
 class SpriteManager {
-     var sprites: [Sprite] = []
+    var sprites: [Sprite] = []
+    private weak var parentScene: SKScene?
     private var currentZPosition: CGFloat = 1
+    private var scale: CGFloat = 1
 
     func addSprite(_ sprite: Sprite) {
         sprite.zPosition = currentZPosition
@@ -15,14 +17,21 @@ class SpriteManager {
     }
 
     func addToScene(scene: SKScene) {
+        self.parentScene = scene
         for sprite in sprites {
             scene.addChild(sprite.node)
         }
     }
     
+    func updateSize(){
+        guard let scene = parentScene else { return }
+        let sceneSize = scene.size
+        scale = 854 / sceneSize.width
+    }
+    
     func updateAll(currentTime: Int) {
         for sprite in sprites {
-            sprite.update(currentTime: currentTime)
+            sprite.update(currentTime: currentTime, scale: scale)
         }
     }
     
@@ -33,7 +42,7 @@ class SpriteManager {
             popupScene.scaleMode = .aspectFit
 
             let activeSpritesAtPosition = self.sprites.filter { $0.isActive(at: time) }
-            for sprite in activeSpritesAtPosition {
+            /*for sprite in activeSpritesAtPosition {
                 let spriteCopy = sprite.clone()
                 spriteCopy.update(currentTime: time)
                 spriteCopy.node.xScale = (spriteCopy.node.xScale) * 0.2
@@ -41,7 +50,7 @@ class SpriteManager {
                 spriteCopy.node.position.x = (spriteCopy.node.position.x + 427) * 0.2
                 spriteCopy.node.position.y = (spriteCopy.node.position.y + 240) * 0.2
                 popupScene.addChild(spriteCopy.node)
-            }
+            }*/
 
             let view = SKView()
             let texture = view.texture(from: popupScene)!

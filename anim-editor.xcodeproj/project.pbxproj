@@ -44,6 +44,8 @@
 		59B870302C66A533001D0DC1 /* TextInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B8702E2C66A533001D0DC1 /* TextInput.swift */; };
 		59C0750D2CD32A3D0092DFA9 /* Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C0750C2CD32A360092DFA9 /* Container.swift */; };
 		59C0750E2CD32A3D0092DFA9 /* Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C0750C2CD32A360092DFA9 /* Container.swift */; };
+		59C71A982CD56C3900FDE954 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C71A972CD56C3000FDE954 /* Helpers.swift */; };
+		59C71A992CD56C3900FDE954 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C71A972CD56C3000FDE954 /* Helpers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -73,6 +75,7 @@
 		59B8702B2C669CE0001D0DC1 /* anim-editor macOSDebug.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "anim-editor macOSDebug.entitlements"; sourceTree = "<group>"; };
 		59B8702E2C66A533001D0DC1 /* TextInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInput.swift; sourceTree = "<group>"; };
 		59C0750C2CD32A360092DFA9 /* Container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Container.swift; sourceTree = "<group>"; };
+		59C71A972CD56C3000FDE954 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,6 +131,7 @@
 				59B8700F2C6564BE001D0DC1 /* Easing.swift */,
 				59B870122C6564CB001D0DC1 /* TweenManager.swift */,
 				59B870182C6564F6001D0DC1 /* Texture.swift */,
+				59C71A972CD56C3000FDE954 /* Helpers.swift */,
 			);
 			path = "anim-editor Shared";
 			sourceTree = "<group>";
@@ -299,6 +303,7 @@
 				59B870102C6564BE001D0DC1 /* Easing.swift in Sources */,
 				59C0750D2CD32A3D0092DFA9 /* Container.swift in Sources */,
 				59B8700D2C6564B4001D0DC1 /* Origin.swift in Sources */,
+				59C71A992CD56C3900FDE954 /* Helpers.swift in Sources */,
 				59B870132C6564CB001D0DC1 /* TweenManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -320,6 +325,7 @@
 				59B870112C6564BE001D0DC1 /* Easing.swift in Sources */,
 				59C0750E2CD32A3D0092DFA9 /* Container.swift in Sources */,
 				59B8700E2C6564B4001D0DC1 /* Origin.swift in Sources */,
+				59C71A982CD56C3900FDE954 /* Helpers.swift in Sources */,
 				59B870142C6564CB001D0DC1 /* TweenManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -40,17 +40,32 @@ class GameScene: SKScene {
         
         spriteManager.addToScene(scene: self)
         
-        let container = Container(alignment: .topLeft,  scene: self, nodeAlignment: .left){
+        let container = Container(alignment: .topLeft,  scene: self, nodeAlignment: .right){
             SKNode.label("Score: 100 y muchas más cosas que no tengo ni idea jeje")
             SKNode.label("Lives: 3")
         }
         
         addChild(container)
+        
+        let container2 = Container(alignment: .center,  scene: self, nodeAlignment: .center){
+            SKNode.label("容器布局改进", fontSize: 96, fontWeight: .bold)
+            //SKNode.label("确保内容水平居中排列", fontWeight: .bold)
+        }
+        
+        addChild(container2)
+        
+        let container3 = Container(alignment: .bottomLeft,  scene: self){
+            SKNode.label("Score: 100 y muchas más cosas que no tengo ni idea jeje")
+            SKNode.label("Lives: 3")
+        }
+        
+        addChild(container3)
     }
     
     override func didChangeSize(_ oldSize: CGSize) {
        super.didChangeSize(oldSize)
         updateContainerLayouts()
+        spriteManager.updateSize()
    }
     
     override func update(_ currentTime: TimeInterval) {
@@ -67,6 +82,7 @@ class GameScene: SKScene {
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             totalDuration = audioPlayer.duration
+            //audioPlayer.volume = 0
             audioPlayer.play()
             audioPlayer.currentTime = 20
         } catch {

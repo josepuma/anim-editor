@@ -57,8 +57,8 @@ class Sprite {
         tweenManager.addBlendModeTween(startTime: startTime, endTime: endTime)
     }
 
-    func update(currentTime: Int) {
-        tweenManager.updateTexture(currentTime: currentTime, textureNode: textureNode)
+    func update(currentTime: Int, scale: CGFloat) {
+        tweenManager.updateTexture(currentTime: currentTime, textureNode: textureNode, scaleSize: scale)
     }
     
     func clone() -> Sprite {

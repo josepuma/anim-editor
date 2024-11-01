@@ -53,44 +53,59 @@ class Container: SKNode {
         
         self.name = "container"
         
-        // Agregar un nodo de fondo para debugging
-        let background = SKShapeNode(rectOf: size)
-        background.fillColor = .clear
-        background.strokeColor = .red
-        background.lineWidth = 1
-        addChild(background)
         
-        // Agregar todos los nodos del builder
+        // Add all nodes from builder
         let nodes = content()
         nodes.forEach { node in
+            if let label = node as? SKLabelNode {
+                // Configuración específica para SKLabelNode
+                switch nodeAlignment {
+                case .left:
+                    label.horizontalAlignmentMode = .left
+                case .center:
+                    label.horizontalAlignmentMode = .center
+                case .right:
+                    label.horizontalAlignmentMode = .right
+                }
+                
+                // Configuración vertical según el alignment
+                if alignment == .topLeft || alignment == .topCenter || alignment == .topRight {
+                    label.verticalAlignmentMode = .top
+                } else if alignment == .bottomLeft || alignment == .bottomCenter || alignment == .bottomRight {
+                    label.verticalAlignmentMode = .bottom
+                } else {
+                    label.verticalAlignmentMode = .center
+                }
+            }
             contents.append(node)
             addChild(node)
         }
         updateLayout()
+        
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
     func updateLayout() {
-        var currentPosition: CGPoint = CGPoint(x: padding, y: -padding)
-        
+        var currentPosition = CGPoint(x: padding, y: -padding)
+       
         if autoSize {
             var totalWidth: CGFloat = padding * 2
             var totalHeight: CGFloat = padding * 2
-            
             for (index, node) in contents.enumerated() {
+                let nodeHeight = node is SKLabelNode ? (node as! SKLabelNode).fontSize : node.frame.height
+                let nodeWidth = node.frame.width
+                
                 if axis == .horizontal {
-                    totalWidth += node.frame.width
-                    totalHeight = max(totalHeight, node.frame.height + padding * 2)
+                    totalWidth += nodeWidth
                     if index < contents.count - 1 {
                         totalWidth += spacing
                     }
                 } else {
-                    totalWidth = max(totalWidth, node.frame.width + padding * 2)
-                    totalHeight += node.frame.height
+                    totalWidth = max(totalWidth, nodeWidth + padding * 2)
+                    totalHeight += nodeHeight
                     if index < contents.count - 1 {
                         totalHeight += spacing
                     }
@@ -98,61 +113,75 @@ class Container: SKNode {
             }
             
             size = CGSize(width: totalWidth, height: totalHeight)
-            (children.first as? SKShapeNode)?.path = CGPath(rect: CGRect(origin: .zero, size: size), transform: nil)
         }
         
-        for (index, node) in contents.enumerated() {
-            // Ajustar la posición según la alineación
+        for node in contents {
+            var nodePosition = currentPosition
+            let nodeHeight = node is SKLabelNode ? (node as! SKLabelNode).fontSize : node.frame.height
+            // Ajuste para la posición horizontal basada en nodeAlignment
             switch nodeAlignment {
-            case .left:
-                node.position = CGPoint(x: currentPosition.x, y: currentPosition.y)
-            case .center:
-                node.position = CGPoint(x: currentPosition.x + (size.width / 2) - (node.frame.width / 2), y: currentPosition.y)
-            case .right:
-                node.position = CGPoint(x: currentPosition.x + size.width - node.frame.width, y: currentPosition.y)
+                case .left:
+                    nodePosition.x = padding
+                case .center:
+                    nodePosition.x = 0
+                case .right:
+                    nodePosition.x = 1
             }
             
-            if axis == .horizontal {
-                currentPosition.x += node.frame.width + spacing
-            } else {
-                currentPosition.y -= node.frame.height + spacing
-            }
+            node.position = nodePosition
+            
+            // Mueve hacia abajo el currentPosition.y para el próximo nodo
+            currentPosition.y -= nodeHeight + spacing
         }
         
         updatePosition()
     }
 
-    func updatePosition() {
-        guard let scene = parentScene else { return }
-        let sceneSize = scene.size
-        
-        var position = CGPoint.zero
-        switch alignment {
-            case .topLeft:
-                position = CGPoint(x: -sceneSize.width / 2, y: sceneSize.height / 2)
-            case .topCenter:
-                position = CGPoint(x: 0, y: sceneSize.height / 2)
-            case .topRight:
-                position = CGPoint(x: sceneSize.width / 2 - size.width, y: sceneSize.height / 2)
-            case .centerLeft:
-                position = CGPoint(x: -sceneSize.width / 2, y: 0)
-            case .center:
-                position = CGPoint(x: 0, y: 0)
-            case .centerRight:
-                position = CGPoint(x: sceneSize.width / 2 - size.width, y: 0)
-            case .bottomLeft:
-                position = CGPoint(x: -sceneSize.width / 2, y: -sceneSize.height / 2)
-            case .bottomCenter:
-                position = CGPoint(x: 0, y: -sceneSize.height / 2)
-            case .bottomRight:
-                position = CGPoint(x: sceneSize.width / 2 - size.width, y: -sceneSize.height / 2)
-            }
-        //let anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        //self.position = CGPoint(x: position.x + (size.width * anchorPoint.x), y: position.y - (size.height * anchorPoint.y))
-        self.position = position
-        
-        print(position)
-    }
+        func updatePosition() {
+            guard let scene = parentScene else { return }
+            let sceneSize = scene.size
+            
+            // Calculate X position based on layout alignment and node alignment
+            let xPosition: CGFloat = {
+                switch (alignment, nodeAlignment) {
+                // Top alignments
+                case (.topLeft, .left), (.centerLeft, .left), (.bottomLeft, .left):
+                    return -sceneSize.width / 2
+                case (.topLeft, .center), (.centerLeft, .center), (.bottomLeft, .center):
+                    return -sceneSize.width / 2 + size.width / 2
+                case (.topLeft, .right), (.centerLeft, .right), (.bottomLeft, .right):
+                    return -sceneSize.width / 2 + size.width
+                    
+                case (.topCenter, .left), (.center, .left), (.bottomCenter, .left):
+                    return -size.width / 2
+                case (.topCenter, .center), (.center, .center), (.bottomCenter, .center):
+                    return 0
+                case (.topCenter, .right), (.center, .right), (.bottomCenter, .right):
+                    return size.width / 2
+                    
+                case (.topRight, .left), (.centerRight, .left), (.bottomRight, .left):
+                    return sceneSize.width / 2 - size.width
+                case (.topRight, .center), (.centerRight, .center), (.bottomRight, .center):
+                    return sceneSize.width / 2 - size.width / 2
+                case (.topRight, .right), (.centerRight, .right), (.bottomRight, .right):
+                    return sceneSize.width / 2
+                }
+            }()
+            
+            // Calculate Y position based on layout alignment
+            let yPosition: CGFloat = {
+                switch alignment {
+                case .topLeft, .topCenter, .topRight:
+                    return sceneSize.height / 2
+                case .centerLeft, .center, .centerRight:
+                    return 0
+                case .bottomLeft, .bottomCenter, .bottomRight:
+                    return -sceneSize.height / 2 + size.height
+                }
+            }()
+            
+            position = CGPoint(x: xPosition, y: yPosition)
+        }
 }
 
 // Result Builder para crear contenido de forma declarativa
@@ -191,8 +220,9 @@ extension SKScene {
 
 // Extensiones útiles para crear nodos comunes
 extension SKNode {
-    static func label(_ text: String, fontSize: CGFloat = 20) -> SKLabelNode {
+    static func label(_ text: String, fontSize: CGFloat = 20, fontWeight: NSFont.Weight = .regular) -> SKLabelNode {
         let label = SKLabelNode(text: text)
+        label.fontName = NSFont.systemFont(ofSize: fontSize, weight: fontWeight).fontName
         label.fontSize = fontSize
         return label
     }
