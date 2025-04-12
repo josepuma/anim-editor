@@ -20,6 +20,7 @@ class GameScene: SKScene {
     var effectsTableNode: EffectsTableNode!
     private var timelineComponent: Timeline!
     private var gridComponent: Grid!
+    private var gridToggleButton: GridToggleButton!
     
     class func newGameScene() -> GameScene {
         // Load 'GameScene.sks' as an SKScene.
@@ -36,12 +37,17 @@ class GameScene: SKScene {
         super.didMove(to: view)
         backgroundColor = .black
         
+            
+            // Crea un NSTrackingArea que abarque toda la vista
         let trackingArea = NSTrackingArea(
-                rect: view.bounds,
-                options: [.mouseEnteredAndExited, .mouseMoved, .activeInKeyWindow],
+                rect: view.visibleRect,  // Usa visibleRect en lugar de bounds
+                options: [.activeAlways, .mouseMoved, .enabledDuringMouseDrag, .inVisibleRect],
                 owner: view,
                 userInfo: nil
             )
+            
+            // Elimina áreas de seguimiento existentes y añade la nueva
+            view.trackingAreas.forEach { view.removeTrackingArea($0) }
             view.addTrackingArea(trackingArea)
 
         let audioFilePath = path + "audio.mp3"
@@ -53,23 +59,7 @@ class GameScene: SKScene {
         
         
         setupGrid()
-        /*effectsTableNode = EffectsTableNode()
-        effectsTableNode.position = CGPoint(x: 0, y: 0)
-        effectsTableNode.isUserInteractionEnabled = true
-        effectsTableNode.zPosition = 20
-        effectsTableNode.parentScene = self
-        effectsTableNode.spriteManager = spriteManager
-        addChild(effectsTableNode)*/
-        
-        /*let rainTexture = Texture.textureFromLocalPath("/Users/josepuma/Downloads/387136 BUTAOTOME - Waizatsu Ideology/sb/d.png")
-        let rainEffect = RainEffect(name: "Rain", parameters: [
-            "texture": rainTexture!,
-            "numberOfSprites": 2,
-            "startTime": 0,
-            "endTime": 100000
-        ])
-        addEffect(rainEffect)*/
-
+        setupGridToggleButton()
     }
     
     func setupTimeline() {
@@ -103,10 +93,44 @@ class GameScene: SKScene {
         }
     }
     
+    func setupGridToggleButton() {
+        gridToggleButton = GridToggleButton(size: 32)
+        
+        // Posicionar en la esquina superior derecha
+        let margin: CGFloat = 20
+        gridToggleButton.position = CGPoint(
+            x: self.size.width/2 - margin - 16,
+            y: self.size.height/2 - margin - 16
+        )
+        
+        // Configurar el callback
+        gridToggleButton.onToggle = { [weak self] isVisible in
+            self?.toggleGridVisibility(visible: isVisible)
+        }
+        
+        gridToggleButton.zPosition = 100 // Asegura que esté por encima del grid
+        addChild(gridToggleButton)
+    }
+    
+    func toggleGridVisibility(visible: Bool) {
+        guard let gridComponent = gridComponent else { return }
+        
+        if visible {
+            // Mostrar grid con animación de fade in
+            let fadeIn = SKAction.fadeIn(withDuration: 0.3)
+            gridComponent.run(fadeIn)
+        } else {
+            // Ocultar grid con animación de fade out
+            let fadeOut = SKAction.fadeOut(withDuration: 0.3)
+            gridComponent.run(fadeOut)
+        }
+    }
+    
     func setupGrid() {
         gridComponent = Grid(cellSize: 20) // Ajusta el tamaño de celda según prefieras
         gridComponent.position = CGPoint.zero // Centrado en la escena
         gridComponent.zPosition = 5 // Por debajo de la UI pero por encima del fondo
+        gridComponent.alpha = 0.0
         addChild(gridComponent)
         
         // Ajustar al tamaño de la pantalla
@@ -136,6 +160,14 @@ class GameScene: SKScene {
             timelineComponent.position = CGPoint(
                 x: 0, // Centrado horizontalmente
                 y: -size.height/2 + bottomPadding // Parte inferior + padding
+            )
+        }
+        
+        if gridToggleButton != nil {
+            let margin: CGFloat = 20
+            gridToggleButton.position = CGPoint(
+                x: self.size.width/2 - margin - 16,
+                y: self.size.height/2 - margin - 16
             )
         }
         
@@ -223,7 +255,6 @@ extension GameScene {
     
     override func mouseMoved(with event: NSEvent) {
         super.mouseMoved(with: event)
-        print("owo")
         // Pasar el evento al componente de grid
         if let gridComponent = gridComponent {
             let location = event.location(in: self)
@@ -250,6 +281,17 @@ extension GameScene {
             }
         }
 
+}
+
+extension SKView {
+    override open func mouseMoved(with event: NSEvent) {
+        super.mouseMoved(with: event)
+        
+        // Pasa el evento a la escena actual
+        if let scene = scene as? GameScene {
+            scene.mouseMoved(with: event)
+        }
+    }
 }
 #endif
 

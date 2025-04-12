@@ -48,14 +48,18 @@ class Grid: SKNode {
     }
     
     private func setupCoordinatesLabel() {
+        let margin: CGFloat = 5
         // Etiqueta para mostrar coordenadas
         coordsLabel = SKLabelNode(text: "X: 0, Y: 0")
         coordsLabel.fontName = "HelveticaNeue-Medium"
-        coordsLabel.fontSize = 14
+        coordsLabel.fontSize = 10
         coordsLabel.fontColor = .white
-        coordsLabel.position = CGPoint(x: 0, y: 0) // Mostrar encima de la cuadrícula
-        coordsLabel.horizontalAlignmentMode = .center
+        coordsLabel.horizontalAlignmentMode = .left
         coordsLabel.zPosition = 10
+        coordsLabel.position = CGPoint(
+            x: -gridWidth/2 - margin + 20,
+            y: gridHeight/2 - margin - 16
+        )
         addChild(coordsLabel)
     }
     
@@ -108,46 +112,54 @@ class Grid: SKNode {
         // Crear nodo para las líneas centrales
         let centerLines = SKShapeNode()
         centerLines.path = centerPath
-        centerLines.strokeColor = SKColor(white: 1.0, alpha: 0.6) // Más brillante para destacar
-        centerLines.lineWidth = 2.0
+        centerLines.strokeColor = SKColor(white: 1.0, alpha: 0.12) // Más brillante para destacar
+        centerLines.lineWidth = 1.0
         addChild(centerLines)
     }
     
     // Actualizar según el tamaño de la pantalla
     func adjustForScreenSize(screenSize: CGSize) {
-        // Calcular factores de escala
+        // Asegurarnos de que el grid siempre ocupe todo el espacio disponible
+        // manteniendo la misma escala en ambos ejes
+        
+        // Primero, actualizamos los factores de escala
         scaleFactorX = screenSize.width / gridWidth
         scaleFactorY = screenSize.height / gridHeight
         
-        // Aplicar escala manteniendo las proporciones
+        // Elegimos el factor que hará que el grid ocupe toda la pantalla
+        // sin distorsionar la relación de aspecto
         let scaleFactor = min(scaleFactorX, scaleFactorY)
+        
+        // Aplicamos la escala
         self.setScale(scaleFactor)
+        drawGrid()
     }
     
-    // Convertir coordenadas del mundo a nuestro sistema de cuadrícula
     func worldToGridCoordinates(_ worldPoint: CGPoint) -> CGPoint {
-        // Convertir el punto al sistema de coordenadas local
-        let localPoint = convert(worldPoint, from: self.scene!)
+        // Verificar si estamos en una escena
+        guard let scene = self.scene else {
+            // Si no estamos en una escena, devolvemos las coordenadas tal cual o un valor por defecto
+            return CGPoint(x: 0, y: 0)
+        }
         
-        // Aplicar la escala inversa para obtener la coordenada real
-        let scaledPoint = CGPoint(
-            x: localPoint.x / xScale,
-            y: localPoint.y / yScale
-        )
+        // Ahora es seguro usar scene (sin el !)
+        let localPoint = convert(worldPoint, from: scene)
         
-        // Mapear al rango 0-854 x 0-480
-        let mappedX = scaledPoint.x + gridWidth/2
-        let mappedY = scaledPoint.y + gridHeight/2
+        // Resto del código...
+        let gridX = localPoint.x + gridWidth/2
+        let gridY = gridHeight/2 - localPoint.y
         
-        return CGPoint(x: mappedX, y: mappedY)
+        return CGPoint(x: gridX, y: gridY)
     }
     
     #if os(OSX)
     // Esta es una función que se llama desde GameScene, ya que SpriteKit
     // no propaga eventos mouseMoved automáticamente a los nodos hijos
     func handleMouseMovement(location: CGPoint) {
-        print("owo")
-        updateCoordinatesDisplay(worldPosition: location)
+        // Solo actualizar si el grid está en la escena
+        if self.parent != nil {
+            updateCoordinatesDisplay(worldPosition: location)
+        }
     }
     #endif
     
@@ -159,10 +171,10 @@ class Grid: SKNode {
         let roundedY = Int(gridPosition.y)
         
         // Actualizar la etiqueta
-        coordsLabel.text = "X: \(roundedX), Y: \(roundedY)"
+        coordsLabel.text = "X: \(roundedX - 107), Y: \(roundedY)"
         
         // Guardar la posición actual para referencia
-        currentPosition = CGPoint(x: roundedX, y: roundedY)
+        currentPosition = CGPoint(x: roundedX, y: roundedY * -1)
     }
     
     // Método para obtener la posición actual en el grid
