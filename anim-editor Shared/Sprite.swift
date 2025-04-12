@@ -4,14 +4,34 @@ class Sprite {
     private var textureNode: SKSpriteNode
     private var tweenManager: TweenManager
     private var zIndexPosition: CGFloat = 1
+    private var initialPosition: CGPoint
+    
+    var node: SKSpriteNode {
+        return textureNode
+    }
+    
+    func isActive(at time: Int) -> Bool {
+        return tweenManager.isActive(at: time)
+    }
+
+    var zPosition: CGFloat {
+        get { return zIndexPosition }
+        set { zIndexPosition = newValue }
+    }
 
     init(texture: SKTexture, origin : Origin = .centre) {
         textureNode = SKSpriteNode(texture: texture)
         textureNode.size = texture.size()
         textureNode.colorBlendFactor = 1
         textureNode.anchorPoint = origin.anchorPoint
+        initialPosition = .zero
         tweenManager = TweenManager()
     }
+    
+    func setInitialPosition(position: CGPoint) {
+       initialPosition = position
+       textureNode.position = position
+   }
     
     func startLoop(startTime: Int, loopCount: Int) {
         tweenManager.startLoop(startTime: startTime, loopCount: loopCount)
@@ -58,7 +78,7 @@ class Sprite {
     }
 
     func update(currentTime: Int, scale: CGFloat) {
-        tweenManager.updateTexture(currentTime: currentTime, textureNode: textureNode, scaleSize: scale)
+        tweenManager.updateTexture(currentTime: currentTime, textureNode: textureNode, scaleSize: scale, initialPosition: initialPosition)
     }
     
     func clone() -> Sprite {
@@ -68,19 +88,6 @@ class Sprite {
         newSprite.tweenManager = tweenManager // Asumiendo que TweenManager se puede compartir
         newSprite.zPosition = zIndexPosition
         return newSprite
-    }
-
-    var node: SKSpriteNode {
-        return textureNode
-    }
-    
-    func isActive(at time: Int) -> Bool {
-        return tweenManager.isActive(at: time)
-    }
-
-    var zPosition: CGFloat {
-        get { return zIndexPosition }
-        set { zIndexPosition = newValue }
     }
 }
 

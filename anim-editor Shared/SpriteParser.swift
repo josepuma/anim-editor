@@ -11,7 +11,7 @@ class SpriteParser {
     }
     
     func getTexture(from texturePath: String) -> SKTexture? {
-        let path = "/Users/josepuma/Downloads/387136 BUTAOTOME - Waizatsu Ideology/"
+        let path = "/Users/josepuma/Downloads/2025917 Ryokuoushoku Shakai - Character"
            // Check if the texture is already in the cache
            if let cachedTexture = textureCache[texturePath] {
                return cachedTexture
@@ -65,11 +65,14 @@ class SpriteParser {
                     if let x = Double(parts[4]), let y = Double(parts[5]) {
                         position = CGPoint(x: x - 320, y: (y - 240) * -1)
                     }
+                
+                    
                     // Create the new sprite with the texture path and position
                     if let texturePath = texturePath, let texture = getTexture(from: "\(texturePath)") {
                         let originName = String(parts[2]).camelCased
                         currentSprite = Sprite(texture: texture, origin: Origin(rawValue: originName) ?? .centre)
-                        currentSprite?.node.position = position
+                        currentSprite?.setInitialPosition(position: position)
+                        //currentSprite?.node.position = position
                     }
                     break;
                     

@@ -282,7 +282,7 @@ class TweenManager {
         latestEndTime = endTimes.max()
     }
 
-    func updateTexture(currentTime: Int, textureNode: SKSpriteNode, scaleSize: CGFloat) {
+    func updateTexture(currentTime: Int, textureNode: SKSpriteNode, scaleSize: CGFloat, initialPosition: CGPoint) {
         var blendMode: SKBlendMode = .alpha
         var scale : CGPoint = CGPoint(x: 1, y: 1)
         var alpha = CGFloat(0)
@@ -311,6 +311,18 @@ class TweenManager {
             return
         }
         
+        if moveTweens.count > 0 {
+            let pos = calculate2DValue(currentTime: currentTime, tweens: moveTweens, defaultValue: initialPosition)
+            textureNode.position.x = pos.x / scaleSize
+            textureNode.position.y = pos.y / scaleSize
+        } else if moveXTweens.count > 0 || moveYTweens.count > 0 {
+            textureNode.position.x = calculateValue(currentTime: currentTime, tweens: moveXTweens, defaultValue: initialPosition.x) / scaleSize
+            textureNode.position.y = calculateValue(currentTime: currentTime, tweens: moveYTweens, defaultValue: initialPosition.y) / scaleSize
+        } else {
+            // Si no hay tweens de movimiento, usar la posición inicial escalada
+            textureNode.position.x = initialPosition.x / scaleSize
+            textureNode.position.y = initialPosition.y / scaleSize
+        }
         
 
         let latestBlendModeKeyframe = blendModeKeyframes.last { $0.time <= currentTime }
@@ -329,17 +341,6 @@ class TweenManager {
             }else{
                 blendMode = .alpha
             }
-        }
-
-        // Apply properties to the texture node
-        
-        if moveTweens.count > 0{
-            let pos = calculate2DValue(currentTime: currentTime, tweens: moveTweens, defaultValue: textureNode.position)
-            textureNode.position.x = pos.x / scaleSize
-            textureNode.position.y = pos.y / scaleSize
-        }else{
-            textureNode.position.x = calculateValue(currentTime: currentTime, tweens: moveXTweens, defaultValue: textureNode.position.x) / scaleSize
-            textureNode.position.y = calculateValue(currentTime: currentTime, tweens: moveYTweens, defaultValue: textureNode.position.y) / scaleSize
         }
         //print(alpha, scale.x, scale.y, textureNode.isHidden)
         textureNode.alpha = alpha
