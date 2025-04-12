@@ -15,7 +15,9 @@ class GameScene: SKScene {
     let spriteManager = SpriteManager()
     private var spriteParser: SpriteParser!
     var barsFFT : [SKNode] = []
+    var effects: [Effect] = []
     var analyzer : AudioFFTAnalyzer?
+    var effectsTableNode: EffectsTableNode!
     
     class func newGameScene() -> GameScene {
         // Load 'GameScene.sks' as an SKScene.
@@ -27,39 +29,42 @@ class GameScene: SKScene {
         return scene
     }
     
-    let path = "/Users/josepuma/Downloads/179323 Sakamoto Maaya - Okaerinasai (tomatomerde Remix)"
+    let path = "/Users/josepuma/Downloads/387136 BUTAOTOME - Waizatsu Ideology/"
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         backgroundColor = .black
 
-        let audioFilePath = "/Users/josepuma/Downloads/179323 Sakamoto Maaya - Okaerinasai (tomatomerde Remix)/okaeri.mp3"
+        let audioFilePath = "/Users/josepuma/Downloads/387136 BUTAOTOME - Waizatsu Ideology/lub.mp3"
         setupAudio(filePath: audioFilePath)
  
-        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "/Sakamoto Maaya - Okaerinasai (tomatomerde Remix) (Azer).osb")
-        spriteParser.parseSprites()
-        
+        //spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "BUTAOTOME - Waizatsu Ideology (Jounzan).osb")
+        //spriteParser.parseSprites()
         spriteManager.addToScene(scene: self)
         
-        let container = Container(alignment: .topLeft,  scene: self, nodeAlignment: .right){
-            SKNode.label("Score: 100 y muchas más cosas que no tengo ni idea jeje")
-            SKNode.label("Lives: 3")
-        }
+        effectsTableNode = EffectsTableNode()
+        effectsTableNode.position = CGPoint(x: 0, y: 0)
+        effectsTableNode.isUserInteractionEnabled = true
+        effectsTableNode.zPosition = 20
+        effectsTableNode.parentScene = self
+        effectsTableNode.spriteManager = spriteManager
+        addChild(effectsTableNode)
         
-        addChild(container)
-        
-        let container2 = Container(alignment: .center,  scene: self, nodeAlignment: .center){
-            SKNode.label("容器布局改进", fontSize: 96, fontWeight: .bold)
-            //SKNode.label("确保内容水平居中排列", fontWeight: .bold)
-        }
-        
-        addChild(container2)
-        
-        let container3 = Container(alignment: .bottomLeft,  scene: self){
-            SKNode.label("Score: 100 y muchas más cosas que no tengo ni idea jeje")
-            SKNode.label("Lives: 3")
-        }
-        
-        addChild(container3)
+        let rainTexture = Texture.textureFromLocalPath("/Users/josepuma/Downloads/387136 BUTAOTOME - Waizatsu Ideology/sb/d.png")
+        let rainEffect = RainEffect(name: "Rain", parameters: [
+            "texture": rainTexture!,
+            "numberOfSprites": 2,
+            "startTime": 0,
+            "endTime": 100000
+        ])
+        addEffect(rainEffect)
+
+    }
+    
+    func addEffect(_ effect: Effect) {
+        effects.append(effect)
+        effect.apply(to: spriteManager, in: self)
+        effectsTableNode.effects = effects
+        effectsTableNode.reloadData()
     }
     
     override func didChangeSize(_ oldSize: CGSize) {
@@ -84,7 +89,7 @@ class GameScene: SKScene {
             totalDuration = audioPlayer.duration
             //audioPlayer.volume = 0
             audioPlayer.play()
-            audioPlayer.currentTime = 20
+            //audioPlayer.currentTime = 30
         } catch {
             print("Error loading audio file: \(error)")
         }

@@ -341,6 +341,7 @@ class TweenManager {
             textureNode.position.x = calculateValue(currentTime: currentTime, tweens: moveXTweens, defaultValue: textureNode.position.x) / scaleSize
             textureNode.position.y = calculateValue(currentTime: currentTime, tweens: moveYTweens, defaultValue: textureNode.position.y) / scaleSize
         }
+        //print(alpha, scale.x, scale.y, textureNode.isHidden)
         textureNode.alpha = alpha
         textureNode.xScale = scale.x / scaleSize
         textureNode.yScale = scale.y / scaleSize

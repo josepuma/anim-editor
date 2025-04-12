@@ -10,6 +10,9 @@ class SpriteManager {
         sprite.zPosition = currentZPosition
         sprites.append(sprite)
         currentZPosition += 1
+        if let scene = parentScene {
+            scene.addChild(sprite.node)
+        }
     }
     
     func addSprites(_ spritesList: [Sprite]){
@@ -32,6 +35,13 @@ class SpriteManager {
     func updateAll(currentTime: Int) {
         for sprite in sprites {
             sprite.update(currentTime: currentTime, scale: scale)
+        }
+    }
+    
+    func removeSprite(_ sprite: Sprite) {
+        if let index = sprites.firstIndex(where: { $0 === sprite }) {
+            sprites.remove(at: index)
+            sprite.node.removeFromParent()
         }
     }
     

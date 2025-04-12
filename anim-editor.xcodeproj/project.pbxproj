@@ -42,6 +42,14 @@
 		59B8701A2C6564F6001D0DC1 /* Texture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B870182C6564F6001D0DC1 /* Texture.swift */; };
 		59B8702F2C66A533001D0DC1 /* TextInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B8702E2C66A533001D0DC1 /* TextInput.swift */; };
 		59B870302C66A533001D0DC1 /* TextInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B8702E2C66A533001D0DC1 /* TextInput.swift */; };
+		59BEB0762D24B4CE0072974F /* Effect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BEB0752D24B4CD0072974F /* Effect.swift */; };
+		59BEB0772D24B4CE0072974F /* Effect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BEB0752D24B4CD0072974F /* Effect.swift */; };
+		59BEB0792D24B4E10072974F /* Rain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BEB0782D24B4E00072974F /* Rain.swift */; };
+		59BEB07A2D24B4E10072974F /* Rain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BEB0782D24B4E00072974F /* Rain.swift */; };
+		59BEB07F2D24B8900072974F /* EffectsTableNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BEB07E2D24B8880072974F /* EffectsTableNode.swift */; };
+		59BEB0802D24B8900072974F /* EffectsTableNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BEB07E2D24B8880072974F /* EffectsTableNode.swift */; };
+		59BEB0822D24C5960072974F /* InputFieldNone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BEB0812D24C58E0072974F /* InputFieldNone.swift */; };
+		59BEB0832D24C5960072974F /* InputFieldNone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BEB0812D24C58E0072974F /* InputFieldNone.swift */; };
 		59C0750D2CD32A3D0092DFA9 /* Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C0750C2CD32A360092DFA9 /* Container.swift */; };
 		59C0750E2CD32A3D0092DFA9 /* Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C0750C2CD32A360092DFA9 /* Container.swift */; };
 		59C71A982CD56C3900FDE954 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C71A972CD56C3000FDE954 /* Helpers.swift */; };
@@ -74,6 +82,10 @@
 		59B870182C6564F6001D0DC1 /* Texture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Texture.swift; sourceTree = "<group>"; };
 		59B8702B2C669CE0001D0DC1 /* anim-editor macOSDebug.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "anim-editor macOSDebug.entitlements"; sourceTree = "<group>"; };
 		59B8702E2C66A533001D0DC1 /* TextInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInput.swift; sourceTree = "<group>"; };
+		59BEB0752D24B4CD0072974F /* Effect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Effect.swift; sourceTree = "<group>"; };
+		59BEB0782D24B4E00072974F /* Rain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rain.swift; sourceTree = "<group>"; };
+		59BEB07E2D24B8880072974F /* EffectsTableNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectsTableNode.swift; sourceTree = "<group>"; };
+		59BEB0812D24C58E0072974F /* InputFieldNone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputFieldNone.swift; sourceTree = "<group>"; };
 		59C0750C2CD32A360092DFA9 /* Container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Container.swift; sourceTree = "<group>"; };
 		59C71A972CD56C3000FDE954 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -118,6 +130,7 @@
 		59B86FCE2C656448001D0DC1 /* anim-editor Shared */ = {
 			isa = PBXGroup;
 			children = (
+				59BEB06E2D24B1380072974F /* EffectSystem */,
 				596FB9312C744BFF00E4733C /* Audio */,
 				59B8702C2C66A505001D0DC1 /* UI */,
 				59B86FCF2C656448001D0DC1 /* Actions.sks */,
@@ -183,6 +196,17 @@
 				59B8702E2C66A533001D0DC1 /* TextInput.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		59BEB06E2D24B1380072974F /* EffectSystem */ = {
+			isa = PBXGroup;
+			children = (
+				59BEB0812D24C58E0072974F /* InputFieldNone.swift */,
+				59BEB07E2D24B8880072974F /* EffectsTableNode.swift */,
+				59BEB0782D24B4E00072974F /* Rain.swift */,
+				59BEB0752D24B4CD0072974F /* Effect.swift */,
+			);
+			path = EffectSystem;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -290,11 +314,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59BEB0822D24C5960072974F /* InputFieldNone.swift in Sources */,
 				59B86FF62C65644A001D0DC1 /* GameScene.swift in Sources */,
 				59B8702F2C66A533001D0DC1 /* TextInput.swift in Sources */,
 				596FB9362C74532F00E4733C /* AudioFFT.swift in Sources */,
 				59B870192C6564F6001D0DC1 /* Texture.swift in Sources */,
+				59BEB0772D24B4CE0072974F /* Effect.swift in Sources */,
+				59BEB0792D24B4E10072974F /* Rain.swift in Sources */,
 				59B870072C65649D001D0DC1 /* SpriteManager.swift in Sources */,
+				59BEB07F2D24B8900072974F /* EffectsTableNode.swift in Sources */,
 				59B870042C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				596FB9332C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
 				59B86FDD2C65644A001D0DC1 /* GameViewController.swift in Sources */,
@@ -312,11 +340,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59BEB0832D24C5960072974F /* InputFieldNone.swift in Sources */,
 				59B86FF72C65644A001D0DC1 /* GameScene.swift in Sources */,
 				59B870302C66A533001D0DC1 /* TextInput.swift in Sources */,
 				596FB9372C74532F00E4733C /* AudioFFT.swift in Sources */,
 				59B8701A2C6564F6001D0DC1 /* Texture.swift in Sources */,
+				59BEB0762D24B4CE0072974F /* Effect.swift in Sources */,
+				59BEB07A2D24B4E10072974F /* Rain.swift in Sources */,
 				59B870082C65649D001D0DC1 /* SpriteManager.swift in Sources */,
+				59BEB0802D24B8900072974F /* EffectsTableNode.swift in Sources */,
 				59B870052C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				596FB9342C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
 				59B86FED2C65644A001D0DC1 /* GameViewController.swift in Sources */,
