@@ -47,26 +47,55 @@ class SpriteManager {
     
     func textureForTime(time: Int, size: CGSize, completion: @escaping (SKTexture) -> Void) {
         DispatchQueue.main.async {
+            // Crear una escena para la vista previa con el tamaño solicitado
             let popupScene = SKScene(size: size)
             popupScene.backgroundColor = .black
             popupScene.scaleMode = .aspectFit
-
-            let activeSpritesAtPosition = self.sprites.filter { $0.isActive(at: time) }
-            /*for sprite in activeSpritesAtPosition {
-                let spriteCopy = sprite.clone()
-                spriteCopy.update(currentTime: time)
-                spriteCopy.node.xScale = (spriteCopy.node.xScale) * 0.2
-                spriteCopy.node.yScale = (spriteCopy.node.yScale) * 0.2
-                spriteCopy.node.position.x = (spriteCopy.node.position.x + 427) * 0.2
-                spriteCopy.node.position.y = (spriteCopy.node.position.y + 240) * 0.2
-                popupScene.addChild(spriteCopy.node)
-            }*/
-
-            let view = SKView()
-            let texture = view.texture(from: popupScene)!
+            popupScene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
             
-            // Call completion on the main thread (we're already on the main thread)
-            completion(texture)
+            // Filtrar sprites activos en ese momento
+            let activeSpritesAtPosition = self.sprites.filter { $0.isActive(at: time) }
+            
+            if activeSpritesAtPosition.isEmpty {
+                // Si no hay sprites activos, mostrar un mensaje
+                let noContentLabel = SKLabelNode(text: "No content at this time")
+                noContentLabel.fontColor = .white
+                noContentLabel.fontSize = 14
+                noContentLabel.position = CGPoint(x: size.width/2, y: size.height/2)
+                popupScene.addChild(noContentLabel)
+            } else {
+                let scale = CGFloat(854 / 256)
+                
+                // Añadir los sprites a la escena temporal
+                for sprite in activeSpritesAtPosition {
+                    // Crear una copia para no afectar los sprites originales
+                    let spriteCopy = sprite.clone()
+                    
+                    // Actualizar al tiempo correcto
+                    spriteCopy.update(currentTime: time, scale: scale)
+                    
+                    popupScene.addChild(spriteCopy.node)
+                }
+            }
+            
+            // Generar la textura
+            let view = SKView()
+            if let texture = view.texture(from: popupScene) {
+                completion(texture)
+            } else {
+                // Textura de respaldo en caso de error
+                let fallbackScene = SKScene(size: size)
+                fallbackScene.backgroundColor = .darkGray
+                
+                let errorLabel = SKLabelNode(text: "Preview unavailable")
+                errorLabel.fontColor = .white
+                errorLabel.fontSize = 14
+                errorLabel.position = CGPoint(x: size.width/2, y: size.height/2)
+                fallbackScene.addChild(errorLabel)
+                
+                let fallbackTexture = view.texture(from: fallbackScene)!
+                completion(fallbackTexture)
+            }
         }
     }
 

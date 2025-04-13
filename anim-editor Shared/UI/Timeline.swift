@@ -1,5 +1,5 @@
 //
-//  Timeline.swift
+//  Timeline.swift (actualización)
 //  anim-editor
 //
 //  Created by José Puma on 12-04-25.
@@ -16,6 +16,7 @@ class Timeline: SKNode {
     private var durationLabel: SKLabelNode!
     private var playButton: SKLabelNode!
     private var hitboxNode: SKShapeNode!
+    private var previewNode: TimelinePreviewNode!
     
     // Properties
     private var barWidth: CGFloat
@@ -27,8 +28,17 @@ class Timeline: SKNode {
     private var isDragging = false
     private var updateTimer: Timer?
     
+    // Preview relacionado
+    private var isHovering = false
+    private var lastPreviewTime: Int = -1
+    private var previewUpdateThrottle: TimeInterval = 0.2 // Limitar actualizaciones
+    private var lastPreviewUpdate: TimeInterval = 0
+    
     // Callback para notificar cambios en la posición
     var onTimeChange: ((TimeInterval) -> Void)?
+    
+    // Callback para solicitar texturas para la vista previa
+    var onRequestPreview: ((Int, @escaping (SKTexture) -> Void) -> Void)?
     
     init(width: CGFloat, height: CGFloat = 8, cornerRadius: CGFloat = 4) {
         self.barWidth = width
@@ -101,6 +111,41 @@ class Timeline: SKNode {
         hitboxNode.alpha = 1 // Casi invisible, pero detectable
         hitboxNode.name = "progressHitbox"
         addChild(hitboxNode)
+        
+        // Crear el nodo de vista previa
+        previewNode = TimelinePreviewNode()
+        addChild(previewNode) // Lo añadimos inicialmente como hijo
+        
+        // Configuramos el nodo para que se actualice cuando el timeline se añada a la escena
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "NodeAddedToScene"), object: nil, queue: nil) { [weak self] _ in
+            self?.addPreviewNodeToScene()
+        }
+    }
+    
+    // No podemos usar didMove ya que no es parte de SKNode
+    // En su lugar, usaremos un nuevo método
+    func addPreviewNodeToScene() {
+        
+        // Verificar si el previewNode ya está en la escena
+        if previewNode.parent == self && self.scene != nil {
+            
+            // Remover de la jerarquía actual
+            previewNode.removeFromParent()
+            
+            // Añadir directamente a la escena para que esté en el nivel superior
+            self.scene!.addChild(previewNode)
+            
+            // Inicialmente ocultar el nodo (alpha 0)
+            previewNode.alpha = 0
+            
+        } else if previewNode.parent == nil {
+            if let scene = self.scene {
+                scene.addChild(previewNode)
+                previewNode.alpha = 0
+            }
+        } else {
+
+        }
     }
     
     func setAudioPlayer(_ player: AVAudioPlayer) {
@@ -239,6 +284,71 @@ class Timeline: SKNode {
                                 transform: nil)
     }
     
+    // Método para calcular el tiempo basado en la posición del cursor
+    private func getTimeAtPosition(_ position: CGPoint) -> Int {
+        guard let player = audioPlayer else { return 0 }
+        
+        // Calcular la posición relativa en la barra
+        let positionRelativeX = position.x + barWidth/2
+        let cappedPositionX = max(0, min(positionRelativeX, barWidth))
+        let progress = cappedPositionX / barWidth
+        
+        // Convertir a milisegundos
+        return Int(player.duration * Double(progress) * 1000)
+    }
+    
+    // En Timeline.swift, método handleHover:
+    private func handleHover(at position: CGPoint) {
+        if hitboxNode.contains(position) {
+            if !isHovering {
+                isHovering = true
+            }
+            
+            // Obtener el tiempo basado en la posición
+            let previewTime = getTimeAtPosition(position)
+            
+            // Evitar actualizar demasiado frecuentemente
+            let currentTime = CACurrentMediaTime()
+            if abs(previewTime - lastPreviewTime) > 50 && // Si hay un cambio significativo en el tiempo
+               currentTime - lastPreviewUpdate > previewUpdateThrottle { // Y ha pasado suficiente tiempo
+                
+                lastPreviewTime = previewTime
+                lastPreviewUpdate = currentTime
+                
+                // Calcular la posición en coordenadas de la escena
+                // La posición debe estar directamente sobre el punto donde el usuario está pasando el cursor en el timeline
+                let positionInScene: CGPoint
+                
+                if let scene = self.scene {
+                    // Convertir la posición local del timeline a coordenadas globales de la escena
+                    positionInScene = scene.convert(position, from: self)
+                } else {
+                    positionInScene = self.convert(position, to: self.parent ?? self)
+                }
+                
+                // Mostrar la vista previa en la posición calculada
+                // La vista previa debe aparecer justo arriba del timeline
+                previewNode.show(at: positionInScene)
+                previewNode.showLoading()
+                
+                // Solicitar la vista previa de manera asíncrona
+                if let onRequestPreview = onRequestPreview {
+                    onRequestPreview(previewTime) { [weak self] texture in
+                        DispatchQueue.main.async {
+                            // Asegurarse de que todavía estamos hovering y que es para el mismo tiempo
+                            if let self = self, self.isHovering && self.lastPreviewTime == previewTime {
+                                self.previewNode.updatePreview(with: texture)
+                            }
+                        }
+                    }
+                }
+            }
+        } else if isHovering {
+            isHovering = false
+            previewNode.hide()
+        }
+    }
+    
     // Para macOS
     #if os(OSX)
     override func mouseDown(with event: NSEvent) {
@@ -264,6 +374,16 @@ class Timeline: SKNode {
         if isDragging {
             isDragging = false
         }
+    }
+    
+    override func mouseMoved(with event: NSEvent) {
+        let position = event.location(in: self)
+        handleHover(at: position)
+    }
+    
+    override func mouseExited(with event: NSEvent) {
+        isHovering = false
+        previewNode.hide()
     }
     #endif
 }

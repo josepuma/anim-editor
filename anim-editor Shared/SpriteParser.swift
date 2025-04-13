@@ -11,7 +11,7 @@ class SpriteParser {
     }
     
     func getTexture(from texturePath: String) -> SKTexture? {
-        let path = "/Users/josepuma/Downloads/2025917 Ryokuoushoku Shakai - Character"
+        let path = "/Users/josepuma/Downloads/1151309 Stonebank - Be Alright (feat. EMEL) (Cut Ver.)"
            // Check if the texture is already in the cache
            if let cachedTexture = textureCache[texturePath] {
                return cachedTexture

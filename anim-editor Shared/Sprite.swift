@@ -82,25 +82,27 @@ class Sprite {
     }
     
     func clone() -> Sprite {
-        let textureCopy = textureNode.texture!.copy() as! SKTexture
-        let newSprite = Sprite(texture: textureCopy)
-        newSprite.textureNode = textureNode.copyNode()
-        newSprite.tweenManager = tweenManager // Asumiendo que TweenManager se puede compartir
-        newSprite.zPosition = zIndexPosition
+        // Clonar la textura
+        let textureCopy = textureNode.texture!
+        
+        // Crear un nuevo sprite con la misma textura y origen
+        let newSprite = Sprite(texture: textureCopy, origin: Origin(rawValue: textureNode.anchorPoint.x == 0.5 && textureNode.anchorPoint.y == 0.5 ? "centre" : "custom") ?? .centre)
+        
+        // Copiar las propiedades directamente
+        newSprite.zPosition = self.zPosition
+        newSprite.setInitialPosition(position: self.initialPosition)
+        
+        // Clonar el nodo de textura con todas sus propiedades
+        newSprite.node.position = self.node.position
+        newSprite.node.xScale = self.node.xScale
+        newSprite.node.yScale = self.node.yScale
+        newSprite.node.zRotation = self.node.zRotation
+        newSprite.node.alpha = self.node.alpha
+        newSprite.node.color = self.node.color
+        newSprite.node.colorBlendFactor = self.node.colorBlendFactor
+        newSprite.node.blendMode = self.node.blendMode
+         newSprite.tweenManager = self.tweenManager
+        
         return newSprite
-    }
-}
-
-extension SKSpriteNode {
-    func copyNode() -> SKSpriteNode {
-        let copy = SKSpriteNode(texture: self.texture)
-        copy.position = self.position
-        copy.zPosition = self.zPosition
-        copy.xScale = self.xScale
-        copy.yScale = self.yScale
-        copy.zRotation = self.zRotation
-        copy.alpha = self.alpha
-        copy.isHidden = self.isHidden
-        return copy
     }
 }

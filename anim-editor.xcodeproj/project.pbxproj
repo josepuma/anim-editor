@@ -60,6 +60,8 @@
 		59FFB4B92DAB0A770002EC56 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4B72DAB0A750002EC56 /* Grid.swift */; };
 		59FFB4BE2DAB13CB0002EC56 /* GridToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4BD2DAB13C90002EC56 /* GridToggle.swift */; };
 		59FFB4BF2DAB13CB0002EC56 /* GridToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4BD2DAB13C90002EC56 /* GridToggle.swift */; };
+		59FFB4C12DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4C02DAB47C60002EC56 /* TimelinePreviewNode.swift */; };
+		59FFB4C22DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4C02DAB47C60002EC56 /* TimelinePreviewNode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -97,6 +99,7 @@
 		59FFB4B12DAAF24E0002EC56 /* Timeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timeline.swift; sourceTree = "<group>"; };
 		59FFB4B72DAB0A750002EC56 /* Grid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
 		59FFB4BD2DAB13C90002EC56 /* GridToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridToggle.swift; sourceTree = "<group>"; };
+		59FFB4C02DAB47C60002EC56 /* TimelinePreviewNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelinePreviewNode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,6 +196,7 @@
 		59B8702C2C66A505001D0DC1 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				59FFB4C02DAB47C60002EC56 /* TimelinePreviewNode.swift */,
 				59FFB4BD2DAB13C90002EC56 /* GridToggle.swift */,
 				59FFB4B72DAB0A750002EC56 /* Grid.swift */,
 				59FFB4B12DAAF24E0002EC56 /* Timeline.swift */,
@@ -337,6 +341,7 @@
 				59B870072C65649D001D0DC1 /* SpriteManager.swift in Sources */,
 				59FFB4B32DAAF2510002EC56 /* Timeline.swift in Sources */,
 				59BEB07F2D24B8900072974F /* EffectsTableNode.swift in Sources */,
+				59FFB4C22DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */,
 				59B870042C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				596FB9332C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
 				59B86FDD2C65644A001D0DC1 /* GameViewController.swift in Sources */,
@@ -366,6 +371,7 @@
 				59B870082C65649D001D0DC1 /* SpriteManager.swift in Sources */,
 				59FFB4B22DAAF2510002EC56 /* Timeline.swift in Sources */,
 				59BEB0802D24B8900072974F /* EffectsTableNode.swift in Sources */,
+				59FFB4C12DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */,
 				59B870052C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				596FB9342C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
 				59B86FED2C65644A001D0DC1 /* GameViewController.swift in Sources */,

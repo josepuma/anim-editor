@@ -24,7 +24,7 @@ class GridToggleButton: SKNode {
         
         // Usar el carácter Unicode para grid/rejilla: "⊞" o "⊟"
         iconLabel = SKLabelNode(text: "⊟")
-        iconLabel.fontName = "HelveticaNeue-Bold"
+        iconLabel.fontName = "HelveticaNeue"
         iconLabel.fontSize = size * 0.6
         iconLabel.fontColor = .white
         iconLabel.verticalAlignmentMode = .center

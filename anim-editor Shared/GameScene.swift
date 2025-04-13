@@ -32,7 +32,7 @@ class GameScene: SKScene {
         return scene
     }
     
-    let path = "/Users/josepuma/Downloads/2025917 Ryokuoushoku Shakai - Character/"
+    let path = "/Users/josepuma/Downloads/1151309 Stonebank - Be Alright (feat. EMEL) (Cut Ver.)/"
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         backgroundColor = .black
@@ -40,20 +40,20 @@ class GameScene: SKScene {
             
             // Crea un NSTrackingArea que abarque toda la vista
         let trackingArea = NSTrackingArea(
-                rect: view.visibleRect,  // Usa visibleRect en lugar de bounds
-                options: [.activeAlways, .mouseMoved, .enabledDuringMouseDrag, .inVisibleRect],
-                owner: view,
-                userInfo: nil
-            )
-            
-            // Elimina áreas de seguimiento existentes y añade la nueva
-            view.trackingAreas.forEach { view.removeTrackingArea($0) }
-            view.addTrackingArea(trackingArea)
+            rect: view.visibleRect,  // Usa visibleRect en lugar de bounds
+            options: [.activeAlways, .mouseMoved, .enabledDuringMouseDrag, .inVisibleRect],
+            owner: view,
+            userInfo: nil
+        )
+        
+        // Elimina áreas de seguimiento existentes y añade la nueva
+        view.trackingAreas.forEach { view.removeTrackingArea($0) }
+        view.addTrackingArea(trackingArea)
 
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
  
-        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Ryokuoushoku Shakai - Character (Amateurre).osb")
+        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Stonebank - Be Alright (feat. EMEL) (Cut Ver.) (Nhawak).osb")
         spriteParser.parseSprites()
         spriteManager.addToScene(scene: self)
         
@@ -89,6 +89,26 @@ class GameScene: SKScene {
                     let gameTime = Int(player.currentTime * 1000)
                     self.spriteManager.updateAll(currentTime: gameTime)
                 }
+            }
+        }
+    }
+    
+    func setupTimelineWithPreview() {
+        // Configurar el timeline (ya existente)
+        setupTimeline()
+        
+        // Configurar el callback para generar vistas previas
+        timelineComponent.onRequestPreview = { [weak self] (timeMilliseconds, completion) in
+            guard let self = self else { return }
+            
+            // Usar el SpriteManager existente para obtener una textura en el tiempo solicitado
+            // Primero, crear una copia del tamaño para la vista previa (más pequeño)
+            let previewSize = CGSize(width: 256, height: 144)
+            
+            // Generar la textura usando el método existente en SpriteManager
+            self.spriteManager.textureForTime(time: timeMilliseconds, size: previewSize) { texture in
+                // Completar con la textura generada
+                completion(texture)
             }
         }
     }
@@ -188,11 +208,11 @@ class GameScene: SKScene {
 
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer.volume = 0
             totalDuration = audioPlayer.duration
+            audioPlayer.volume = 0
             audioPlayer.play()
             // Configurar el timeline después de inicializar el audio
-            setupTimeline()
+            setupTimelineWithPreview()
             timelineComponent.updatePlayPauseButton(isPlaying: true)
         } catch {
             print("Error loading audio file: \(error)")
@@ -246,11 +266,11 @@ extension GameScene {
     }
     
     override func mouseDragged(with event: NSEvent) {
-
+        self.atPoint(event.location(in: self)).mouseDragged(with: event)
     }
     
     override func mouseUp(with event: NSEvent) {
-
+        self.atPoint(event.location(in: self)).mouseUp(with: event)
     }
     
     override func mouseMoved(with event: NSEvent) {
@@ -259,6 +279,17 @@ extension GameScene {
         if let gridComponent = gridComponent {
             let location = event.location(in: self)
             gridComponent.handleMouseMovement(location: location)
+        }
+        
+        if let timeline = timelineComponent {
+            timeline.mouseMoved(with: event)
+        }
+    }
+    
+    override func mouseExited(with event: NSEvent) {
+        // También propagar el evento mouseExited
+        if let timeline = timelineComponent {
+            timeline.mouseExited(with: event)
         }
     }
     
@@ -290,6 +321,15 @@ extension SKView {
         // Pasa el evento a la escena actual
         if let scene = scene as? GameScene {
             scene.mouseMoved(with: event)
+        }
+    }
+    
+    override open func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        
+        // Pasar el evento mouseExited también
+        if let scene = scene as? GameScene {
+            scene.mouseExited(with: event)
         }
     }
 }
