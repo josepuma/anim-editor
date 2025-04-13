@@ -79,6 +79,9 @@ class Button: SKNode {
         addChild(labelNode)
         
         isUserInteractionEnabled = true
+        /*drawButtonBorder()
+            drawLabelBorder()
+            drawIconBorder()*/
     }
     
     // Constructor con tamaño automático basado en el texto
@@ -120,6 +123,9 @@ class Button: SKNode {
         )
         
         self.padding = padding
+        /*drawButtonBorder()
+            drawLabelBorder()
+            drawIconBorder()*/
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -199,23 +205,88 @@ class Button: SKNode {
     func setIcon(name: String, size: CGFloat? = nil, color: SKColor = .white) {
         // Eliminar icono anterior si existe
         iconNode?.removeFromParent()
-        
+
         // Guardar propiedades
         iconName = name
         iconColor = color
         iconSize = size ?? (min(buttonSize.width, buttonSize.height) * 0.6)
-        
+
         // Crear nuevo icono
         iconNode = IconManager.shared.getIcon(named: name, size: iconSize, color: color)
-        
-        // Si estamos en modo círculo, ocultar el texto
-        if case .circle = buttonShape {
-            labelNode.isHidden = true
-        }
-        
+
         // Añadir el icono
         if let iconNode = iconNode {
             addChild(iconNode)
+
+            // Calcular la posición del icono y el texto
+            let textWidth = labelNode.frame.width
+            let iconWidth = iconNode.frame.width
+            let spacing: CGFloat = 2 // Espacio entre el icono y el texto
+
+            // Calcular el ancho total del contenido
+            let totalContentWidth = textWidth + iconWidth + spacing
+
+            // Calcular el ancho disponible para el padding
+            let availablePadding = buttonSize.width - totalContentWidth
+
+            // Calcular el padding uniforme para ambos lados
+            let uniformPadding = availablePadding / 2
+
+            if labelNode.text != nil && labelNode.text != "" {
+                // Posicionar el icono a la izquierda del texto
+                iconNode.position = CGPoint(x: -totalContentWidth / 2 + iconWidth / 2, y: 0)
+                labelNode.position = CGPoint(x: totalContentWidth / 2 - textWidth / 2, y: 0)
+
+                // Recalcular el tamaño del botón incluyendo el padding uniforme
+                let totalWidth = totalContentWidth + uniformPadding * 2
+                let totalHeight = max(labelNode.frame.height, iconNode.frame.height) + padding.height * 2
+
+                // Ajustar el tamaño del botón
+                updateButtonSize(newWidth: totalWidth, newHeight: totalHeight)
+            } else {
+                // Centrar el icono si no hay texto
+                iconNode.position = CGPoint(x: 0, y: 0)
+
+                // Ajustar el tamaño del botón al tamaño del icono incluyendo el padding uniforme
+                updateButtonSize(newWidth: iconWidth + uniformPadding * 2, newHeight: iconNode.frame.height + padding.height * 2)
+            }
+        }
+    }
+
+    // Función auxiliar para actualizar el tamaño del botón
+    private func updateButtonSize(newWidth: CGFloat, newHeight: CGFloat) {
+        let newSize = CGSize(width: newWidth, height: newHeight)
+
+        // Si es circular, mantener la forma circular
+        if case .circle = buttonShape {
+            let diameter = max(newWidth, newHeight)
+            buttonSize = CGSize(width: diameter, height: diameter)
+        } else {
+            buttonSize = newSize
+        }
+
+        // Recrear el nodo del botón con el nuevo tamaño
+        switch buttonShape {
+        case .circle:
+            let radius = min(buttonSize.width, buttonSize.height) / 2
+            let newButtonNode = SKShapeNode(circleOfRadius: radius)
+            newButtonNode.fillColor = buttonColor
+            newButtonNode.strokeColor = buttonBorderColor
+            newButtonNode.lineWidth = 1.0
+
+            buttonNode.removeFromParent()
+            buttonNode = newButtonNode
+            insertChild(buttonNode, at: 0)
+
+        case .rectangle(let cornerRadius):
+            let newButtonNode = SKShapeNode(rectOf: buttonSize, cornerRadius: cornerRadius)
+            newButtonNode.fillColor = buttonColor
+            newButtonNode.strokeColor = buttonBorderColor
+            newButtonNode.lineWidth = 1.0
+
+            buttonNode.removeFromParent()
+            buttonNode = newButtonNode
+            insertChild(buttonNode, at: 0)
         }
     }
     
@@ -244,6 +315,41 @@ class Button: SKNode {
     func setTextColor(color: SKColor) {
         textColor = color
         labelNode.fontColor = color
+    }
+    
+    func drawButtonBorder() {
+        let borderNode = SKShapeNode()
+        
+        switch buttonShape {
+        case .circle:
+            let radius = min(buttonSize.width, buttonSize.height) / 2
+            borderNode.path = CGPath(ellipseIn: CGRect(x: -radius, y: -radius, width: radius * 2, height: radius * 2), transform: nil)
+        case .rectangle(let cornerRadius):
+            borderNode.path = CGPath(roundedRect: CGRect(origin: CGPoint(x: -buttonSize.width / 2, y: -buttonSize.height / 2), size: buttonSize), cornerWidth: cornerRadius, cornerHeight: cornerRadius, transform: nil)
+        }
+        
+        borderNode.strokeColor = .red // Color del borde de debug
+        borderNode.lineWidth = 1.0
+        borderNode.zPosition = 100 // Asegura que esté al frente
+        addChild(borderNode)
+    }
+    
+    func drawLabelBorder() {
+        let labelBorderNode = SKShapeNode(rect: labelNode.frame)
+        labelBorderNode.strokeColor = .blue // Color del borde de debug
+        labelBorderNode.lineWidth = 1.0
+        labelBorderNode.zPosition = 100 // Asegura que esté al frente
+        addChild(labelBorderNode)
+    }
+    
+    func drawIconBorder() {
+        if let iconNode = iconNode {
+            let iconBorderNode = SKShapeNode(rect: iconNode.frame)
+            iconBorderNode.strokeColor = .green // Color del borde de debug
+            iconBorderNode.lineWidth = 1.0
+            iconBorderNode.zPosition = 100 // Asegura que esté al frente
+            addChild(iconBorderNode)
+        }
     }
     
     // MouseEntered for hover effect

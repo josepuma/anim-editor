@@ -21,8 +21,16 @@ class GameScene: SKScene {
     private var timelineComponent: Timeline!
     private var gridComponent: Grid!
     private var gridToggleButton: ToggleButton!
-    private var openFolderButton: Button!
     private var controlsContainer: VerticalContainer!
+    private var volumeSlider: VolumeSlider!
+    private var volumeContainer: HorizontalContainer!
+    
+    private var toolsContainer: VerticalContainer!
+    
+    private var accent = NSColor(red: 202 / 255, green: 217 / 255, blue: 91 / 255, alpha: 1)
+    private var backgroundColorAccent = NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 0.7)
+    private var backgroundColorButton = NSColor(red: 28 / 255, green: 28 / 255, blue: 42 / 255, alpha: 1)
+    private var buttonColorText = NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1)
     
     class func newGameScene() -> GameScene {
         // Load 'GameScene.sks' as an SKScene.
@@ -34,7 +42,7 @@ class GameScene: SKScene {
         return scene
     }
     
-    let path = "/Users/josepuma/Downloads/179323 Sakamoto Maaya - Okaerinasai (tomatomerde Remix)/"
+    let path = "/Users/josepuma/Downloads/2321897 USAO - USAO ULTIMATE HYPER MEGA MIX/"
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         backgroundColor = .black
@@ -57,7 +65,7 @@ class GameScene: SKScene {
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
  
-        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Sakamoto Maaya - Okaerinasai (tomatomerde Remix) (Azer).osb")
+        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "USAO - USAO ULTIMATE HYPER MEGA MIX (Castiello).osb")
         spriteParser.parseSprites()
         spriteManager.addToScene(scene: self)
         
@@ -118,15 +126,55 @@ class GameScene: SKScene {
     }
     
     func setupControls() {
+        
+        toolsContainer = VerticalContainer(
+            spacing: 10,
+            padding: CGSize(width: 10, height: 8),
+            verticalAlignment: .center,
+            horizontalAlignment: .left,
+            showBackground: true,
+            backgroundColor: NSColor(red: 7 / 255, green: 7 / 255, blue: 13 / 255, alpha: 1),
+            cornerRadius: 8
+        )
+        
+        volumeSlider = VolumeSlider(width: 80, height: 4, knobSize: 12)
+        
+        volumeSlider.onVolumeChange = { [weak self] volume in
+            self?.audioPlayer?.volume = Float(volume)
+        }
+        
+        // Si ya hay un reproductor de audio, establecer el volumen inicial
+        if let player = audioPlayer {
+            volumeSlider.setVolume(CGFloat(player.volume), animated: false)
+        } else {
+            volumeSlider.setVolume(0.5, animated: false) // Valor predeterminado
+        }
+        
+        let volumeIcon = IconManager.shared.getIcon(named: "volume", size: 16, color: NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1))
+            
+        // Crear el contenedor horizontal
+        volumeContainer = HorizontalContainer(
+            spacing: 10,
+            padding: CGSize(width: 10, height: 8),
+            verticalAlignment: .center,
+            horizontalAlignment: .left,
+            showBackground: true,
+            backgroundColor: NSColor(red: 7 / 255, green: 7 / 255, blue: 13 / 255, alpha: 1),
+            cornerRadius: 8
+        )
+        
+        volumeContainer.addNodes([volumeIcon, volumeSlider])
+        
         // Crear el contenedor
         controlsContainer = VerticalContainer(
             spacing: 10,
             padding: CGSize(width: 8, height: 8),
             verticalAlignment: .top,
-            horizontalAlignment: .center,
+            horizontalAlignment: .left,
             showBackground: true,
-            backgroundColor: SKColor(white: 0.1, alpha: 0.5),
-            cornerRadius: 8
+            backgroundColor: NSColor(red: 7 / 255, green: 7 / 255, blue: 13 / 255, alpha: 1),
+            cornerRadius: 8,
+            stretchChildren: true
         )
         
         // Crear los botones
@@ -135,35 +183,65 @@ class GameScene: SKScene {
             onIconName: "eye-dotted",
             offIconName: "eye-closed",
             isInitiallyToggled: false,
-            buttonColor: .darkGray,
-            iconColor: .white
+            buttonColor: .clear,
+            buttonBorderColor: .clear,
+            iconColor: NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1)
         )
+        
+        //button background color NSColor(red: 28 / 255, green: 28 / 255, blue: 42 / 255, alpha: 1)
         
         // Configurar el callback
         gridToggleButton.onToggle = { [weak self] isVisible in
             self?.toggleGridVisibility(visible: isVisible)
         }
+
+        let openFolderButton = Button(text: "Open Project Folder", padding: CGSize(width: 20, height: 8), buttonColor: accent, buttonBorderColor: accent, textColor: .black, fontSize: 12)
+        openFolderButton.setIcon(name: "folder-open", size: 16, color: .black)
         
-        openFolderButton = Button(text: "", shape: .circle, buttonColor: .darkGray)
-        openFolderButton.setIcon(name: "folder-open", color: .white)
+        let openScriptButton = Button(text: "Open Scripts Folder", padding: CGSize(width: 20, height: 8), buttonColor: accent, buttonBorderColor: accent, textColor: .black, fontSize: 12)
+        openScriptButton.setIcon(name: "folder-open", size: 16, color: .black)
+        
+        let createNewScriptButton = Button(text: "Open Scripts Folder", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12)
         
         openFolderButton.onPress = {
             let url = URL(fileURLWithPath: self.path)
             NSWorkspace.shared.open(url)
         }
         
-        // Añadir los botones al contenedor
-        controlsContainer.addNodes([gridToggleButton, openFolderButton])
-        
-        // Posicionar el contenedor en la esquina superior derecha
-        let margin: CGFloat = 4
-        controlsContainer.position = CGPoint(
-            x: self.size.width/2 - margin - controlsContainer.getSize().width/2,
-            y: self.size.height/2 - margin - controlsContainer.getSize().height/2
+        let gridOptions = HorizontalContainer(
+            spacing: 10,
+            padding: CGSize(width: 10, height: 8),
+            verticalAlignment: .center,
+            horizontalAlignment: .left,
+            showBackground: false
         )
         
-        controlsContainer.zPosition = 100 // Asegura que esté por encima de otros elementos
-        addChild(controlsContainer)
+        gridOptions.addNodes([
+            Button(text: "1:1", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12),
+            Button(text: "16:9", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12),
+            Button(text: "5:4", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12)
+        ])
+        
+        toolsContainer.addNodes([
+            Text(text: "Audio", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
+            volumeContainer,
+            Text(text: "Editor", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
+            gridToggleButton,
+            openScriptButton,
+            gridOptions,
+            createNewScriptButton,
+            Text(text: "System", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
+            openFolderButton,
+        ])
+        // Posicionar el contenedor en la esquina superior derecha
+        let margin: CGFloat = 4
+        toolsContainer.position = CGPoint(
+            x: self.size.width/2 - margin - toolsContainer.getSize().width/2,
+            y: self.size.height/2 - margin - toolsContainer.getSize().height/2
+        )
+
+        toolsContainer.zPosition = 100
+        addChild(toolsContainer)
     }
     
     func toggleGridVisibility(visible: Bool) {
@@ -217,11 +295,11 @@ class GameScene: SKScene {
             )
         }
         
-        if controlsContainer != nil {
+        if toolsContainer != nil {
             let margin: CGFloat = 16
-            controlsContainer.position = CGPoint(
-                x: self.size.width/2 - margin - controlsContainer.getSize().width/2,
-                y: self.size.height/2 - margin - controlsContainer.getSize().height/2
+            toolsContainer.position = CGPoint(
+                x: self.size.width/2 - margin - toolsContainer.getSize().width/2,
+                y: self.size.height/2 - margin - toolsContainer.getSize().height/2
             )
         }
         
@@ -243,11 +321,15 @@ class GameScene: SKScene {
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             totalDuration = audioPlayer.duration
-            audioPlayer.volume = 0
+            // Cambiar esto para no establecer volumen a 0
+            audioPlayer.volume = 0.5 // Volumen predeterminado al 50%
             audioPlayer.play()
             // Configurar el timeline después de inicializar el audio
             setupTimelineWithPreview()
             timelineComponent.updatePlayPauseButton(isPlaying: true)
+            
+            // Si el control de volumen ya se inicializó, actualizar su valor
+            volumeSlider?.setVolume(CGFloat(audioPlayer.volume), animated: false)
         } catch {
             print("Error loading audio file: \(error)")
         }

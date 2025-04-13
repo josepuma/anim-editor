@@ -1,5 +1,5 @@
 //
-//  VerticalContainer.swift
+//  HorizontalContainer.swift
 //  anim-editor
 //
 //  Created by José Puma on 13-04-25.
@@ -7,25 +7,12 @@
 
 import SpriteKit
 
-enum VerticalAlignment {
-    case top
-    case center
-    case bottom
-}
-
-enum HorizontalAlignment {
-    case left
-    case center
-    case right
-}
-
-class VerticalContainer: SKNode {
+class HorizontalContainer: SKNode {
     // Configuration
     private var spacing: CGFloat
     private var padding: CGSize
     private var verticalAlignment: VerticalAlignment
     private var horizontalAlignment: HorizontalAlignment
-    private var stretchChildren: Bool
     
     // Content tracking
     private var childNodes: [SKNode] = []
@@ -40,12 +27,11 @@ class VerticalContainer: SKNode {
     init(
         spacing: CGFloat = 10,
         padding: CGSize = CGSize(width: 10, height: 10),
-        verticalAlignment: VerticalAlignment = .top,
-        horizontalAlignment: HorizontalAlignment = .center,
+        verticalAlignment: VerticalAlignment = .center,
+        horizontalAlignment: HorizontalAlignment = .left,
         showBackground: Bool = false,
         backgroundColor: SKColor = SKColor(white: 0.1, alpha: 0.5),
-        cornerRadius: CGFloat = 8,
-        stretchChildren: Bool = true
+        cornerRadius: CGFloat = 8
     ) {
         self.spacing = spacing
         self.padding = padding
@@ -54,7 +40,6 @@ class VerticalContainer: SKNode {
         self.showBackground = showBackground
         self.backgroundColor = backgroundColor
         self.cornerRadius = cornerRadius
-        self.stretchChildren = stretchChildren
         
         super.init()
         
@@ -121,24 +106,24 @@ class VerticalContainer: SKNode {
             return
         }
         
-        // Calculate the width based on the widest child
-        let containerWidth = childNodes.map { node -> CGFloat in
-            return node.calculateAccumulatedFrame().width
+        // Calculate the height based on the tallest child
+        let containerHeight = childNodes.map { node -> CGFloat in
+            return node.calculateAccumulatedFrame().height
         }.max() ?? 0
         
-        // Calculate the total height
-        var totalHeight: CGFloat = 0
+        // Calculate the total width
+        var totalWidth: CGFloat = 0
         for (index, node) in childNodes.enumerated() {
-            totalHeight += node.calculateAccumulatedFrame().height
+            totalWidth += node.calculateAccumulatedFrame().width
             if index < childNodes.count - 1 {
-                totalHeight += spacing
+                totalWidth += spacing
             }
         }
         
         // Update container size with padding
         containerSize = CGSize(
-            width: containerWidth + padding.width * 2,
-            height: totalHeight + padding.height * 2
+            width: totalWidth + padding.width * 2,
+            height: containerHeight + padding.height * 2
         )
         
         // Update background if needed
@@ -153,38 +138,38 @@ class VerticalContainer: SKNode {
         }
         
         // Position each node
-        var currentY: CGFloat
+        var currentX: CGFloat
         
-        // Set starting Y position based on vertical alignment
-        switch verticalAlignment {
-        case .top:
-            currentY = containerSize.height/2 - padding.height
+        // Set starting X position based on horizontal alignment
+        switch horizontalAlignment {
+        case .left:
+            currentX = -containerSize.width/2 + padding.width
         case .center:
-            currentY = totalHeight/2
-        case .bottom:
-            currentY = -containerSize.height/2 + padding.height + childNodes.first!.calculateAccumulatedFrame().height/2
+            currentX = -totalWidth/2
+        case .right:
+            currentX = containerSize.width/2 - padding.width - childNodes.first!.calculateAccumulatedFrame().width
         }
         
         for node in childNodes {
             let nodeHeight = node.calculateAccumulatedFrame().height
             let nodeWidth = node.calculateAccumulatedFrame().width
             
-            // Set X position based on horizontal alignment
-            var xPos: CGFloat
-            switch horizontalAlignment {
-            case .left:
-                xPos = -containerSize.width/2 + padding.width + nodeWidth/2
+            // Set Y position based on vertical alignment
+            var yPos: CGFloat
+            switch verticalAlignment {
+            case .top:
+                yPos = containerSize.height/2 - padding.height - nodeHeight/2
             case .center:
-                xPos = 0
-            case .right:
-                xPos = containerSize.width/2 - padding.width - nodeWidth/2
+                yPos = 0
+            case .bottom:
+                yPos = -containerSize.height/2 + padding.height + nodeHeight/2
             }
             
             // Position the node
-            node.position = CGPoint(x: xPos, y: currentY - nodeHeight/2)
+            node.position = CGPoint(x: currentX + nodeWidth/2, y: yPos)
             
-            // Move down for the next node
-            currentY -= nodeHeight + spacing
+            // Move right for the next node
+            currentX += nodeWidth + spacing
         }
     }
     
