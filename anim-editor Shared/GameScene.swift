@@ -20,7 +20,9 @@ class GameScene: SKScene {
     var effectsTableNode: EffectsTableNode!
     private var timelineComponent: Timeline!
     private var gridComponent: Grid!
-    private var gridToggleButton: GridToggleButton!
+    private var gridToggleButton: ToggleButton!
+    private var openFolderButton: Button!
+    private var controlsContainer: VerticalContainer!
     
     class func newGameScene() -> GameScene {
         // Load 'GameScene.sks' as an SKScene.
@@ -32,10 +34,12 @@ class GameScene: SKScene {
         return scene
     }
     
-    let path = "/Users/josepuma/Downloads/1151309 Stonebank - Be Alright (feat. EMEL) (Cut Ver.)/"
+    let path = "/Users/josepuma/Downloads/179323 Sakamoto Maaya - Okaerinasai (tomatomerde Remix)/"
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         backgroundColor = .black
+        
+        IconManager.shared.preloadAllIcons(colors: [.white, .green, .blue])
         
             
             // Crea un NSTrackingArea que abarque toda la vista
@@ -53,13 +57,13 @@ class GameScene: SKScene {
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
  
-        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Stonebank - Be Alright (feat. EMEL) (Cut Ver.) (Nhawak).osb")
+        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Sakamoto Maaya - Okaerinasai (tomatomerde Remix) (Azer).osb")
         spriteParser.parseSprites()
         spriteManager.addToScene(scene: self)
         
         
         setupGrid()
-        setupGridToggleButton()
+        setupControls()
     }
     
     func setupTimeline() {
@@ -113,14 +117,26 @@ class GameScene: SKScene {
         }
     }
     
-    func setupGridToggleButton() {
-        gridToggleButton = GridToggleButton(size: 32)
+    func setupControls() {
+        // Crear el contenedor
+        controlsContainer = VerticalContainer(
+            spacing: 10,
+            padding: CGSize(width: 8, height: 8),
+            verticalAlignment: .top,
+            horizontalAlignment: .center,
+            showBackground: true,
+            backgroundColor: SKColor(white: 0.1, alpha: 0.5),
+            cornerRadius: 8
+        )
         
-        // Posicionar en la esquina superior derecha
-        let margin: CGFloat = 20
-        gridToggleButton.position = CGPoint(
-            x: self.size.width/2 - margin - 16,
-            y: self.size.height/2 - margin - 16
+        // Crear los botones
+        gridToggleButton = ToggleButton(
+            size: 32,
+            onIconName: "eye-dotted",
+            offIconName: "eye-closed",
+            isInitiallyToggled: false,
+            buttonColor: .darkGray,
+            iconColor: .white
         )
         
         // Configurar el callback
@@ -128,8 +144,26 @@ class GameScene: SKScene {
             self?.toggleGridVisibility(visible: isVisible)
         }
         
-        gridToggleButton.zPosition = 100 // Asegura que esté por encima del grid
-        addChild(gridToggleButton)
+        openFolderButton = Button(text: "", shape: .circle, buttonColor: .darkGray)
+        openFolderButton.setIcon(name: "folder-open", color: .white)
+        
+        openFolderButton.onPress = {
+            let url = URL(fileURLWithPath: self.path)
+            NSWorkspace.shared.open(url)
+        }
+        
+        // Añadir los botones al contenedor
+        controlsContainer.addNodes([gridToggleButton, openFolderButton])
+        
+        // Posicionar el contenedor en la esquina superior derecha
+        let margin: CGFloat = 4
+        controlsContainer.position = CGPoint(
+            x: self.size.width/2 - margin - controlsContainer.getSize().width/2,
+            y: self.size.height/2 - margin - controlsContainer.getSize().height/2
+        )
+        
+        controlsContainer.zPosition = 100 // Asegura que esté por encima de otros elementos
+        addChild(controlsContainer)
     }
     
     func toggleGridVisibility(visible: Bool) {
@@ -183,11 +217,11 @@ class GameScene: SKScene {
             )
         }
         
-        if gridToggleButton != nil {
-            let margin: CGFloat = 20
-            gridToggleButton.position = CGPoint(
-                x: self.size.width/2 - margin - 16,
-                y: self.size.height/2 - margin - 16
+        if controlsContainer != nil {
+            let margin: CGFloat = 16
+            controlsContainer.position = CGPoint(
+                x: self.size.width/2 - margin - controlsContainer.getSize().width/2,
+                y: self.size.height/2 - margin - controlsContainer.getSize().height/2
             )
         }
         
@@ -307,6 +341,15 @@ extension GameScene {
                     let newTime = min(player.duration, player.currentTime + 5)
                     player.currentTime = newTime
                 }
+            case 49:
+                if let player = audioPlayer {
+                        if player.isPlaying {
+                            player.pause()
+                        } else {
+                            player.play()
+                        }
+                    timelineComponent.updatePlayPauseButton(isPlaying: player.isPlaying)
+                    }
             default:
                 super.keyDown(with: event)
             }
