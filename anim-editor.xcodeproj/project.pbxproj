@@ -74,6 +74,8 @@
 		59FFB4E32DAC3D190002EC56 /* HorizontalContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4E12DAC3D100002EC56 /* HorizontalContainer.swift */; };
 		59FFB4E52DAC4CF50002EC56 /* Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4E42DAC4CF20002EC56 /* Text.swift */; };
 		59FFB4E62DAC4CF50002EC56 /* Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4E42DAC4CF20002EC56 /* Text.swift */; };
+		59FFB4E82DAC89FF0002EC56 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4E72DAC89FC0002EC56 /* Separator.swift */; };
+		59FFB4E92DAC89FF0002EC56 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4E72DAC89FC0002EC56 /* Separator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -118,6 +120,7 @@
 		59FFB4DB2DAC3A350002EC56 /* VolumeSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeSlider.swift; sourceTree = "<group>"; };
 		59FFB4E12DAC3D100002EC56 /* HorizontalContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalContainer.swift; sourceTree = "<group>"; };
 		59FFB4E42DAC4CF20002EC56 /* Text.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Text.swift; sourceTree = "<group>"; };
+		59FFB4E72DAC89FC0002EC56 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -219,6 +222,7 @@
 		59B8702C2C66A505001D0DC1 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				59FFB4E72DAC89FC0002EC56 /* Separator.swift */,
 				59FFB4E42DAC4CF20002EC56 /* Text.swift */,
 				59FFB4E12DAC3D100002EC56 /* HorizontalContainer.swift */,
 				59FFB4DB2DAC3A350002EC56 /* VolumeSlider.swift */,
@@ -393,6 +397,7 @@
 				596FB9332C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
 				59B86FDD2C65644A001D0DC1 /* GameViewController.swift in Sources */,
 				59B8700A2C6564A8001D0DC1 /* Sprite.swift in Sources */,
+				59FFB4E92DAC89FF0002EC56 /* Separator.swift in Sources */,
 				59FFB4E32DAC3D190002EC56 /* HorizontalContainer.swift in Sources */,
 				59B86FDB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
 				59B870102C6564BE001D0DC1 /* Easing.swift in Sources */,
@@ -429,6 +434,7 @@
 				596FB9342C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
 				59B86FED2C65644A001D0DC1 /* GameViewController.swift in Sources */,
 				59B8700B2C6564A8001D0DC1 /* Sprite.swift in Sources */,
+				59FFB4E82DAC89FF0002EC56 /* Separator.swift in Sources */,
 				59FFB4E22DAC3D190002EC56 /* HorizontalContainer.swift in Sources */,
 				59B86FEB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
 				59B870112C6564BE001D0DC1 /* Easing.swift in Sources */,

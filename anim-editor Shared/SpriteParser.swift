@@ -11,7 +11,7 @@ class SpriteParser {
     }
     
     func getTexture(from texturePath: String) -> SKTexture? {
-        let path = "/Users/josepuma/Downloads/2321897 USAO - USAO ULTIMATE HYPER MEGA MIX"
+        let path = "/Users/josepuma/Downloads/1602640 Quinn Karter - Living in a Dream (feat. Natalie Major) (Feint Remix)"
            // Check if the texture is already in the cache
            if let cachedTexture = textureCache[texturePath] {
                return cachedTexture

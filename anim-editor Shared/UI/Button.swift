@@ -79,9 +79,6 @@ class Button: SKNode {
         addChild(labelNode)
         
         isUserInteractionEnabled = true
-        /*drawButtonBorder()
-            drawLabelBorder()
-            drawIconBorder()*/
     }
     
     // Constructor con tamaño automático basado en el texto
@@ -317,40 +314,11 @@ class Button: SKNode {
         labelNode.fontColor = color
     }
     
-    func drawButtonBorder() {
-        let borderNode = SKShapeNode()
-        
-        switch buttonShape {
-        case .circle:
-            let radius = min(buttonSize.width, buttonSize.height) / 2
-            borderNode.path = CGPath(ellipseIn: CGRect(x: -radius, y: -radius, width: radius * 2, height: radius * 2), transform: nil)
-        case .rectangle(let cornerRadius):
-            borderNode.path = CGPath(roundedRect: CGRect(origin: CGPoint(x: -buttonSize.width / 2, y: -buttonSize.height / 2), size: buttonSize), cornerWidth: cornerRadius, cornerHeight: cornerRadius, transform: nil)
-        }
-        
-        borderNode.strokeColor = .red // Color del borde de debug
-        borderNode.lineWidth = 1.0
-        borderNode.zPosition = 100 // Asegura que esté al frente
-        addChild(borderNode)
+    
+    func setFullWidth(width: CGFloat) {
+        updateButtonSize(newWidth: width, newHeight: buttonSize.height)
     }
     
-    func drawLabelBorder() {
-        let labelBorderNode = SKShapeNode(rect: labelNode.frame)
-        labelBorderNode.strokeColor = .blue // Color del borde de debug
-        labelBorderNode.lineWidth = 1.0
-        labelBorderNode.zPosition = 100 // Asegura que esté al frente
-        addChild(labelBorderNode)
-    }
-    
-    func drawIconBorder() {
-        if let iconNode = iconNode {
-            let iconBorderNode = SKShapeNode(rect: iconNode.frame)
-            iconBorderNode.strokeColor = .green // Color del borde de debug
-            iconBorderNode.lineWidth = 1.0
-            iconBorderNode.zPosition = 100 // Asegura que esté al frente
-            addChild(iconBorderNode)
-        }
-    }
     
     // MouseEntered for hover effect
     override func mouseEntered(with event: NSEvent) {

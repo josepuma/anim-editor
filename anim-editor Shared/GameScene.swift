@@ -42,7 +42,7 @@ class GameScene: SKScene {
         return scene
     }
     
-    let path = "/Users/josepuma/Downloads/2321897 USAO - USAO ULTIMATE HYPER MEGA MIX/"
+    let path = "/Users/josepuma/Downloads/1602640 Quinn Karter - Living in a Dream (feat. Natalie Major) (Feint Remix)/"
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         backgroundColor = .black
@@ -65,7 +65,7 @@ class GameScene: SKScene {
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
  
-        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "USAO - USAO ULTIMATE HYPER MEGA MIX (Castiello).osb")
+        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Quinn Karter - Living in a Dream (feat. Natalie Major) (Feint Remix) (Asphyxia).osb")
         spriteParser.parseSprites()
         spriteManager.addToScene(scene: self)
         
@@ -137,7 +137,7 @@ class GameScene: SKScene {
             cornerRadius: 8
         )
         
-        volumeSlider = VolumeSlider(width: 80, height: 4, knobSize: 12)
+        volumeSlider = VolumeSlider(width: 150, height: 4, knobSize: 12)
         
         volumeSlider.onVolumeChange = { [weak self] volume in
             self?.audioPlayer?.volume = Float(volume)
@@ -173,8 +173,7 @@ class GameScene: SKScene {
             horizontalAlignment: .left,
             showBackground: true,
             backgroundColor: NSColor(red: 7 / 255, green: 7 / 255, blue: 13 / 255, alpha: 1),
-            cornerRadius: 8,
-            stretchChildren: true
+            cornerRadius: 8
         )
         
         // Crear los botones
@@ -225,11 +224,13 @@ class GameScene: SKScene {
         toolsContainer.addNodes([
             Text(text: "Audio", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
             volumeContainer,
+            Separator(),
             Text(text: "Editor", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
             gridToggleButton,
             openScriptButton,
             gridOptions,
             createNewScriptButton,
+            Separator(),
             Text(text: "System", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
             openFolderButton,
         ])
@@ -303,7 +304,6 @@ class GameScene: SKScene {
             )
         }
         
-        updateContainerLayouts()
         spriteManager.updateSize()
    }
     

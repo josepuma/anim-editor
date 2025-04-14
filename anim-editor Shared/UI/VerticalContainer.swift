@@ -25,7 +25,6 @@ class VerticalContainer: SKNode {
     private var padding: CGSize
     private var verticalAlignment: VerticalAlignment
     private var horizontalAlignment: HorizontalAlignment
-    private var stretchChildren: Bool
     
     // Content tracking
     private var childNodes: [SKNode] = []
@@ -44,8 +43,7 @@ class VerticalContainer: SKNode {
         horizontalAlignment: HorizontalAlignment = .center,
         showBackground: Bool = false,
         backgroundColor: SKColor = SKColor(white: 0.1, alpha: 0.5),
-        cornerRadius: CGFloat = 8,
-        stretchChildren: Bool = true
+        cornerRadius: CGFloat = 8
     ) {
         self.spacing = spacing
         self.padding = padding
@@ -54,7 +52,6 @@ class VerticalContainer: SKNode {
         self.showBackground = showBackground
         self.backgroundColor = backgroundColor
         self.cornerRadius = cornerRadius
-        self.stretchChildren = stretchChildren
         
         super.init()
         
@@ -111,7 +108,38 @@ class VerticalContainer: SKNode {
         updateLayout()
     }
     
-    // Update the layout
+    func getAvailableInnerWidth() -> CGFloat {
+        return containerSize.width - padding.width * 2
+    }
+    
+    
+
+    // Método para ajustar elementos a ancho completo después de la configuración inicial
+    func adjustChildrenWidths() {
+        // Obtener el ancho disponible
+        let availableWidth = getAvailableInnerWidth()
+        
+        // Buscar nodos que deberían ocupar todo el ancho
+        for node in childNodes {
+            // Solo modificar los nodos que no tienen hermanos en el mismo nivel Y
+            // (esto es una simplificación - verifica si el nodo está solo en su "fila")
+            let nodeLevel = node.position.y
+            let nodesAtSameLevel = childNodes.filter { abs($0.position.y - nodeLevel) < 0.1 }
+            
+            if nodesAtSameLevel.count == 1 {
+                // Este nodo está solo en su nivel
+                if let button = node as? Button {
+                    // Ajustar el ancho del botón
+                    button.setFullWidth(width: availableWidth)
+                }
+                // Puedes agregar más casos para otros tipos de nodos aquí
+            }
+        }
+        
+        // Actualizar la posición de todos los nodos una vez que se han ajustado los tamaños
+        updateLayout()
+    }
+    
     func updateLayout() {
         guard !childNodes.isEmpty else {
             containerSize = .zero
@@ -121,13 +149,29 @@ class VerticalContainer: SKNode {
             return
         }
         
+        // PASO 1: Calcular dimensiones iniciales
+        updateContainerDimensions()
+        
+        // PASO 2: Posicionar nodos con dimensiones originales
+        positionAllNodes()
+        
+        // PASO 3: Ajustar anchos de nodos solitarios
+        adjustChildrenWidthsInternal()
+        
+        // PASO 4: Recalcular posiciones después del ajuste de anchos
+        positionAllNodes()
+    }
+
+    var totalHeight: CGFloat = 0
+    // Calcula las dimensiones del contenedor y actualiza el fondo
+    private func updateContainerDimensions() {
         // Calculate the width based on the widest child
         let containerWidth = childNodes.map { node -> CGFloat in
             return node.calculateAccumulatedFrame().width
         }.max() ?? 0
         
         // Calculate the total height
-        var totalHeight: CGFloat = 0
+       
         for (index, node) in childNodes.enumerated() {
             totalHeight += node.calculateAccumulatedFrame().height
             if index < childNodes.count - 1 {
@@ -151,18 +195,20 @@ class VerticalContainer: SKNode {
             )
             backgroundNode.path = backgroundPath
         }
-        
-        // Position each node
+    }
+
+    // Posiciona todos los nodos según la alineación configurada
+    private func positionAllNodes() {
         var currentY: CGFloat
         
         // Set starting Y position based on vertical alignment
         switch verticalAlignment {
-        case .top:
-            currentY = containerSize.height/2 - padding.height
-        case .center:
-            currentY = totalHeight/2
-        case .bottom:
-            currentY = -containerSize.height/2 + padding.height + childNodes.first!.calculateAccumulatedFrame().height/2
+            case .top:
+                currentY = containerSize.height/2 - padding.height
+            case .center:
+                currentY = totalHeight/2
+            case .bottom:
+                currentY = -containerSize.height/2 + padding.height + childNodes.first!.calculateAccumulatedFrame().height/2
         }
         
         for node in childNodes {
@@ -172,19 +218,49 @@ class VerticalContainer: SKNode {
             // Set X position based on horizontal alignment
             var xPos: CGFloat
             switch horizontalAlignment {
-            case .left:
-                xPos = -containerSize.width/2 + padding.width + nodeWidth/2
-            case .center:
-                xPos = 0
-            case .right:
-                xPos = containerSize.width/2 - padding.width - nodeWidth/2
+                case .left:
+                    xPos = -containerSize.width/2 + padding.width + nodeWidth/2
+                case .center:
+                    xPos = 0
+                case .right:
+                    xPos = containerSize.width/2 - padding.width - nodeWidth/2
             }
             
             // Position the node
             node.position = CGPoint(x: xPos, y: currentY - nodeHeight/2)
-            
             // Move down for the next node
             currentY -= nodeHeight + spacing
+        }
+    }
+
+    // Método para ajustar los anchos de los nodos solitarios
+    private func adjustChildrenWidthsInternal() {
+        let availableWidth = getAvailableInnerWidth() - 4 // Margen de seguridad
+        
+        // Estructura para agrupar nodos por nivel Y
+        var levelGroups: [CGFloat: [SKNode]] = [:]
+        
+        // Agrupar nodos por su posición Y actual
+        for node in childNodes {
+            let yLevel = node.position.y
+            if levelGroups[yLevel] != nil {
+                levelGroups[yLevel]?.append(node)
+            } else {
+                levelGroups[yLevel] = [node]
+            }
+        }
+        
+        // Ajustar el ancho de los nodos solitarios
+        for (_, nodes) in levelGroups {
+            if nodes.count == 1, let node = nodes.first {
+                if let button = node as? Button {
+                    button.setFullWidth(width: availableWidth)
+                }
+                if let separator = node as? Separator{
+                    separator.setWidth(availableWidth)
+                }
+                // Añadir otros tipos si es necesario
+            }
         }
     }
     
