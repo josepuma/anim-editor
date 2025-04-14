@@ -206,6 +206,9 @@ class GameScene: SKScene {
         positionButton = Button(text: "X: 320 - Y: 240", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: accent, fontSize: 12)
         positionButton.setIcon(name: "grid-4x4", size: 16, color: accent)
         
+        let createScriptButton = Button(text: "New Script", padding: CGSize(width: 20, height: 8), buttonColor: accent, buttonBorderColor: accent, textColor: .black, fontSize: 12)
+        createScriptButton.setIcon(name: "file-code-2", size: 16, color: .black)
+        
         openFolderButton.onPress = {
             let url = URL(fileURLWithPath: self.path)
             NSWorkspace.shared.open(url)
@@ -245,13 +248,16 @@ class GameScene: SKScene {
             Separator(),
             Text(text: "Editor", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
             toogleOptions,
-            openScriptButton,
-            gridOptions,
             positionButton,
-            createNewScriptButton,
+            Separator(),
+            Text(text: "CODING", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
+            gridOptions,
+            createScriptButton,
+            Button(text: "Open Scripts Folder", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12),
             Separator(),
             Text(text: "System", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
-            openFolderButton,
+            Button(text: "Open Project Folder", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12),
+            createNewScriptButton,
         ])
         // Posicionar el contenedor en la esquina superior derecha
         let margin: CGFloat = 4
