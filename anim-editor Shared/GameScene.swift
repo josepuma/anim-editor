@@ -24,6 +24,7 @@ class GameScene: SKScene {
     private var controlsContainer: VerticalContainer!
     private var volumeSlider: VolumeSlider!
     private var volumeContainer: HorizontalContainer!
+    private var positionButton: Button!
     
     private var toolsContainer: VerticalContainer!
     
@@ -42,7 +43,7 @@ class GameScene: SKScene {
         return scene
     }
     
-    let path = "/Users/josepuma/Downloads/1602640 Quinn Karter - Living in a Dream (feat. Natalie Major) (Feint Remix)/"
+    let path = "/Users/josepuma/Downloads/387136 BUTAOTOME - Waizatsu Ideology/"
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         backgroundColor = .black
@@ -65,7 +66,7 @@ class GameScene: SKScene {
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
  
-        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Quinn Karter - Living in a Dream (feat. Natalie Major) (Feint Remix) (Asphyxia).osb")
+        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "BUTAOTOME - Waizatsu Ideology (Jounzan).osb")
         spriteParser.parseSprites()
         spriteManager.addToScene(scene: self)
         
@@ -202,6 +203,9 @@ class GameScene: SKScene {
         
         let createNewScriptButton = Button(text: "Open Scripts Folder", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12)
         
+        positionButton = Button(text: "X: 320 - Y: 240", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: accent, fontSize: 12)
+        positionButton.setIcon(name: "grid-4x4", size: 16, color: accent)
+        
         openFolderButton.onPress = {
             let url = URL(fileURLWithPath: self.path)
             NSWorkspace.shared.open(url)
@@ -215,6 +219,20 @@ class GameScene: SKScene {
             showBackground: false
         )
         
+        let toogleOptions = HorizontalContainer(
+            spacing: 10,
+            padding: CGSize(width: 10, height: 8),
+            verticalAlignment: .center,
+            horizontalAlignment: .left,
+            showBackground: false
+        )
+        
+        toogleOptions.addNodes([
+            gridToggleButton,
+            ToggleButton(size: 32, onIconName: "camera", offIconName: "camera", buttonColor: .clear, buttonBorderColor: .clear, iconColor: NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1)),
+            ToggleButton(size: 32, onIconName: "zoom-code", offIconName: "zoom-code", buttonColor: .clear, buttonBorderColor: .clear, iconColor: NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1))
+        ])
+        
         gridOptions.addNodes([
             Button(text: "1:1", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12),
             Button(text: "16:9", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12),
@@ -226,9 +244,10 @@ class GameScene: SKScene {
             volumeContainer,
             Separator(),
             Text(text: "Editor", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
-            gridToggleButton,
+            toogleOptions,
             openScriptButton,
             gridOptions,
+            positionButton,
             createNewScriptButton,
             Separator(),
             Text(text: "System", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
@@ -268,6 +287,10 @@ class GameScene: SKScene {
         
         // Ajustar al tamaño de la pantalla
         gridComponent.adjustForScreenSize(screenSize: self.size)
+        
+        gridComponent.onMousePositionChange = {value in
+            self.positionButton.setText(text: value)
+        }
     }
     
     func addEffect(_ effect: Effect) {

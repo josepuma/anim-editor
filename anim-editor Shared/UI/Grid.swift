@@ -23,6 +23,8 @@ class Grid: SKNode {
     private var scaleFactorX: CGFloat = 1.0
     private var scaleFactorY: CGFloat = 1.0
     
+    var onMousePositionChange: ((String) -> Void)?
+    
     init(cellSize: CGFloat = 50) {
         self.cellSize = cellSize
         super.init()
@@ -169,12 +171,15 @@ class Grid: SKNode {
         // Redondear a enteros para una visualización más limpia
         let roundedX = Int(gridPosition.x)
         let roundedY = Int(gridPosition.y)
-        
+        let newText = "X: \(roundedX - 107) - Y: \(roundedY)"
         // Actualizar la etiqueta
-        coordsLabel.text = "X: \(roundedX - 107), Y: \(roundedY)"
+        coordsLabel.text = newText
         
         // Guardar la posición actual para referencia
         currentPosition = CGPoint(x: roundedX, y: roundedY * -1)
+        
+        onMousePositionChange?(newText)
+        
     }
     
     // Método para obtener la posición actual en el grid
