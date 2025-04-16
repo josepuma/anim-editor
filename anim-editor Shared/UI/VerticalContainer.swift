@@ -101,11 +101,11 @@ class VerticalContainer: SKNode {
     
     // Clear all nodes
     func clearNodes() {
+        // Eliminar todos los nodos hijos
         for node in childNodes {
             node.removeFromParent()
         }
         childNodes.removeAll()
-        updateLayout()
     }
     
     func getAvailableInnerWidth() -> CGFloat {
@@ -132,6 +132,9 @@ class VerticalContainer: SKNode {
                     // Ajustar el ancho del botón
                     button.setFullWidth(width: availableWidth)
                 }
+                if let horizontalContainer = node as? HorizontalContainer{
+                    horizontalContainer.setFullWidth(width: availableWidth)
+                }
                 // Puedes agregar más casos para otros tipos de nodos aquí
             }
         }
@@ -150,21 +153,22 @@ class VerticalContainer: SKNode {
         }
         
         // PASO 1: Calcular dimensiones iniciales
-        updateContainerDimensions()
+        let newHeight = updateContainerDimensions()
         
         // PASO 2: Posicionar nodos con dimensiones originales
-        positionAllNodes()
+        positionAllNodes(totalHeight: newHeight)
         
         // PASO 3: Ajustar anchos de nodos solitarios
         adjustChildrenWidthsInternal()
         
         // PASO 4: Recalcular posiciones después del ajuste de anchos
-        positionAllNodes()
+        positionAllNodes(totalHeight: newHeight)
     }
 
-    var totalHeight: CGFloat = 0
+
     // Calcula las dimensiones del contenedor y actualiza el fondo
-    private func updateContainerDimensions() {
+    private func updateContainerDimensions() -> CGFloat {
+        var totalHeight: CGFloat = 0
         // Calculate the width based on the widest child
         let containerWidth = childNodes.map { node -> CGFloat in
             return node.calculateAccumulatedFrame().width
@@ -195,10 +199,12 @@ class VerticalContainer: SKNode {
             )
             backgroundNode.path = backgroundPath
         }
+        
+        return totalHeight
     }
 
     // Posiciona todos los nodos según la alineación configurada
-    private func positionAllNodes() {
+    private func positionAllNodes(totalHeight: CGFloat) {
         var currentY: CGFloat
         
         // Set starting Y position based on vertical alignment

@@ -1,10 +1,17 @@
 import SpriteKit
 
-class Sprite {
+class Sprite : Equatable {
     private var textureNode: SKSpriteNode
     private var tweenManager: TweenManager
     private var zIndexPosition: CGFloat = 1
     private var initialPosition: CGPoint
+    private var isHovered = false
+    private var isSelected = false
+    
+    static func == (lhs: Sprite, rhs: Sprite) -> Bool {
+        // Dos sprites son iguales si su nodo es el mismo
+        return lhs.node == rhs.node
+    }
     
     var node: SKSpriteNode {
         return textureNode
@@ -32,6 +39,65 @@ class Sprite {
        initialPosition = position
        textureNode.position = position
    }
+    
+    func setHovered(_ hovered: Bool) {
+        isHovered = hovered
+    }
+    
+    func setSelected(_ selected: Bool) {
+        isSelected = selected
+    }
+    
+    func updateBorders() {
+        // Actualizar borde de hover si es necesario
+        updateHoverBorder()
+        
+        // Actualizar borde de selección si es necesario
+        updateSelectionBorder()
+    }
+    
+    func updateHoverBorder() {
+        // Solo actualizar si está en estado hover
+        if isHovered {
+            // Eliminar el borde anterior
+            node.childNode(withName: "hoverBorder")?.removeFromParent()
+            
+            // Crear un nuevo borde con el tamaño actual
+            let border = SKShapeNode(rectOf: node.size)
+            border.strokeColor = .yellow
+            border.lineWidth = 2.0
+            border.name = "hoverBorder"
+            border.zPosition = 10  // Por encima del contenido del sprite
+            
+            node.addChild(border)
+        }
+    }
+    
+    func updateSelectionBorder() {
+        // Eliminar el borde anterior
+        node.childNode(withName: "selectionBorder")?.removeFromParent()
+        
+        // Solo crear nuevo borde si está seleccionado
+        if isSelected {
+            let border = SKShapeNode(rectOf: node.size)
+            border.strokeColor = .white
+            border.lineWidth = 2.5
+            border.name = "selectionBorder"
+            border.zPosition = 11  // Ligeramente por encima del borde de hover
+            
+            node.addChild(border)
+        }
+    }
+    
+    func removeHoverBorder() {
+        isHovered = false
+        node.childNode(withName: "hoverBorder")?.removeFromParent()
+    }
+    
+    func removeSelectionBorder() {
+        isSelected = false
+        node.childNode(withName: "selectionBorder")?.removeFromParent()
+    }
     
     func startLoop(startTime: Int, loopCount: Int) {
         tweenManager.startLoop(startTime: startTime, loopCount: loopCount)
@@ -104,5 +170,69 @@ class Sprite {
          newSprite.tweenManager = self.tweenManager
         
         return newSprite
+    }
+}
+
+extension Sprite {    
+    // Métodos para obtener los diferentes tipos de tweens
+    func getMoveTweens() -> [TweenInfo] {
+        // Implementar acceso a los moveTweens del tweenManager
+        return tweenManager.getMoveTweens().map { tween in
+            TweenInfo(
+                startTime: tween.startTime,
+                endTime: tween.endTime,
+                startValue: tween.startValue,
+                endValue: tween.endValue,
+                easing: tween.easing
+            )
+        }
+    }
+    
+    func getScaleTweens() -> [TweenInfo] {
+        return tweenManager.getScaleTweens().map { tween in
+            TweenInfo(
+                startTime: tween.startTime,
+                endTime: tween.endTime,
+                startValue: tween.startValue,
+                endValue: tween.endValue,
+                easing: tween.easing
+            )
+        }
+    }
+    
+    func getRotateTweens() -> [TweenInfo] {
+        return tweenManager.getRotateTweens().map { tween in
+            TweenInfo(
+                startTime: tween.startTime,
+                endTime: tween.endTime,
+                startValue: tween.startValue,
+                endValue: tween.endValue,
+                easing: tween.easing
+            )
+        }
+    }
+    
+    func getFadeTweens() -> [TweenInfo] {
+        return tweenManager.getFadeTweens().map { tween in
+            TweenInfo(
+                startTime: tween.startTime,
+                endTime: tween.endTime,
+                startValue: tween.startValue,
+                endValue: tween.endValue,
+                easing: tween.easing
+            )
+        }
+    }
+    
+    func getColorTweens() -> [TweenInfo] {
+        return tweenManager.getColorTweens().map { tween in
+            TweenInfo(
+                startTime: tween.startTime,
+                endTime: tween.endTime,
+                startValue: tween.startValue,
+                endValue: tween.endValue,
+                easing: tween.easing
+            )
+        }
     }
 }

@@ -99,7 +99,15 @@ class SpriteManager {
         }
     }
 
+}
 
-
-
+extension SpriteManager {
+    func getSpriteForNode(_ node: SKNode) -> Sprite? {
+        for sprite in sprites {
+            if node == sprite.node || node.parent == sprite.node {
+                return sprite
+            }
+        }
+        return nil
+    }
 }

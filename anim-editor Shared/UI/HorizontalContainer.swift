@@ -188,6 +188,10 @@ class HorizontalContainer: SKNode {
         }
     }
     
+    func setFullWidth(width: CGFloat) {
+        
+    }
+    
     // Set background color
     func setBackgroundColor(_ color: SKColor) {
         backgroundColor = color

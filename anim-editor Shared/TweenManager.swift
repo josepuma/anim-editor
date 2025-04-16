@@ -485,3 +485,26 @@ class TweenManager {
 
 
 }
+
+extension TweenManager {
+    // Métodos para acceder a los diferentes tipos de tweens
+    func getMoveTweens() -> [Tween<CGPoint>] {
+        return moveTweens
+    }
+    
+    func getScaleTweens() -> [Tween<CGFloat>] {
+        return scaleTweens
+    }
+    
+    func getRotateTweens() -> [Tween<CGFloat>] {
+        return rotateTweens
+    }
+    
+    func getFadeTweens() -> [Tween<CGFloat>] {
+        return fadeTweens
+    }
+    
+    func getColorTweens() -> [Tween<SKColor>] {
+        return colorTweens
+    }
+}

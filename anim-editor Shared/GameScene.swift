@@ -27,6 +27,9 @@ class GameScene: SKScene {
     private var positionButton: Button!
     
     private var toolsContainer: VerticalContainer!
+    private var spriteInfoPanel: SpriteInfoPanel!
+    private var currentHoveredSprite: Sprite?
+    private var currentSelectedSprite: Sprite?
     
     private var accent = NSColor(red: 202 / 255, green: 217 / 255, blue: 91 / 255, alpha: 1)
     private var backgroundColorAccent = NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 0.7)
@@ -43,7 +46,7 @@ class GameScene: SKScene {
         return scene
     }
     
-    let path = "/Users/josepuma/Downloads/387136 BUTAOTOME - Waizatsu Ideology/"
+    let path = "/Users/josepuma/Downloads/244001 yanaginagi - landscape/"
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         backgroundColor = .black
@@ -66,7 +69,7 @@ class GameScene: SKScene {
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
  
-        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "BUTAOTOME - Waizatsu Ideology (Jounzan).osb")
+        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "yanaginagi - landscape ([Vincent]).osb")
         spriteParser.parseSprites()
         spriteManager.addToScene(scene: self)
         
@@ -127,6 +130,8 @@ class GameScene: SKScene {
     }
     
     func setupControls() {
+        let margin: CGFloat = 4
+    
         
         toolsContainer = VerticalContainer(
             spacing: 10,
@@ -260,14 +265,23 @@ class GameScene: SKScene {
             createNewScriptButton,
         ])
         // Posicionar el contenedor en la esquina superior derecha
-        let margin: CGFloat = 4
-        toolsContainer.position = CGPoint(
+
+        /*toolsContainer.position = CGPoint(
             x: self.size.width/2 - margin - toolsContainer.getSize().width/2,
             y: self.size.height/2 - margin - toolsContainer.getSize().height/2
-        )
+        )*/
 
         toolsContainer.zPosition = 100
         addChild(toolsContainer)
+        
+        spriteInfoPanel = SpriteInfoPanel()
+        spriteInfoPanel.zPosition = 100
+        /*spriteInfoPanel.position = CGPoint(
+            x: self.size.width/2 - margin - toolsContainer.getSize().width/2,
+            y: self.size.height/2 - margin - toolsContainer.getSize().height/2
+        )*/
+        //spriteInfoPanel.alpha = 0 // Inicialmente invisible
+        addChild(spriteInfoPanel)
     }
     
     func toggleGridVisibility(visible: Bool) {
@@ -325,22 +339,55 @@ class GameScene: SKScene {
             )
         }
         
+        let margin: CGFloat = 16
         if toolsContainer != nil {
-            let margin: CGFloat = 16
             toolsContainer.position = CGPoint(
                 x: self.size.width/2 - margin - toolsContainer.getSize().width/2,
                 y: self.size.height/2 - margin - toolsContainer.getSize().height/2
             )
         }
         
+       
+        calculateSpriteInfoPanelPosition()
         spriteManager.updateSize()
    }
+    
+    func calculateSpriteInfoPanelPosition(){
+        let margin: CGFloat = 16
+        if spriteInfoPanel != nil {
+            spriteInfoPanel.position = CGPoint(
+                x: -self.size.width/2 + margin + spriteInfoPanel.getSize().width/2,
+                y: self.size.height/2 - margin - spriteInfoPanel.getSize().height/2
+            )
+        }
+    }
     
     override func update(_ currentTime: TimeInterval) {
         super.update(currentTime)
         if audioPlayer != nil{
             let gameTime = Int(audioPlayer.currentTime * 1000) // Convert to milliseconds or your desired unit
             spriteManager.updateAll(currentTime: gameTime)
+            
+            if let hoveredSprite = currentHoveredSprite {
+                if hoveredSprite.isActive(at: gameTime) {
+                    hoveredSprite.updateHoverBorder()
+                } else {
+                    hoveredSprite.removeHoverBorder()
+                    currentHoveredSprite = nil
+                }
+            }
+            
+            if let selectedSprite = currentSelectedSprite {
+                if selectedSprite.isActive(at: gameTime) {
+                    selectedSprite.updateBorders()
+                } else {
+                    selectedSprite.removeSelectionBorder()
+                    currentSelectedSprite = nil
+                    
+                    // Opcional: ocultar el panel de información si el sprite seleccionado ya no está activo
+                    spriteInfoPanel?.run(SKAction.fadeOut(withDuration: 0.3))
+                }
+            }
         }
     }
     
@@ -407,7 +454,49 @@ extension GameScene {
 extension GameScene {
 
     override func mouseDown(with event: NSEvent) {
-        self.atPoint(event.location(in: self)).mouseDown(with: event)
+        //self.atPoint(event.location(in: self)).mouseDown(with: event)
+        super.mouseDown(with: event)
+        
+        // Manejar selección de sprite
+           let location = event.location(in: self)
+           let nodesAtPoint = nodes(at: location)
+           
+           var selectedSprite: Sprite? = nil
+           for node in nodesAtPoint {
+               if node is SKSpriteNode || node.parent is SKSpriteNode {
+                   if let sprite = spriteManager.getSpriteForNode(node) {
+                       if sprite.isActive(at: Int((audioPlayer?.currentTime ?? 0) * 1000)) {
+                           selectedSprite = sprite
+                           break
+                       }
+                   }
+               }
+           }
+           
+           // Primero, desmarcar el sprite anterior si existe
+           if let currentSprite = currentSelectedSprite {
+               currentSprite.setSelected(false)
+               currentSprite.removeSelectionBorder() // Eliminar explícitamente el borde
+           }
+           
+           // Actualizar la referencia al sprite seleccionado
+           currentSelectedSprite = selectedSprite
+           
+           // Si hay un nuevo sprite seleccionado
+           if let sprite = selectedSprite {
+               // Marcar como seleccionado
+               sprite.setSelected(true)
+               // Mostrar y actualizar panel de información
+               spriteInfoPanel?.updateWithSprite(sprite)
+               calculateSpriteInfoPanelPosition()
+               // Hacer visible el panel si estaba oculto
+               if (spriteInfoPanel?.alpha ?? 0) < 0.1 {
+                   spriteInfoPanel?.run(SKAction.fadeIn(withDuration: 0.3))
+               }
+           } else {
+               // Ocultar panel si no hay selección
+               spriteInfoPanel?.run(SKAction.fadeOut(withDuration: 0.3))
+           }
     }
     
     override func mouseDragged(with event: NSEvent) {
@@ -420,6 +509,9 @@ extension GameScene {
     
     override func mouseMoved(with event: NSEvent) {
         super.mouseMoved(with: event)
+        let location = event.location(in: self)
+        let nodesAtPoint = nodes(at: location)
+        
         // Pasar el evento al componente de grid
         if let gridComponent = gridComponent {
             let location = event.location(in: self)
@@ -428,6 +520,25 @@ extension GameScene {
         
         if let timeline = timelineComponent {
             timeline.mouseMoved(with: event)
+        }
+        
+        var foundSprite: Sprite? = nil
+        for node in nodesAtPoint {
+            // Verificar primero si es un SKSpriteNode o si su padre es un SKSpriteNode
+            if node is SKSpriteNode || node.parent is SKSpriteNode {
+                if let sprite = spriteManager.getSpriteForNode(node) {
+                    if sprite.isActive(at: Int((audioPlayer?.currentTime ?? 0) * 1000)) {
+                        foundSprite = sprite
+                        break
+                    }
+                }
+            }
+        }
+
+        if foundSprite !== currentHoveredSprite {
+            currentHoveredSprite?.removeHoverBorder()
+            foundSprite?.setHovered(true)  // Solo marcamos como hover
+            currentHoveredSprite = foundSprite
         }
     }
     
