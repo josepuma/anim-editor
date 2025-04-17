@@ -85,34 +85,7 @@ class GameScene: SKScene {
 
         setupScriptSystem()
         setupScriptButtons()
-        
-        someTestingModule()
-    }
-    
-    func someTestingModule() {
-        let particleManager = particleManager// Tu instancia de ParticleManager
-        let scene = self// Tu instancia de SKScene
-        let interpreter = JSInterpreter(particleManager: particleManager!, scene: scene)
 
-        let simpleTestScript = """
-        console.log("Script de prueba iniciado");
-
-        function main() {
-            console.log("Función main() del script de prueba");
-            if (typeof ParticleAPI !== 'undefined' && typeof ParticleAPI.createSprite === 'function') {
-                console.log("✅ ParticleAPI.createSprite está disponible");
-                var testSprite = ParticleAPI.createSprite("dummyTexture.png");
-                if (testSprite) {
-                    console.log("✅ Sprite de prueba creado (aunque la textura pueda no existir)");
-                } else {
-                    console.error("❌ Error al crear el sprite de prueba");
-                }
-            } else {
-                console.error("❌ ParticleAPI o ParticleAPI.createSprite no están definidos");
-            }
-        }
-        """
-        interpreter.testScript(scriptContent: simpleTestScript)
     }
     
     func setupTimeline() {

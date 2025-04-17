@@ -86,7 +86,7 @@ class ScriptParametersPanel: VerticalContainer {
             textColor: buttonColorText,
             fontSize: 12
         )
-        editButton.setIcon(name: "edit", size: 14, color: buttonColorText)
+        editButton.setIcon(name: "volume", size: 14, color: buttonColorText)
         editButton.onPress = { [weak self] in
             self?.editScript()
         }

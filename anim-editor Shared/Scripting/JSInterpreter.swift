@@ -26,30 +26,51 @@ class JSInterpreter {
     private var scriptSprites: [String: [Sprite]] = [:]
     
     // ID del script actual que se está ejecutando
-    private var currentScriptId: String?
+    internal var currentScriptId: String?
+    
+    func addSpriteToScript(scriptId: String, sprite: Sprite) {
+            if scriptSprites[scriptId] == nil {
+                scriptSprites[scriptId] = []
+            }
+            scriptSprites[scriptId]?.append(sprite)
+        }
+        
+        func clearScriptSprites(scriptId: String, spriteManager: SpriteManager) {
+            guard let sprites = scriptSprites[scriptId] else { return }
+            
+            for sprite in sprites {
+                spriteManager.removeSprite(sprite)
+            }
+            
+            scriptSprites[scriptId] = []
+        }
     
     init(particleManager: ParticleManager, scene: SKScene) {
-        self.particleManager = particleManager
-        self.scene = scene
-        
-        // Inicializar el contexto JavaScript
-        guard let newContext = JSContext() else {
-            fatalError("No se pudo crear el contexto JavaScript")
+           self.particleManager = particleManager
+           self.scene = scene
+           
+           // Inicializar el contexto JavaScript
+           self.context = JSContext()!
+           
+           // Configurar el manejador de excepciones
+           self.context.exceptionHandler = { context, exception in
+               if let exc = exception {
+                   print("JS Error: \(exc.toString() ?? "Unknown error")")
+               }
+           }
+           
+           setupConsoleObject()
+       }
+    
+    func setupAPIBridge() {
+            guard let particleManager = particleManager, let scene = scene else { return }
+            
+            // Crear el bridge API
+            let apiBridge = ParticleAPIBridge(interpreter: self, particleManager: particleManager, scene: scene)
+            
+            // Registrar el bridge en el contexto global
+            context.setObject(apiBridge, forKeyedSubscript: "ParticleAPI" as NSString)
         }
-        
-        self.context = newContext
-        
-        // Configurar el manejador de excepciones
-        self.context.exceptionHandler = { context, exception in
-            if let exc = exception {
-                let error = "JS Error: \(exc.toString() ?? "Unknown error")"
-                print(error)
-            }
-        }
-        setupConsoleObject()
-        // Registrar API para scripts
-        registerAPIFunctions()
-    }
     
     // MARK: - Registro de funciones de API
     
@@ -69,19 +90,17 @@ class JSInterpreter {
             }
             return Int(audioPlayer.currentTime * 1000)
         }
-        api?.setValue(getCurrentTime, forProperty: "getCurrentTime")
         
         // Función para generar números aleatorios
         let random: @convention(block) (Double, Double) -> Double = { (min, max) in
             return Double.random(in: min...max)
         }
-        api?.setValue(random, forProperty: "random")
         
         // Función para generar números aleatorios enteros
         let randomInt: @convention(block) (Int, Int) -> Int = { (min, max) in
             return Int.random(in: min...max)
         }
-        api?.setValue(randomInt, forProperty: "randomInt")
+
         
         // --- Registro de funciones en la API ---
         
@@ -252,9 +271,9 @@ class JSInterpreter {
         // --- Registro de funciones en la API ---
         
         // Utilidades
-        //api?.setValue(getCurrentTime, forProperty: "getCurrentTime")
-        //api?.setValue(random, forProperty: "random")
-        //api?.setValue(randomInt, forProperty: "randomInt")
+        api?.setValue(getCurrentTime, forProperty: "getCurrentTime")
+        api?.setValue(random, forProperty: "random")
+        api?.setValue(randomInt, forProperty: "randomInt")
         
         // Manejo de sprites
         api?.setValue(createSprite, forProperty: "createSprite")
@@ -268,7 +287,7 @@ class JSInterpreter {
     // MARK: - Funciones auxiliares
     
     // Convierte un string de easing a la enumeración Easing
-    private func getEasingFromString(_ string: String) -> Easing {
+    func getEasingFromString(_ string: String) -> Easing {
         switch string.lowercased() {
         case "linear": return .linear
         case "easein", "easing_in": return .easingIn
@@ -304,81 +323,80 @@ class JSInterpreter {
     
     // MARK: - Carga y ejecución de scripts
     
-    // Carga un script desde una ruta de archivo
     func loadScript(from filePath: String) -> Bool {
             do {
                 let scriptContent = try String(contentsOfFile: filePath, encoding: .utf8)
                 let fileName = URL(fileURLWithPath: filePath).deletingPathExtension().lastPathComponent
-
+                
+                // Crear un nuevo contexto
                 guard let scriptContext = JSContext() else {
                     print("Error: No se pudo crear el contexto para el script \(fileName)")
                     return false
                 }
                 
-                let particleAPIFromMainContext = context.globalObject.objectForKeyedSubscript("ParticleAPI")
-
-               print("⏳ loadScript: Intentando establecer ParticleAPI en el contexto del script")
-               scriptContext.globalObject.setObject(
-                   particleAPIFromMainContext,
-                   forKeyedSubscript: "ParticleAPI" as NSString
-               )
-                print("✅ loadScript: ParticleAPI establecida en el contexto del script")
-
-                // **Configurar el objeto console en el contexto del script**
-                let consoleObject = JSValue(newObjectIn: scriptContext)
-
-                let logFunction: @convention(block) (String) -> Void = { message in
-                    print("📜 [JS Log - \(fileName)] \(message)") // Incluir nombre del script
-                }
-                consoleObject?.setValue(logFunction, forProperty: "log")
-
-                let errorFunction: @convention(block) (String) -> Void = { message in
-                    print("❌ [JS Error - \(fileName)] \(message)")
-                }
-                consoleObject?.setValue(errorFunction, forProperty: "error")
-
-                let warnFunction: @convention(block) (String) -> Void = { message in
-                    print("⚠️ [JS Warning - \(fileName)] \(message)")
-                }
-                consoleObject?.setValue(warnFunction, forProperty: "warn")
-
-                scriptContext.setObject(consoleObject, forKeyedSubscript: "console" as NSString)
-
-                // Configurar manejador de excepciones
-                scriptContext.exceptionHandler = { context, exception in
-                    if let exc = exception {
-                        print("Error en script \(fileName): \(exc.toString() ?? "Unknown error")")
-                    }
+                // Configurar console
+                setupConsoleForContext(scriptContext, scriptName: fileName)
+                
+                // Crear y configurar el bridge para este contexto
+                guard let particleManager = particleManager, let scene = scene else {
+                    print("Error: particleManager o scene son nil")
+                    return false
                 }
                 
-                print("⏳ loadScript: Intentando obtener ParticleAPI del contexto principal")
-                if let api = particleAPIFromMainContext {
-                    print("✅ loadScript: ParticleAPI obtenida del contexto principal: \(api)")
-                } else {
-                    print("❌ loadScript: No se pudo obtener ParticleAPI del contexto principal")
-                }
+                let apiBridge = ParticleAPIBridge(interpreter: self, particleManager: particleManager, scene: scene)
+                scriptContext.setObject(apiBridge, forKeyedSubscript: "ParticleAPI" as NSString)
+                
+                // Verificar
+                print("✅ API Bridge configurado para script \(fileName)")
+                
                 // Evaluar el script
                 scriptContext.evaluateScript(scriptContent)
-
-                // Almacenar en caché
+                
+                // Guardar en caché
                 scriptCache[fileName] = scriptContext
-
-                // Inicializar entrada en seguimiento de sprites si no existe
                 scriptSprites[fileName] = []
-
-                // Intentar ejecutar la función init si existe
+                
+                // Intentar ejecutar init
                 if let initFn = scriptContext.objectForKeyedSubscript("init"),
                    initFn.isObject,
-                   !initFn.isUndefined && initFn.hasProperty("call") {
+                   !initFn.isUndefined {
                     initFn.call(withArguments: [])
                 }
-
+                
                 return true
             } catch {
                 print("Error cargando script \(filePath): \(error)")
                 return false
             }
         }
+        
+    private func setupConsoleForContext(_ context: JSContext, scriptName: String) {
+           let consoleObject = JSValue(newObjectIn: context)
+           
+           let logFunction: @convention(block) (String) -> Void = { message in
+               print("📜 [JS Log - \(scriptName)] \(message)")
+           }
+           consoleObject?.setValue(logFunction, forProperty: "log")
+           
+           let errorFunction: @convention(block) (String) -> Void = { message in
+               print("❌ [JS Error - \(scriptName)] \(message)")
+           }
+           consoleObject?.setValue(errorFunction, forProperty: "error")
+           
+           let warnFunction: @convention(block) (String) -> Void = { message in
+               print("⚠️ [JS Warning - \(scriptName)] \(message)")
+           }
+           consoleObject?.setValue(warnFunction, forProperty: "warn")
+           
+           context.setObject(consoleObject, forKeyedSubscript: "console" as NSString)
+           
+           // Configurar manejador de excepciones
+           context.exceptionHandler = { context, exception in
+               if let exc = exception {
+                   print("Error en script \(scriptName): \(exc.toString() ?? "Unknown error")")
+               }
+           }
+       }
     
     // Busca y carga todos los scripts JS de una carpeta
     func loadScripts(fromFolder folderPath: String) -> [String] {

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5903B7772DB1A25B004C29A7 /* ParticleAPIExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5903B7762DB1A253004C29A7 /* ParticleAPIExport.swift */; };
+		5903B7782DB1A25B004C29A7 /* ParticleAPIExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5903B7762DB1A253004C29A7 /* ParticleAPIExport.swift */; };
 		596FB9332C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */; };
 		596FB9342C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */; };
 		596FB9362C74532F00E4733C /* AudioFFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9352C74532F00E4733C /* AudioFFT.swift */; };
@@ -97,6 +99,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5903B7762DB1A253004C29A7 /* ParticleAPIExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleAPIExport.swift; sourceTree = "<group>"; };
 		596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFTAnalyzer.swift; sourceTree = "<group>"; };
 		596FB9352C74532F00E4733C /* AudioFFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFT.swift; sourceTree = "<group>"; };
 		59B86FCF2C656448001D0DC1 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
@@ -298,6 +301,7 @@
 		59EC38962DB1341500C674C7 /* Scripting */ = {
 			isa = PBXGroup;
 			children = (
+				5903B7762DB1A253004C29A7 /* ParticleAPIExport.swift */,
 				59EC389A2DB1345C00C674C7 /* ParticleScriptManager.swift */,
 				59EC38972DB1341C00C674C7 /* JSInterpreter.swift */,
 			);
@@ -460,6 +464,7 @@
 				59FFB4CB2DAC29F30002EC56 /* VerticalContainer.swift in Sources */,
 				59B8700D2C6564B4001D0DC1 /* Origin.swift in Sources */,
 				59EC388E2DB093D600C674C7 /* ParticlePresets.swift in Sources */,
+				5903B7772DB1A25B004C29A7 /* ParticleAPIExport.swift in Sources */,
 				59C71A992CD56C3900FDE954 /* Helpers.swift in Sources */,
 				59EC38842DB0939B00C674C7 /* ParticleEmitter.swift in Sources */,
 				59EC38912DB093E300C674C7 /* ParticleManager.swift in Sources */,
@@ -506,6 +511,7 @@
 				59FFB4CA2DAC29F30002EC56 /* VerticalContainer.swift in Sources */,
 				59B8700E2C6564B4001D0DC1 /* Origin.swift in Sources */,
 				59EC388F2DB093D600C674C7 /* ParticlePresets.swift in Sources */,
+				5903B7782DB1A25B004C29A7 /* ParticleAPIExport.swift in Sources */,
 				59C71A982CD56C3900FDE954 /* Helpers.swift in Sources */,
 				59EC38852DB0939B00C674C7 /* ParticleEmitter.swift in Sources */,
 				59EC38922DB093E300C674C7 /* ParticleManager.swift in Sources */,
