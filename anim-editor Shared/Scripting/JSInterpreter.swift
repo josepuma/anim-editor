@@ -426,6 +426,21 @@ class JSInterpreter {
         }
     }
     
+    func clearScriptsSprites(_ scriptName: String) {
+        guard let sprites = scriptSprites[scriptName],
+              let particleManager = particleManager else {
+            return
+        }
+        
+        print("🧹 Limpiando \(sprites.count) sprites existentes del script \(scriptName)")
+        
+        for sprite in sprites {
+            particleManager.spriteManager.removeSprite(sprite)
+        }
+        
+        scriptSprites[scriptName] = []
+    }
+    
     // Ejecuta un script específico por nombre
     func executeScript(named scriptName: String) -> Bool {
         guard let scriptContext = scriptCache[scriptName] else {
@@ -433,9 +448,11 @@ class JSInterpreter {
             return false
         }
 
+        // Limpiar los sprites existentes para este script antes de ejecutarlo de nuevo
+        clearScriptsSprites(scriptName)
+        
         currentScriptId = scriptName
         print("🚀 Ejecutando script: \(scriptName)")
-        clearScriptSprites(scriptName)
 
         print("🔍 Buscando la función main() en \(scriptName)")
         let success = executeMainFunction(in: scriptContext)
