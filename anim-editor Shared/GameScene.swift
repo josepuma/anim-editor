@@ -24,6 +24,7 @@ class GameScene: SKScene {
     private var controlsContainer: VerticalContainer!
     private var volumeSlider: VolumeSlider!
     private var volumeContainer: HorizontalContainer!
+    private var particleManager: ParticleManager!
     private var positionButton: Button!
     
     private var toolsContainer: VerticalContainer!
@@ -46,7 +47,7 @@ class GameScene: SKScene {
         return scene
     }
     
-    let path = "/Users/josepuma/Downloads/244001 yanaginagi - landscape/"
+    let path = "/Users/josepuma/Downloads/183467 Marika - quantum jump/"
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         backgroundColor = .black
@@ -69,7 +70,7 @@ class GameScene: SKScene {
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
  
-        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "yanaginagi - landscape ([Vincent]).osb")
+        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Marika - quantum jump (Shurelia).osb")
         spriteParser.parseSprites()
         spriteManager.addToScene(scene: self)
         
@@ -130,8 +131,17 @@ class GameScene: SKScene {
     }
     
     func setupControls() {
-        let margin: CGFloat = 4
-    
+        particleManager = ParticleManager(
+            spriteManager: spriteManager,
+            scene: self,
+            texturesPath: path // Asumiendo que tienes una variable 'path' como ruta base
+        )
+        
+        effectsTableNode = EffectsTableNode()
+        effectsTableNode.spriteManager = spriteManager
+        effectsTableNode.parentScene = self
+        effectsTableNode.zPosition = 111111
+        
         
         toolsContainer = VerticalContainer(
             spacing: 10,
@@ -282,7 +292,293 @@ class GameScene: SKScene {
         )*/
         //spriteInfoPanel.alpha = 0 // Inicialmente invisible
         addChild(spriteInfoPanel)
+        setupParticleButtons()
+        addChild(effectsTableNode)
     }
+    
+    private func setupParticleButtons() {
+        // Crear contenedor para los botones de efectos
+        let effectsTitle = Text(
+            text: "PARTICLES",
+            fontSize: 10,
+            color: backgroundColorAccent,
+            type: .capitalTitle,
+            letterSpacing: 2.0
+        )
+        
+        // Crear la primera fila de botones de efectos
+        let effectsRow1 = HorizontalContainer(
+            spacing: 10,
+            padding: CGSize(width: 10, height: 8),
+            verticalAlignment: .center,
+            horizontalAlignment: .left,
+            showBackground: false
+        )
+        
+        // Crear la segunda fila de botones de efectos (si necesitas más)
+        let effectsRow2 = HorizontalContainer(
+            spacing: 10,
+            padding: CGSize(width: 10, height: 8),
+            verticalAlignment: .center,
+            horizontalAlignment: .left,
+            showBackground: false
+        )
+        
+        // Botón para efecto de lluvia
+        let rainButton = Button(
+            text: "Rain",
+            padding: CGSize(width: 12, height: 8),
+            buttonColor: backgroundColorButton,
+            buttonBorderColor: backgroundColorButton,
+            textColor: buttonColorText,
+            fontSize: 12
+        )
+        rainButton.setIcon(name: "volume", size: 16, color: buttonColorText)
+        rainButton.onPress = { [weak self] in
+            self?.addRainEffect()
+        }
+        
+        // Botón para efecto de nieve
+        let snowButton = Button(
+            text: "Snow",
+            padding: CGSize(width: 12, height: 8),
+            buttonColor: backgroundColorButton,
+            buttonBorderColor: backgroundColorButton,
+            textColor: buttonColorText,
+            fontSize: 12
+        )
+        snowButton.setIcon(name: "volume", size: 16, color: buttonColorText)
+        snowButton.onPress = { [weak self] in
+            self?.addSnowEffect()
+        }
+        
+        // Botón para efecto de fuego
+        let fireButton = Button(
+            text: "Fire",
+            padding: CGSize(width: 12, height: 8),
+            buttonColor: backgroundColorButton,
+            buttonBorderColor: backgroundColorButton,
+            textColor: buttonColorText,
+            fontSize: 12
+        )
+        fireButton.setIcon(name: "volume", size: 16, color: buttonColorText)
+        fireButton.onPress = { [weak self] in
+            self?.addFireEffect()
+        }
+        
+        // Botón para efecto de explosión
+        let explosionButton = Button(
+            text: "Boom",
+            padding: CGSize(width: 12, height: 8),
+            buttonColor: backgroundColorButton,
+            buttonBorderColor: backgroundColorButton,
+            textColor: buttonColorText,
+            fontSize: 12
+        )
+        explosionButton.setIcon(name: "volume", size: 16, color: buttonColorText)
+        explosionButton.onPress = { [weak self] in
+            self?.addExplosionEffect()
+        }
+        
+        // Botón para efecto de humo
+        let smokeButton = Button(
+            text: "Smoke",
+            padding: CGSize(width: 12, height: 8),
+            buttonColor: backgroundColorButton,
+            buttonBorderColor: backgroundColorButton,
+            textColor: buttonColorText,
+            fontSize: 12
+        )
+        smokeButton.setIcon(name: "volume", size: 16, color: buttonColorText)
+        smokeButton.onPress = { [weak self] in
+            self?.addSmokeEffect()
+        }
+        
+        // Botón para efecto de brillos
+        let sparkleButton = Button(
+            text: "Sparkle",
+            padding: CGSize(width: 12, height: 8),
+            buttonColor: backgroundColorButton,
+            buttonBorderColor: backgroundColorButton,
+            textColor: buttonColorText,
+            fontSize: 12
+        )
+        sparkleButton.setIcon(name: "volume", size: 16, color: buttonColorText)
+        sparkleButton.onPress = { [weak self] in
+            self?.addSparkleEffect()
+        }
+        
+        // Añadir botones a las filas
+        effectsRow1.addNodes([rainButton, snowButton, fireButton])
+        effectsRow2.addNodes([explosionButton, smokeButton, sparkleButton])
+        
+        // Añadir título y filas al contenedor principal
+        toolsContainer.addNode(Separator())
+        toolsContainer.addNode(effectsTitle)
+        toolsContainer.addNode(effectsRow1)
+        toolsContainer.addNode(effectsRow2)
+    }
+    
+    private func addRainEffect() {
+        // Obtener tiempo actual de la canción
+        let currentTime = Int(audioPlayer.currentTime * 1000)
+        let endTime = currentTime + 30000 // 30 segundos
+        
+        guard let effect = particleManager.createRainEffect(
+               textureName: "SB/Effects/dot.png",
+               startTime: currentTime,
+               endTime: currentTime + 30000,
+               intensity: 60
+           ) else {
+               print("No se pudo crear el efecto de lluvia")
+               return
+           }
+           
+           // Añadir a la lista de efectos
+           effects.append(effect)
+           
+           // Proteger el acceso a effectsTableNode
+           guard let tableNode = effectsTableNode else {
+               print("Advertencia: effectsTableNode no está inicializado")
+               return
+           }
+           
+           tableNode.effects = effects
+           tableNode.reloadData()
+        
+        // Notificar al usuario
+        print("Efecto de lluvia añadido desde tiempo \(currentTime) hasta \(endTime)")
+    }
+
+    // Método para añadir efecto de nieve
+    private func addSnowEffect() {
+        let currentTime = Int(audioPlayer.currentTime * 1000)
+        let endTime = currentTime + 30000 // 30 segundos
+        
+        guard let effect = particleManager.createSnowEffect(
+            textureName: "SB/Effects/dot.png", // Asegúrate de tener esta textura
+            startTime: currentTime,
+            endTime: endTime,
+            intensity: 40
+        ) else {
+            print("No se pudo crear el efecto de nieve")
+            return
+        }
+        
+        // Añadir a la lista de efectos para la UI
+        effects.append(effect)
+        effectsTableNode.effects = effects
+        effectsTableNode.reloadData()
+        
+        print("Efecto de nieve añadido desde tiempo \(currentTime) hasta \(endTime)")
+    }
+
+    // Método para añadir efecto de fuego
+    private func addFireEffect() {
+        let currentTime = Int(audioPlayer.currentTime * 1000)
+        let endTime = currentTime + 20000 // 20 segundos
+        
+        // Posicionar el fuego en la parte inferior central
+        let position = CGPoint(x: 320, y: 240)
+        
+        guard let effect = particleManager.createFireEffect(
+            textureName: "SB/Effects/dot.png", // Asegúrate de tener esta textura
+            position: position,
+            startTime: currentTime,
+            endTime: endTime,
+            intensity: 60
+        ) else {
+            print("No se pudo crear el efecto de fuego")
+            return
+        }
+        
+        // Añadir a la lista de efectos para la UI
+        effects.append(effect)
+        effectsTableNode.effects = effects
+        effectsTableNode.reloadData()
+        
+        print("Efecto de fuego añadido en posición \(position) desde \(currentTime) hasta \(endTime)")
+    }
+
+    // Método para añadir efecto de explosión
+    private func addExplosionEffect() {
+        let currentTime = Int(audioPlayer.currentTime * 1000)
+        
+        // La explosión ocurre en el centro de la pantalla
+        let position = CGPoint(x: 320, y: 240)
+        
+        guard let effect = particleManager.createExplosionEffect(
+            textureName: "SB/Effects/dot.png", // Asegúrate de tener esta textura
+            position: position,
+            startTime: currentTime,
+            intensity: 100
+        ) else {
+            print("No se pudo crear el efecto de explosión")
+            return
+        }
+        
+        // Añadir a la lista de efectos para la UI
+        effects.append(effect)
+        effectsTableNode.effects = effects
+        effectsTableNode.reloadData()
+        
+        print("Efecto de explosión añadido en posición \(position) en tiempo \(currentTime)")
+    }
+
+    // Método para añadir efecto de humo
+    private func addSmokeEffect() {
+        let currentTime = Int(audioPlayer.currentTime * 1000)
+        let endTime = currentTime + 25000 // 25 segundos
+        
+        // El humo surge de un punto en la parte inferior
+        let position = CGPoint(x: 320, y: 480)
+        
+        guard let effect = particleManager.createSmokeEffect(
+            textureName: "SB/Effects/dot.png", // Asegúrate de tener esta textura
+            position: position,
+            startTime: currentTime,
+            endTime: endTime,
+            intensity: 40
+        ) else {
+            print("No se pudo crear el efecto de humo")
+            return
+        }
+        
+        // Añadir a la lista de efectos para la UI
+        effects.append(effect)
+        effectsTableNode.effects = effects
+        effectsTableNode.reloadData()
+        
+        print("Efecto de humo añadido en posición \(position) desde \(currentTime) hasta \(endTime)")
+    }
+
+    // Método para añadir efecto de destellos
+    private func addSparkleEffect() {
+        let currentTime = Int(audioPlayer.currentTime * 1000)
+        let endTime = currentTime + 15000 // 15 segundos
+        
+        // Los destellos aparecen en un área central
+        let position = CGPoint(x: 320, y: 240)
+        
+        guard let effect = particleManager.createSparkleEffect(
+            textureName: "SB/Effects/dot.png", // Asegúrate de tener esta textura
+            position: position,
+            startTime: currentTime,
+            endTime: endTime,
+            intensity: 30
+        ) else {
+            print("No se pudo crear el efecto de destellos")
+            return
+        }
+        
+        // Añadir a la lista de efectos para la UI
+        effects.append(effect)
+        effectsTableNode.effects = effects
+        effectsTableNode.reloadData()
+        
+        print("Efecto de destellos añadido en área \(position) desde \(currentTime) hasta \(endTime)")
+    }
+
     
     func toggleGridVisibility(visible: Bool) {
         guard let gridComponent = gridComponent else { return }
@@ -456,6 +752,23 @@ extension GameScene {
     override func mouseDown(with event: NSEvent) {
         //self.atPoint(event.location(in: self)).mouseDown(with: event)
         super.mouseDown(with: event)
+        
+        if event.modifierFlags.contains(.option) {
+                let location = event.location(in: self)
+                
+                // Crear explosión en la posición del mouse
+                guard let effect = particleManager.createExplosionEffect(
+                    textureName: "spark.png",
+                    position: location,
+                    startTime: Int(audioPlayer.currentTime * 1000),
+                    intensity: 80
+                ) else { return }
+                
+                // Añadir a la lista de efectos si es necesario
+                effects.append(effect)
+                effectsTableNode.effects = effects
+                effectsTableNode.reloadData()
+            }
         
         // Manejar selección de sprite
            let location = event.location(in: self)

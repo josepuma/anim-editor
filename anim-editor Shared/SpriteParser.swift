@@ -11,7 +11,7 @@ class SpriteParser {
     }
     
     func getTexture(from texturePath: String) -> SKTexture? {
-        let path = "/Users/josepuma/Downloads/244001 yanaginagi - landscape"
+        let path = "/Users/josepuma/Downloads/183467 Marika - quantum jump"
            // Check if the texture is already in the cache
            if let cachedTexture = textureCache[texturePath] {
                return cachedTexture
@@ -110,7 +110,6 @@ class SpriteParser {
                     }
                     
                     if let startTime = Int(parts[2]), let startValueX = Double(parts[4]), let startValueY = Double(parts[5]) {
-                        let easingValue = Int(parts[1]) ?? 0
                         let easing = Easing.allCases[Int(parts[1]) ?? 0]
                         
                         let endTime = Int(parts[3]) ?? startTime

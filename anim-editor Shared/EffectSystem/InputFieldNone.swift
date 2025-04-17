@@ -8,16 +8,20 @@
 import SpriteKit
 
 class InputFieldNode: SKNode {
-    let backgroundNode: SKShapeNode
-    let textNode: SKLabelNode
-    var textField: NSTextField?
+    private let backgroundNode: SKShapeNode
+    private let textNode: SKLabelNode
+    private var textField: NSTextField?
+    private var isEditing = false  // Nueva bandera para evitar ediciones duplicadas
+    
     var value: String
+    private weak var parentWindow: NSWindow?  // Mantener una referencia débil a la ventana
     
     init(text: String, width: CGFloat = 100, height: CGFloat = 20) {
         self.value = text
         
         backgroundNode = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 5)
         backgroundNode.fillColor = .gray
+        backgroundNode.strokeColor = .lightGray  // Añade un borde para mejor visibilidad
         
         textNode = SKLabelNode(text: text)
         textNode.fontName = "Helvetica"
@@ -31,7 +35,12 @@ class InputFieldNode: SKNode {
         addChild(backgroundNode)
         addChild(textNode)
         isUserInteractionEnabled = true
-        textNode.position = CGPoint(x: -backgroundNode.frame.width / 2 + 5, y: 0) // Desplazar un poco para el margen izquierdo
+        textNode.position = CGPoint(x: -backgroundNode.frame.width / 2 + 5, y: 0)
+        
+        // Asegurarnos de que este nodo tenga un nombre único
+        if name == nil {
+            name = "input_" + UUID().uuidString
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -39,104 +48,146 @@ class InputFieldNode: SKNode {
     }
     
     override func mouseDown(with event: NSEvent) {
-        print("InputFieldNode clicked")
-        startEditing(in: self.scene!.view!)
+        // Evitar múltiples campos de texto
+        if !isEditing {
+            startEditing(in: self.scene!.view!)
+        }
     }
     
     func startEditing(in view: SKView) {
-        // Hide the SKLabelNode (textNode) when editing starts
+        // Evitar múltiples llamadas
+        if isEditing || textField != nil {
+            return
+        }
+        
+        isEditing = true
         textNode.isHidden = true
         
-        let textField = NSTextField(frame: .zero)
+        // Guardar referencia a la ventana
+        parentWindow = view.window
+        
+        // Crear campo de texto en la posición correcta
+        let scenePoint = self.convert(.zero, to: self.scene!)
+        let viewPoint = view.convert(scenePoint, from: self.scene!)
+        
+        // Ajustar posición para alinear con el nodo
+        let yPosition = viewPoint.y - backgroundNode.frame.height / 2
+        let xPosition = viewPoint.x - backgroundNode.frame.width / 2
+        
+        let textField = NSTextField(frame: NSRect(
+            x: xPosition,
+            y: yPosition,
+            width: backgroundNode.frame.width,
+            height: backgroundNode.frame.height
+        ))
+        
+        // Configurar el campo de texto
         textField.stringValue = value
         textField.font = NSFont(name: "Helvetica", size: 12)
         textField.isBezeled = false
-        textField.drawsBackground = false
-        textField.backgroundColor = .white
+        textField.drawsBackground = true
+        textField.backgroundColor = NSColor.darkGray
         textField.textColor = .white
+        textField.isBordered = true
+        textField.focusRingType = .none
+        textField.alignment = .left
+        
+        // Configurar delegado y acción
+        textField.delegate = self as? NSTextFieldDelegate
         textField.target = self
-        textField.action = #selector(textFieldDidEndEditing)
+        textField.action = #selector(textFieldAction)
         
-        // Get the absolute position in scene coordinates
-        let scenePoint = self.convert(CGPoint.zero, to: self.scene!)
-        
-        // Convert scene coordinates to view coordinates
-        let viewPoint = view.convert(scenePoint, from: self.scene!)
-        
-        // Adjust y position: Ensure it's relative to the top of the view
-        let yPosition = viewPoint.y - backgroundNode.frame.height / 2
-        
-        // Adjust x position to align text field with background node
-        let xPosition = viewPoint.x - backgroundNode.frame.width / 2
-        
-        // Set the frame of the NSTextField to match the background node's position and size
-        textField.frame = CGRect(
-            x: xPosition,   // Correct x position (aligned with SKShapeNode)
-            y: yPosition,   // Correct y position (aligned with SKShapeNode)
-            width: backgroundNode.frame.width,  // Same width as the background node
-            height: backgroundNode.frame.height // Same height as the background node
-        )
-        
-        // Add the NSTextField to the view and focus it
+        // Añadir al view y enfocar
         view.addSubview(textField)
-        textField.becomeFirstResponder()
+        view.window?.makeFirstResponder(textField)
         self.textField = textField
         
-        // Register to receive window resize notifications
-        NotificationCenter.default.addObserver(self, selector: #selector(windowDidResize), name: NSWindow.didResizeNotification, object: view.window)
+        // Registrar notificación para detectar cuando se termina de editar
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(textFieldDidEndEditing),
+            name: NSControl.textDidEndEditingNotification,
+            object: textField
+        )
+        
+        // Registrar notificación para el redimensionamiento de la ventana
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidResize),
+            name: NSWindow.didResizeNotification,
+            object: view.window
+        )
     }
     
     @objc func windowDidResize(notification: Notification) {
-        guard let view = self.scene?.view else { return }
+        guard let view = self.scene?.view, let textField = self.textField else { return }
         
-        // Recalculate position of the NSTextField when window size changes
-        let scenePoint = self.convert(CGPoint.zero, to: self.scene!)
+        // Recalcular posición cuando cambia el tamaño de la ventana
+        let scenePoint = self.convert(.zero, to: self.scene!)
         let viewPoint = view.convert(scenePoint, from: self.scene!)
         
-        // Recalculate new y position based on resized window
         let yPosition = viewPoint.y - backgroundNode.frame.height / 2
         let xPosition = viewPoint.x - backgroundNode.frame.width / 2
         
-        // Update the position of the NSTextField
-        textField?.frame.origin = CGPoint(x: xPosition, y: yPosition)
+        textField.frame.origin = CGPoint(x: xPosition, y: yPosition)
     }
     
-    func controlTextDidEndEditing(_ obj: Notification) {
-        textFieldDidEndEditing()
+    @objc func textFieldAction() {
+        endEditing()
     }
     
-    @objc func textFieldDidEndEditing() {
-        if let text = textField?.stringValue {
-            value = text
-            textNode.text = text
-            textNode.isHidden = false  // Make the textNode visible again when editing ends
+    @objc func textFieldDidEndEditing(notification: Notification) {
+        endEditing()
+    }
+    
+    private func endEditing() {
+        // Evitar múltiples llamadas
+        guard isEditing, let textField = self.textField else { return }
+        
+        isEditing = false
+        
+        // Actualizar el valor y el nodo de texto
+        if !textField.stringValue.isEmpty {
+            value = textField.stringValue
+            textNode.text = value
             
+            // Notificar al padre del cambio
             if let parentNode = parent as? EffectsTableNode,
-               let nodeName = name,
-               let index = Int(nodeName.split(separator: "_")[1]),
-               let parameter = nodeName.split(separator: "_").last.map(String.init) {
-                
-                // Get original parameter value to determine type
-                let originalValue = parentNode.effects[index].parameters[parameter]
-                
-                // Convert according to original type
-                let newValue: Any
-                
-                if originalValue is Int {
-                    newValue = Int(text) ?? 0
-                } else if originalValue is Double {
-                    newValue = Double(text) ?? 0.0
-                } else if originalValue is String {
-                    newValue = text
-                } else {
-                    // Default to string if type unknown
-                    newValue = text
+               let nodeName = name {
+                let components = nodeName.split(separator: "_").map { String($0) }
+                if components.count >= 3, let index = Int(components[1]) {
+                    let parameter = components.dropFirst(2).joined(separator: "_")
+                    
+                    // Convertir el valor al tipo apropiado
+                    let newValue: Any
+                    if parameter.lowercased().contains("time") || parameter.lowercased().contains("count") {
+                        newValue = Int(value) ?? 0
+                    } else if parameter.lowercased().contains("scale") ||
+                              parameter.lowercased().contains("alpha") {
+                        newValue = Double(value) ?? 0.0
+                    } else {
+                        newValue = value
+                    }
+                    
+                    parentNode.updateEffectParameter(at: index, parameter: parameter, value: newValue)
                 }
-                
-                parentNode.updateEffectParameter(at: index, parameter: parameter, value: newValue)
             }
         }
+        
+        // Mostrar el texto nuevamente
+        textNode.isHidden = false
+        
+        // Limpiar
+        textField.removeFromSuperview()
+        self.textField = nil
+        
+        // Eliminar las notificaciones
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    deinit {
+        // Asegurarse de eliminar todas las notificaciones y recursos
+        NotificationCenter.default.removeObserver(self)
         textField?.removeFromSuperview()
-        textField = nil
     }
 }

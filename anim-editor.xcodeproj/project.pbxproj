@@ -56,6 +56,16 @@
 		59C71A992CD56C3900FDE954 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C71A972CD56C3000FDE954 /* Helpers.swift */; };
 		59EC38812DAF619B00C674C7 /* SpriteInfoPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38802DAF619900C674C7 /* SpriteInfoPanel.swift */; };
 		59EC38822DAF619B00C674C7 /* SpriteInfoPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38802DAF619900C674C7 /* SpriteInfoPanel.swift */; };
+		59EC38842DB0939B00C674C7 /* ParticleEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38832DB0939600C674C7 /* ParticleEmitter.swift */; };
+		59EC38852DB0939B00C674C7 /* ParticleEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38832DB0939600C674C7 /* ParticleEmitter.swift */; };
+		59EC38872DB093BD00C674C7 /* ParticleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38862DB093B900C674C7 /* ParticleEffect.swift */; };
+		59EC38882DB093BD00C674C7 /* ParticleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38862DB093B900C674C7 /* ParticleEffect.swift */; };
+		59EC388E2DB093D600C674C7 /* ParticlePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC388D2DB093D300C674C7 /* ParticlePresets.swift */; };
+		59EC388F2DB093D600C674C7 /* ParticlePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC388D2DB093D300C674C7 /* ParticlePresets.swift */; };
+		59EC38912DB093E300C674C7 /* ParticleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38902DB093DF00C674C7 /* ParticleManager.swift */; };
+		59EC38922DB093E300C674C7 /* ParticleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38902DB093DF00C674C7 /* ParticleManager.swift */; };
+		59EC38942DB095C200C674C7 /* CustomParticleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38932DB095BD00C674C7 /* CustomParticleEffect.swift */; };
+		59EC38952DB095C200C674C7 /* CustomParticleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38932DB095BD00C674C7 /* CustomParticleEffect.swift */; };
 		59FFB4B22DAAF2510002EC56 /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4B12DAAF24E0002EC56 /* Timeline.swift */; };
 		59FFB4B32DAAF2510002EC56 /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4B12DAAF24E0002EC56 /* Timeline.swift */; };
 		59FFB4B82DAB0A770002EC56 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4B72DAB0A750002EC56 /* Grid.swift */; };
@@ -113,6 +123,11 @@
 		59C0750C2CD32A360092DFA9 /* Container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Container.swift; sourceTree = "<group>"; };
 		59C71A972CD56C3000FDE954 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		59EC38802DAF619900C674C7 /* SpriteInfoPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteInfoPanel.swift; sourceTree = "<group>"; };
+		59EC38832DB0939600C674C7 /* ParticleEmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleEmitter.swift; sourceTree = "<group>"; };
+		59EC38862DB093B900C674C7 /* ParticleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleEffect.swift; sourceTree = "<group>"; };
+		59EC388D2DB093D300C674C7 /* ParticlePresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticlePresets.swift; sourceTree = "<group>"; };
+		59EC38902DB093DF00C674C7 /* ParticleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleManager.swift; sourceTree = "<group>"; };
+		59EC38932DB095BD00C674C7 /* CustomParticleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomParticleEffect.swift; sourceTree = "<group>"; };
 		59FFB4B12DAAF24E0002EC56 /* Timeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timeline.swift; sourceTree = "<group>"; };
 		59FFB4B72DAB0A750002EC56 /* Grid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
 		59FFB4C02DAB47C60002EC56 /* TimelinePreviewNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelinePreviewNode.swift; sourceTree = "<group>"; };
@@ -254,6 +269,11 @@
 		59BEB06E2D24B1380072974F /* EffectSystem */ = {
 			isa = PBXGroup;
 			children = (
+				59EC38932DB095BD00C674C7 /* CustomParticleEffect.swift */,
+				59EC38902DB093DF00C674C7 /* ParticleManager.swift */,
+				59EC388D2DB093D300C674C7 /* ParticlePresets.swift */,
+				59EC38862DB093B900C674C7 /* ParticleEffect.swift */,
+				59EC38832DB0939600C674C7 /* ParticleEmitter.swift */,
 				59BEB0812D24C58E0072974F /* InputFieldNone.swift */,
 				59BEB07E2D24B8880072974F /* EffectsTableNode.swift */,
 				59BEB0782D24B4E00072974F /* Rain.swift */,
@@ -397,6 +417,7 @@
 				59EC38822DAF619B00C674C7 /* SpriteInfoPanel.swift in Sources */,
 				59BEB07F2D24B8900072974F /* EffectsTableNode.swift in Sources */,
 				59FFB4C22DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */,
+				59EC38942DB095C200C674C7 /* CustomParticleEffect.swift in Sources */,
 				59FFB4DA2DAC355B0002EC56 /* IconManager.swift in Sources */,
 				59B870042C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				596FB9332C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
@@ -404,6 +425,7 @@
 				59B8700A2C6564A8001D0DC1 /* Sprite.swift in Sources */,
 				59FFB4E92DAC89FF0002EC56 /* Separator.swift in Sources */,
 				59FFB4E32DAC3D190002EC56 /* HorizontalContainer.swift in Sources */,
+				59EC38872DB093BD00C674C7 /* ParticleEffect.swift in Sources */,
 				59B86FDB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
 				59B870102C6564BE001D0DC1 /* Easing.swift in Sources */,
 				59FFB4E62DAC4CF50002EC56 /* Text.swift in Sources */,
@@ -413,7 +435,10 @@
 				59C0750D2CD32A3D0092DFA9 /* Container.swift in Sources */,
 				59FFB4CB2DAC29F30002EC56 /* VerticalContainer.swift in Sources */,
 				59B8700D2C6564B4001D0DC1 /* Origin.swift in Sources */,
+				59EC388E2DB093D600C674C7 /* ParticlePresets.swift in Sources */,
 				59C71A992CD56C3900FDE954 /* Helpers.swift in Sources */,
+				59EC38842DB0939B00C674C7 /* ParticleEmitter.swift in Sources */,
+				59EC38912DB093E300C674C7 /* ParticleManager.swift in Sources */,
 				59B870132C6564CB001D0DC1 /* TweenManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -435,6 +460,7 @@
 				59EC38812DAF619B00C674C7 /* SpriteInfoPanel.swift in Sources */,
 				59BEB0802D24B8900072974F /* EffectsTableNode.swift in Sources */,
 				59FFB4C12DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */,
+				59EC38952DB095C200C674C7 /* CustomParticleEffect.swift in Sources */,
 				59FFB4D92DAC355B0002EC56 /* IconManager.swift in Sources */,
 				59B870052C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				596FB9342C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
@@ -442,6 +468,7 @@
 				59B8700B2C6564A8001D0DC1 /* Sprite.swift in Sources */,
 				59FFB4E82DAC89FF0002EC56 /* Separator.swift in Sources */,
 				59FFB4E22DAC3D190002EC56 /* HorizontalContainer.swift in Sources */,
+				59EC38882DB093BD00C674C7 /* ParticleEffect.swift in Sources */,
 				59B86FEB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
 				59B870112C6564BE001D0DC1 /* Easing.swift in Sources */,
 				59FFB4E52DAC4CF50002EC56 /* Text.swift in Sources */,
@@ -451,7 +478,10 @@
 				59C0750E2CD32A3D0092DFA9 /* Container.swift in Sources */,
 				59FFB4CA2DAC29F30002EC56 /* VerticalContainer.swift in Sources */,
 				59B8700E2C6564B4001D0DC1 /* Origin.swift in Sources */,
+				59EC388F2DB093D600C674C7 /* ParticlePresets.swift in Sources */,
 				59C71A982CD56C3900FDE954 /* Helpers.swift in Sources */,
+				59EC38852DB0939B00C674C7 /* ParticleEmitter.swift in Sources */,
+				59EC38922DB093E300C674C7 /* ParticleManager.swift in Sources */,
 				59B870142C6564CB001D0DC1 /* TweenManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
