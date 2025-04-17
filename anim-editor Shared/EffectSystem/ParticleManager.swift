@@ -151,15 +151,17 @@ class TextureLoader {
     func getTexture(named textureName: String) -> SKTexture? {
         // Check if the texture is already in the cache
         if let cachedTexture = textureCache[textureName] {
+            print("textura  cargada")
             return cachedTexture
         }
         
         // If not, load it from the file path
         if let texture = Texture.textureFromLocalPath("\(basePath)/\(textureName)") {
             textureCache[textureName] = texture
+            print("textura  cargada")
             return texture
         }
-        
+        print("textura no cargada")
         // If the texture could not be loaded, return nil
         return nil
     }

@@ -6,22 +6,28 @@
 //
 
 import SpriteKit
+import Foundation
+import ObjectiveC
 
 class InputFieldNode: SKNode {
     private let backgroundNode: SKShapeNode
     private let textNode: SKLabelNode
     private var textField: NSTextField?
-    private var isEditing = false  // Nueva bandera para evitar ediciones duplicadas
+    private var isEditing = false
     
     var value: String
-    private weak var parentWindow: NSWindow?  // Mantener una referencia débil a la ventana
+    private weak var parentWindow: NSWindow?
+    
+    // Callback para cuando el valor cambia
+    var onTextChanged: ((String) -> Void)?
     
     init(text: String, width: CGFloat = 100, height: CGFloat = 20) {
         self.value = text
         
         backgroundNode = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 5)
-        backgroundNode.fillColor = .gray
-        backgroundNode.strokeColor = .lightGray  // Añade un borde para mejor visibilidad
+        backgroundNode.fillColor = NSColor(red: 28 / 255, green: 28 / 255, blue: 42 / 255, alpha: 1)
+        backgroundNode.strokeColor = NSColor(white: 0.5, alpha: 0.5)
+        backgroundNode.lineWidth = 1
         
         textNode = SKLabelNode(text: text)
         textNode.fontName = "Helvetica"
@@ -48,14 +54,12 @@ class InputFieldNode: SKNode {
     }
     
     override func mouseDown(with event: NSEvent) {
-        // Evitar múltiples campos de texto
         if !isEditing {
             startEditing(in: self.scene!.view!)
         }
     }
     
     func startEditing(in view: SKView) {
-        // Evitar múltiples llamadas
         if isEditing || textField != nil {
             return
         }
@@ -63,14 +67,11 @@ class InputFieldNode: SKNode {
         isEditing = true
         textNode.isHidden = true
         
-        // Guardar referencia a la ventana
         parentWindow = view.window
         
-        // Crear campo de texto en la posición correcta
         let scenePoint = self.convert(.zero, to: self.scene!)
         let viewPoint = view.convert(scenePoint, from: self.scene!)
         
-        // Ajustar posición para alinear con el nodo
         let yPosition = viewPoint.y - backgroundNode.frame.height / 2
         let xPosition = viewPoint.x - backgroundNode.frame.width / 2
         
@@ -81,28 +82,24 @@ class InputFieldNode: SKNode {
             height: backgroundNode.frame.height
         ))
         
-        // Configurar el campo de texto
         textField.stringValue = value
         textField.font = NSFont(name: "Helvetica", size: 12)
         textField.isBezeled = false
         textField.drawsBackground = true
-        textField.backgroundColor = NSColor.darkGray
+        textField.backgroundColor = NSColor(red: 28 / 255, green: 28 / 255, blue: 42 / 255, alpha: 1)
         textField.textColor = .white
         textField.isBordered = true
         textField.focusRingType = .none
         textField.alignment = .left
         
-        // Configurar delegado y acción
         textField.delegate = self as? NSTextFieldDelegate
         textField.target = self
         textField.action = #selector(textFieldAction)
         
-        // Añadir al view y enfocar
         view.addSubview(textField)
         view.window?.makeFirstResponder(textField)
         self.textField = textField
         
-        // Registrar notificación para detectar cuando se termina de editar
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(textFieldDidEndEditing),
@@ -110,7 +107,6 @@ class InputFieldNode: SKNode {
             object: textField
         )
         
-        // Registrar notificación para el redimensionamiento de la ventana
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(windowDidResize),
@@ -122,7 +118,6 @@ class InputFieldNode: SKNode {
     @objc func windowDidResize(notification: Notification) {
         guard let view = self.scene?.view, let textField = self.textField else { return }
         
-        // Recalcular posición cuando cambia el tamaño de la ventana
         let scenePoint = self.convert(.zero, to: self.scene!)
         let viewPoint = view.convert(scenePoint, from: self.scene!)
         
@@ -141,17 +136,22 @@ class InputFieldNode: SKNode {
     }
     
     private func endEditing() {
-        // Evitar múltiples llamadas
         guard isEditing, let textField = self.textField else { return }
         
         isEditing = false
         
         // Actualizar el valor y el nodo de texto
         if !textField.stringValue.isEmpty {
+            let oldValue = value
             value = textField.stringValue
             textNode.text = value
             
-            // Notificar al padre del cambio
+            // Notificar al callback del cambio
+            if oldValue != value && onTextChanged != nil {
+                onTextChanged?(value)
+            }
+            
+            // Notificar al padre del cambio - para compatibilidad con código existente
             if let parentNode = parent as? EffectsTableNode,
                let nodeName = name {
                 let components = nodeName.split(separator: "_").map { String($0) }
@@ -186,7 +186,6 @@ class InputFieldNode: SKNode {
     }
     
     deinit {
-        // Asegurarse de eliminar todas las notificaciones y recursos
         NotificationCenter.default.removeObserver(self)
         textField?.removeFromSuperview()
     }

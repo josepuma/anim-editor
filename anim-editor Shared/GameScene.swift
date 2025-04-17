@@ -22,10 +22,15 @@ class GameScene: SKScene {
     private var gridComponent: Grid!
     private var gridToggleButton: ToggleButton!
     private var controlsContainer: VerticalContainer!
+    private var toogleOptions: HorizontalContainer!
     private var volumeSlider: VolumeSlider!
     private var volumeContainer: HorizontalContainer!
     private var particleManager: ParticleManager!
     private var positionButton: Button!
+    
+    private var scriptManager: ParticleScriptManager!
+    private var scriptPanel: ScriptPanel!
+    private var scriptParametersPanel: ScriptParametersPanel!
     
     private var toolsContainer: VerticalContainer!
     private var spriteInfoPanel: SpriteInfoPanel!
@@ -70,13 +75,44 @@ class GameScene: SKScene {
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
  
-        spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Marika - quantum jump (Shurelia).osb")
-        spriteParser.parseSprites()
+        //spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Marika - quantum jump (Shurelia).osb")
+        //spriteParser.parseSprites()
         spriteManager.addToScene(scene: self)
         
         
         setupGrid()
         setupControls()
+
+        setupScriptSystem()
+        setupScriptButtons()
+        
+        someTestingModule()
+    }
+    
+    func someTestingModule() {
+        let particleManager = particleManager// Tu instancia de ParticleManager
+        let scene = self// Tu instancia de SKScene
+        let interpreter = JSInterpreter(particleManager: particleManager!, scene: scene)
+
+        let simpleTestScript = """
+        console.log("Script de prueba iniciado");
+
+        function main() {
+            console.log("Función main() del script de prueba");
+            if (typeof ParticleAPI !== 'undefined' && typeof ParticleAPI.createSprite === 'function') {
+                console.log("✅ ParticleAPI.createSprite está disponible");
+                var testSprite = ParticleAPI.createSprite("dummyTexture.png");
+                if (testSprite) {
+                    console.log("✅ Sprite de prueba creado (aunque la textura pueda no existir)");
+                } else {
+                    console.error("❌ Error al crear el sprite de prueba");
+                }
+            } else {
+                console.error("❌ ParticleAPI o ParticleAPI.createSprite no están definidos");
+            }
+        }
+        """
+        interpreter.testScript(scriptContent: simpleTestScript)
     }
     
     func setupTimeline() {
@@ -130,6 +166,44 @@ class GameScene: SKScene {
         }
     }
     
+    func setupScriptSystem() {
+        // Asegurarse de que existe la carpeta de scripts
+        let scriptsFolder = path + "/scripts"
+        
+        // Crear el administrador de scripts
+        scriptManager = ParticleScriptManager(
+            particleManager: particleManager,
+            scene: self,
+            scriptsFolder: scriptsFolder
+        )
+        
+        // Crear el panel de scripts
+        scriptPanel = ScriptPanel(scriptManager: scriptManager)
+        scriptPanel.position = CGPoint(
+            x: -self.size.width/2 + 16 + scriptPanel.getSize().width/2,
+            y: 0 // Centro vertical
+        )
+        scriptPanel.zPosition = 100
+        addChild(scriptPanel)
+        
+        // Configurar callback para selección de script
+        scriptPanel.onScriptSelected = { [weak self] scriptName in
+            self?.scriptParametersPanel.updateWithScript(scriptName)
+        }
+        
+        // Crear el panel de parámetros
+        scriptParametersPanel = ScriptParametersPanel(scriptManager: scriptManager)
+        scriptParametersPanel.position = CGPoint(
+            x: -self.size.width/2 + 16 + scriptParametersPanel.getSize().width/2,
+            y: -120 // Debajo del panel de scripts
+        )
+        scriptParametersPanel.zPosition = 100
+        addChild(scriptParametersPanel)
+        
+        // Inicializar sin script seleccionado
+        scriptParametersPanel.updateWithScript(nil)
+    }
+    
     func setupControls() {
         particleManager = ParticleManager(
             spriteManager: spriteManager,
@@ -141,6 +215,7 @@ class GameScene: SKScene {
         effectsTableNode.spriteManager = spriteManager
         effectsTableNode.parentScene = self
         effectsTableNode.zPosition = 111111
+        effectsTableNode.position = CGPoint(x: self.size.width/2 , y: 0)
         
         
         toolsContainer = VerticalContainer(
@@ -209,6 +284,21 @@ class GameScene: SKScene {
         gridToggleButton.onToggle = { [weak self] isVisible in
             self?.toggleGridVisibility(visible: isVisible)
         }
+        
+        let toggleScriptsButton = ToggleButton(
+            size: 32,
+            onIconName: "file-code-2",
+            offIconName: "file-code-2",
+            isInitiallyToggled: false,
+            buttonColor: .clear,
+            buttonBorderColor: .clear,
+            iconColor: NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1)
+        )
+        
+        // Configurar callback
+        toggleScriptsButton.onToggle = { [weak self] isVisible in
+            self?.toggleScriptPanelsVisibility(visible: isVisible)
+        }
 
         let openFolderButton = Button(text: "Open Project Folder", padding: CGSize(width: 20, height: 8), buttonColor: accent, buttonBorderColor: accent, textColor: .black, fontSize: 12)
         openFolderButton.setIcon(name: "folder-open", size: 16, color: .black)
@@ -237,7 +327,7 @@ class GameScene: SKScene {
             showBackground: false
         )
         
-        let toogleOptions = HorizontalContainer(
+        toogleOptions = HorizontalContainer(
             spacing: 10,
             padding: CGSize(width: 10, height: 8),
             verticalAlignment: .center,
@@ -248,7 +338,8 @@ class GameScene: SKScene {
         toogleOptions.addNodes([
             gridToggleButton,
             ToggleButton(size: 32, onIconName: "camera", offIconName: "camera", buttonColor: .clear, buttonBorderColor: .clear, iconColor: NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1)),
-            ToggleButton(size: 32, onIconName: "zoom-code", offIconName: "zoom-code", buttonColor: .clear, buttonBorderColor: .clear, iconColor: NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1))
+            ToggleButton(size: 32, onIconName: "zoom-code", offIconName: "zoom-code", buttonColor: .clear, buttonBorderColor: .clear, iconColor: NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1)),
+            toggleScriptsButton
         ])
         
         gridOptions.addNodes([
@@ -292,291 +383,8 @@ class GameScene: SKScene {
         )*/
         //spriteInfoPanel.alpha = 0 // Inicialmente invisible
         addChild(spriteInfoPanel)
-        setupParticleButtons()
-        addChild(effectsTableNode)
-    }
-    
-    private func setupParticleButtons() {
-        // Crear contenedor para los botones de efectos
-        let effectsTitle = Text(
-            text: "PARTICLES",
-            fontSize: 10,
-            color: backgroundColorAccent,
-            type: .capitalTitle,
-            letterSpacing: 2.0
-        )
-        
-        // Crear la primera fila de botones de efectos
-        let effectsRow1 = HorizontalContainer(
-            spacing: 10,
-            padding: CGSize(width: 10, height: 8),
-            verticalAlignment: .center,
-            horizontalAlignment: .left,
-            showBackground: false
-        )
-        
-        // Crear la segunda fila de botones de efectos (si necesitas más)
-        let effectsRow2 = HorizontalContainer(
-            spacing: 10,
-            padding: CGSize(width: 10, height: 8),
-            verticalAlignment: .center,
-            horizontalAlignment: .left,
-            showBackground: false
-        )
-        
-        // Botón para efecto de lluvia
-        let rainButton = Button(
-            text: "Rain",
-            padding: CGSize(width: 12, height: 8),
-            buttonColor: backgroundColorButton,
-            buttonBorderColor: backgroundColorButton,
-            textColor: buttonColorText,
-            fontSize: 12
-        )
-        rainButton.setIcon(name: "volume", size: 16, color: buttonColorText)
-        rainButton.onPress = { [weak self] in
-            self?.addRainEffect()
-        }
-        
-        // Botón para efecto de nieve
-        let snowButton = Button(
-            text: "Snow",
-            padding: CGSize(width: 12, height: 8),
-            buttonColor: backgroundColorButton,
-            buttonBorderColor: backgroundColorButton,
-            textColor: buttonColorText,
-            fontSize: 12
-        )
-        snowButton.setIcon(name: "volume", size: 16, color: buttonColorText)
-        snowButton.onPress = { [weak self] in
-            self?.addSnowEffect()
-        }
-        
-        // Botón para efecto de fuego
-        let fireButton = Button(
-            text: "Fire",
-            padding: CGSize(width: 12, height: 8),
-            buttonColor: backgroundColorButton,
-            buttonBorderColor: backgroundColorButton,
-            textColor: buttonColorText,
-            fontSize: 12
-        )
-        fireButton.setIcon(name: "volume", size: 16, color: buttonColorText)
-        fireButton.onPress = { [weak self] in
-            self?.addFireEffect()
-        }
-        
-        // Botón para efecto de explosión
-        let explosionButton = Button(
-            text: "Boom",
-            padding: CGSize(width: 12, height: 8),
-            buttonColor: backgroundColorButton,
-            buttonBorderColor: backgroundColorButton,
-            textColor: buttonColorText,
-            fontSize: 12
-        )
-        explosionButton.setIcon(name: "volume", size: 16, color: buttonColorText)
-        explosionButton.onPress = { [weak self] in
-            self?.addExplosionEffect()
-        }
-        
-        // Botón para efecto de humo
-        let smokeButton = Button(
-            text: "Smoke",
-            padding: CGSize(width: 12, height: 8),
-            buttonColor: backgroundColorButton,
-            buttonBorderColor: backgroundColorButton,
-            textColor: buttonColorText,
-            fontSize: 12
-        )
-        smokeButton.setIcon(name: "volume", size: 16, color: buttonColorText)
-        smokeButton.onPress = { [weak self] in
-            self?.addSmokeEffect()
-        }
-        
-        // Botón para efecto de brillos
-        let sparkleButton = Button(
-            text: "Sparkle",
-            padding: CGSize(width: 12, height: 8),
-            buttonColor: backgroundColorButton,
-            buttonBorderColor: backgroundColorButton,
-            textColor: buttonColorText,
-            fontSize: 12
-        )
-        sparkleButton.setIcon(name: "volume", size: 16, color: buttonColorText)
-        sparkleButton.onPress = { [weak self] in
-            self?.addSparkleEffect()
-        }
-        
-        // Añadir botones a las filas
-        effectsRow1.addNodes([rainButton, snowButton, fireButton])
-        effectsRow2.addNodes([explosionButton, smokeButton, sparkleButton])
-        
-        // Añadir título y filas al contenedor principal
-        toolsContainer.addNode(Separator())
-        toolsContainer.addNode(effectsTitle)
-        toolsContainer.addNode(effectsRow1)
-        toolsContainer.addNode(effectsRow2)
-    }
-    
-    private func addRainEffect() {
-        // Obtener tiempo actual de la canción
-        let currentTime = Int(audioPlayer.currentTime * 1000)
-        let endTime = currentTime + 30000 // 30 segundos
-        
-        guard let effect = particleManager.createRainEffect(
-               textureName: "SB/Effects/dot.png",
-               startTime: currentTime,
-               endTime: currentTime + 30000,
-               intensity: 60
-           ) else {
-               print("No se pudo crear el efecto de lluvia")
-               return
-           }
-           
-           // Añadir a la lista de efectos
-           effects.append(effect)
-           
-           // Proteger el acceso a effectsTableNode
-           guard let tableNode = effectsTableNode else {
-               print("Advertencia: effectsTableNode no está inicializado")
-               return
-           }
-           
-           tableNode.effects = effects
-           tableNode.reloadData()
-        
-        // Notificar al usuario
-        print("Efecto de lluvia añadido desde tiempo \(currentTime) hasta \(endTime)")
-    }
-
-    // Método para añadir efecto de nieve
-    private func addSnowEffect() {
-        let currentTime = Int(audioPlayer.currentTime * 1000)
-        let endTime = currentTime + 30000 // 30 segundos
-        
-        guard let effect = particleManager.createSnowEffect(
-            textureName: "SB/Effects/dot.png", // Asegúrate de tener esta textura
-            startTime: currentTime,
-            endTime: endTime,
-            intensity: 40
-        ) else {
-            print("No se pudo crear el efecto de nieve")
-            return
-        }
-        
-        // Añadir a la lista de efectos para la UI
-        effects.append(effect)
-        effectsTableNode.effects = effects
-        effectsTableNode.reloadData()
-        
-        print("Efecto de nieve añadido desde tiempo \(currentTime) hasta \(endTime)")
-    }
-
-    // Método para añadir efecto de fuego
-    private func addFireEffect() {
-        let currentTime = Int(audioPlayer.currentTime * 1000)
-        let endTime = currentTime + 20000 // 20 segundos
-        
-        // Posicionar el fuego en la parte inferior central
-        let position = CGPoint(x: 320, y: 240)
-        
-        guard let effect = particleManager.createFireEffect(
-            textureName: "SB/Effects/dot.png", // Asegúrate de tener esta textura
-            position: position,
-            startTime: currentTime,
-            endTime: endTime,
-            intensity: 60
-        ) else {
-            print("No se pudo crear el efecto de fuego")
-            return
-        }
-        
-        // Añadir a la lista de efectos para la UI
-        effects.append(effect)
-        effectsTableNode.effects = effects
-        effectsTableNode.reloadData()
-        
-        print("Efecto de fuego añadido en posición \(position) desde \(currentTime) hasta \(endTime)")
-    }
-
-    // Método para añadir efecto de explosión
-    private func addExplosionEffect() {
-        let currentTime = Int(audioPlayer.currentTime * 1000)
-        
-        // La explosión ocurre en el centro de la pantalla
-        let position = CGPoint(x: 320, y: 240)
-        
-        guard let effect = particleManager.createExplosionEffect(
-            textureName: "SB/Effects/dot.png", // Asegúrate de tener esta textura
-            position: position,
-            startTime: currentTime,
-            intensity: 100
-        ) else {
-            print("No se pudo crear el efecto de explosión")
-            return
-        }
-        
-        // Añadir a la lista de efectos para la UI
-        effects.append(effect)
-        effectsTableNode.effects = effects
-        effectsTableNode.reloadData()
-        
-        print("Efecto de explosión añadido en posición \(position) en tiempo \(currentTime)")
-    }
-
-    // Método para añadir efecto de humo
-    private func addSmokeEffect() {
-        let currentTime = Int(audioPlayer.currentTime * 1000)
-        let endTime = currentTime + 25000 // 25 segundos
-        
-        // El humo surge de un punto en la parte inferior
-        let position = CGPoint(x: 320, y: 480)
-        
-        guard let effect = particleManager.createSmokeEffect(
-            textureName: "SB/Effects/dot.png", // Asegúrate de tener esta textura
-            position: position,
-            startTime: currentTime,
-            endTime: endTime,
-            intensity: 40
-        ) else {
-            print("No se pudo crear el efecto de humo")
-            return
-        }
-        
-        // Añadir a la lista de efectos para la UI
-        effects.append(effect)
-        effectsTableNode.effects = effects
-        effectsTableNode.reloadData()
-        
-        print("Efecto de humo añadido en posición \(position) desde \(currentTime) hasta \(endTime)")
-    }
-
-    // Método para añadir efecto de destellos
-    private func addSparkleEffect() {
-        let currentTime = Int(audioPlayer.currentTime * 1000)
-        let endTime = currentTime + 15000 // 15 segundos
-        
-        // Los destellos aparecen en un área central
-        let position = CGPoint(x: 320, y: 240)
-        
-        guard let effect = particleManager.createSparkleEffect(
-            textureName: "SB/Effects/dot.png", // Asegúrate de tener esta textura
-            position: position,
-            startTime: currentTime,
-            endTime: endTime,
-            intensity: 30
-        ) else {
-            print("No se pudo crear el efecto de destellos")
-            return
-        }
-        
-        // Añadir a la lista de efectos para la UI
-        effects.append(effect)
-        effectsTableNode.effects = effects
-        effectsTableNode.reloadData()
-        
-        print("Efecto de destellos añadido en área \(position) desde \(currentTime) hasta \(endTime)")
+        //setupParticleButtons()
+        //addChild(effectsTableNode)
     }
 
     
@@ -643,10 +451,62 @@ class GameScene: SKScene {
             )
         }
         
+        if scriptPanel != nil {
+                scriptPanel.position = CGPoint(
+                    x: -self.size.width/2 + 16 + scriptPanel.getSize().width/2,
+                    y: 0 // Centro vertical
+                )
+            }
+            
+            // Posicionar panel de parámetros
+            if scriptParametersPanel != nil {
+                scriptParametersPanel.position = CGPoint(
+                    x: -self.size.width/2 + 16 + scriptParametersPanel.getSize().width/2,
+                    y: -120 // Debajo del panel de scripts
+                )
+            }
        
         calculateSpriteInfoPanelPosition()
         spriteManager.updateSize()
    }
+    
+    func setupScriptButtons() {
+        // Crear botón para mostrar/ocultar paneles de scripts
+        let toggleScriptsButton = ToggleButton(
+            size: 32,
+            onIconName: "file-code-2",
+            offIconName: "file-code-2",
+            isInitiallyToggled: false,
+            buttonColor: .clear,
+            buttonBorderColor: .clear,
+            iconColor: NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1)
+        )
+        
+        // Configurar callback
+        toggleScriptsButton.onToggle = { [weak self] isVisible in
+            self?.toggleScriptPanelsVisibility(visible: isVisible)
+        }
+        
+        // Añadir a la fila de herramientas
+        // (Esto debería añadirse en el punto adecuado de tu código)
+        toogleOptions.addNode(toggleScriptsButton)
+    }
+    
+    func toggleScriptPanelsVisibility(visible: Bool) {
+        guard scriptPanel != nil && scriptParametersPanel != nil else { return }
+        
+        if visible {
+            // Mostrar paneles con animación
+            let fadeIn = SKAction.fadeIn(withDuration: 0.3)
+            scriptPanel.run(fadeIn)
+            scriptParametersPanel.run(fadeIn)
+        } else {
+            // Ocultar paneles con animación
+            let fadeOut = SKAction.fadeOut(withDuration: 0.3)
+            scriptPanel.run(fadeOut)
+            scriptParametersPanel.run(fadeOut)
+        }
+    }
     
     func calculateSpriteInfoPanelPosition(){
         let margin: CGFloat = 16
@@ -752,23 +612,6 @@ extension GameScene {
     override func mouseDown(with event: NSEvent) {
         //self.atPoint(event.location(in: self)).mouseDown(with: event)
         super.mouseDown(with: event)
-        
-        if event.modifierFlags.contains(.option) {
-                let location = event.location(in: self)
-                
-                // Crear explosión en la posición del mouse
-                guard let effect = particleManager.createExplosionEffect(
-                    textureName: "spark.png",
-                    position: location,
-                    startTime: Int(audioPlayer.currentTime * 1000),
-                    intensity: 80
-                ) else { return }
-                
-                // Añadir a la lista de efectos si es necesario
-                effects.append(effect)
-                effectsTableNode.effects = effects
-                effectsTableNode.reloadData()
-            }
         
         // Manejar selección de sprite
            let location = event.location(in: self)

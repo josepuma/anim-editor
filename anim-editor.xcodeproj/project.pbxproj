@@ -64,8 +64,14 @@
 		59EC388F2DB093D600C674C7 /* ParticlePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC388D2DB093D300C674C7 /* ParticlePresets.swift */; };
 		59EC38912DB093E300C674C7 /* ParticleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38902DB093DF00C674C7 /* ParticleManager.swift */; };
 		59EC38922DB093E300C674C7 /* ParticleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38902DB093DF00C674C7 /* ParticleManager.swift */; };
-		59EC38942DB095C200C674C7 /* CustomParticleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38932DB095BD00C674C7 /* CustomParticleEffect.swift */; };
-		59EC38952DB095C200C674C7 /* CustomParticleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38932DB095BD00C674C7 /* CustomParticleEffect.swift */; };
+		59EC38982DB1341F00C674C7 /* JSInterpreter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38972DB1341C00C674C7 /* JSInterpreter.swift */; };
+		59EC38992DB1341F00C674C7 /* JSInterpreter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38972DB1341C00C674C7 /* JSInterpreter.swift */; };
+		59EC389B2DB1346100C674C7 /* ParticleScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC389A2DB1345C00C674C7 /* ParticleScriptManager.swift */; };
+		59EC389C2DB1346100C674C7 /* ParticleScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC389A2DB1345C00C674C7 /* ParticleScriptManager.swift */; };
+		59EC389E2DB1359600C674C7 /* ScriptPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC389D2DB1359200C674C7 /* ScriptPanel.swift */; };
+		59EC389F2DB1359600C674C7 /* ScriptPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC389D2DB1359200C674C7 /* ScriptPanel.swift */; };
+		59EC38A12DB135B000C674C7 /* ScriptParametersPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38A02DB135AA00C674C7 /* ScriptParametersPanel.swift */; };
+		59EC38A22DB135B000C674C7 /* ScriptParametersPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EC38A02DB135AA00C674C7 /* ScriptParametersPanel.swift */; };
 		59FFB4B22DAAF2510002EC56 /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4B12DAAF24E0002EC56 /* Timeline.swift */; };
 		59FFB4B32DAAF2510002EC56 /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4B12DAAF24E0002EC56 /* Timeline.swift */; };
 		59FFB4B82DAB0A770002EC56 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FFB4B72DAB0A750002EC56 /* Grid.swift */; };
@@ -127,7 +133,11 @@
 		59EC38862DB093B900C674C7 /* ParticleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleEffect.swift; sourceTree = "<group>"; };
 		59EC388D2DB093D300C674C7 /* ParticlePresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticlePresets.swift; sourceTree = "<group>"; };
 		59EC38902DB093DF00C674C7 /* ParticleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleManager.swift; sourceTree = "<group>"; };
-		59EC38932DB095BD00C674C7 /* CustomParticleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomParticleEffect.swift; sourceTree = "<group>"; };
+		59EC38972DB1341C00C674C7 /* JSInterpreter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSInterpreter.swift; sourceTree = "<group>"; };
+		59EC389A2DB1345C00C674C7 /* ParticleScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleScriptManager.swift; sourceTree = "<group>"; };
+		59EC389D2DB1359200C674C7 /* ScriptPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptPanel.swift; sourceTree = "<group>"; };
+		59EC38A02DB135AA00C674C7 /* ScriptParametersPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptParametersPanel.swift; sourceTree = "<group>"; };
+		59EC38A32DB137B100C674C7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		59FFB4B12DAAF24E0002EC56 /* Timeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timeline.swift; sourceTree = "<group>"; };
 		59FFB4B72DAB0A750002EC56 /* Grid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
 		59FFB4C02DAB47C60002EC56 /* TimelinePreviewNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelinePreviewNode.swift; sourceTree = "<group>"; };
@@ -175,6 +185,7 @@
 		59B86FC92C656448001D0DC1 = {
 			isa = PBXGroup;
 			children = (
+				59EC38A32DB137B100C674C7 /* README.md */,
 				59B86FCE2C656448001D0DC1 /* anim-editor Shared */,
 				59B86FD92C65644A001D0DC1 /* anim-editor iOS */,
 				59B86FE92C65644A001D0DC1 /* anim-editor macOS */,
@@ -185,6 +196,7 @@
 		59B86FCE2C656448001D0DC1 /* anim-editor Shared */ = {
 			isa = PBXGroup;
 			children = (
+				59EC38962DB1341500C674C7 /* Scripting */,
 				59FFB4CC2DAC310F0002EC56 /* Assets */,
 				59BEB06E2D24B1380072974F /* EffectSystem */,
 				596FB9312C744BFF00E4733C /* Audio */,
@@ -240,6 +252,8 @@
 		59B8702C2C66A505001D0DC1 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				59EC38A02DB135AA00C674C7 /* ScriptParametersPanel.swift */,
+				59EC389D2DB1359200C674C7 /* ScriptPanel.swift */,
 				59EC38802DAF619900C674C7 /* SpriteInfoPanel.swift */,
 				59FFB4E72DAC89FC0002EC56 /* Separator.swift */,
 				59FFB4E42DAC4CF20002EC56 /* Text.swift */,
@@ -269,7 +283,6 @@
 		59BEB06E2D24B1380072974F /* EffectSystem */ = {
 			isa = PBXGroup;
 			children = (
-				59EC38932DB095BD00C674C7 /* CustomParticleEffect.swift */,
 				59EC38902DB093DF00C674C7 /* ParticleManager.swift */,
 				59EC388D2DB093D300C674C7 /* ParticlePresets.swift */,
 				59EC38862DB093B900C674C7 /* ParticleEffect.swift */,
@@ -280,6 +293,15 @@
 				59BEB0752D24B4CD0072974F /* Effect.swift */,
 			);
 			path = EffectSystem;
+			sourceTree = "<group>";
+		};
+		59EC38962DB1341500C674C7 /* Scripting */ = {
+			isa = PBXGroup;
+			children = (
+				59EC389A2DB1345C00C674C7 /* ParticleScriptManager.swift */,
+				59EC38972DB1341C00C674C7 /* JSInterpreter.swift */,
+			);
+			path = Scripting;
 			sourceTree = "<group>";
 		};
 		59FFB4CC2DAC310F0002EC56 /* Assets */ = {
@@ -409,15 +431,16 @@
 				59B8702F2C66A533001D0DC1 /* TextInput.swift in Sources */,
 				596FB9362C74532F00E4733C /* AudioFFT.swift in Sources */,
 				59B870192C6564F6001D0DC1 /* Texture.swift in Sources */,
+				59EC389F2DB1359600C674C7 /* ScriptPanel.swift in Sources */,
 				59FFB4B82DAB0A770002EC56 /* Grid.swift in Sources */,
 				59BEB0772D24B4CE0072974F /* Effect.swift in Sources */,
 				59BEB0792D24B4E10072974F /* Rain.swift in Sources */,
 				59B870072C65649D001D0DC1 /* SpriteManager.swift in Sources */,
 				59FFB4B32DAAF2510002EC56 /* Timeline.swift in Sources */,
+				59EC38982DB1341F00C674C7 /* JSInterpreter.swift in Sources */,
 				59EC38822DAF619B00C674C7 /* SpriteInfoPanel.swift in Sources */,
 				59BEB07F2D24B8900072974F /* EffectsTableNode.swift in Sources */,
 				59FFB4C22DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */,
-				59EC38942DB095C200C674C7 /* CustomParticleEffect.swift in Sources */,
 				59FFB4DA2DAC355B0002EC56 /* IconManager.swift in Sources */,
 				59B870042C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				596FB9332C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
@@ -433,6 +456,7 @@
 				59FFB4DC2DAC3A380002EC56 /* VolumeSlider.swift in Sources */,
 				59FFB4C72DAC273E0002EC56 /* Button.swift in Sources */,
 				59C0750D2CD32A3D0092DFA9 /* Container.swift in Sources */,
+				59EC389B2DB1346100C674C7 /* ParticleScriptManager.swift in Sources */,
 				59FFB4CB2DAC29F30002EC56 /* VerticalContainer.swift in Sources */,
 				59B8700D2C6564B4001D0DC1 /* Origin.swift in Sources */,
 				59EC388E2DB093D600C674C7 /* ParticlePresets.swift in Sources */,
@@ -440,6 +464,7 @@
 				59EC38842DB0939B00C674C7 /* ParticleEmitter.swift in Sources */,
 				59EC38912DB093E300C674C7 /* ParticleManager.swift in Sources */,
 				59B870132C6564CB001D0DC1 /* TweenManager.swift in Sources */,
+				59EC38A22DB135B000C674C7 /* ScriptParametersPanel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,15 +477,16 @@
 				59B870302C66A533001D0DC1 /* TextInput.swift in Sources */,
 				596FB9372C74532F00E4733C /* AudioFFT.swift in Sources */,
 				59B8701A2C6564F6001D0DC1 /* Texture.swift in Sources */,
+				59EC389E2DB1359600C674C7 /* ScriptPanel.swift in Sources */,
 				59FFB4B92DAB0A770002EC56 /* Grid.swift in Sources */,
 				59BEB0762D24B4CE0072974F /* Effect.swift in Sources */,
 				59BEB07A2D24B4E10072974F /* Rain.swift in Sources */,
 				59B870082C65649D001D0DC1 /* SpriteManager.swift in Sources */,
 				59FFB4B22DAAF2510002EC56 /* Timeline.swift in Sources */,
+				59EC38992DB1341F00C674C7 /* JSInterpreter.swift in Sources */,
 				59EC38812DAF619B00C674C7 /* SpriteInfoPanel.swift in Sources */,
 				59BEB0802D24B8900072974F /* EffectsTableNode.swift in Sources */,
 				59FFB4C12DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */,
-				59EC38952DB095C200C674C7 /* CustomParticleEffect.swift in Sources */,
 				59FFB4D92DAC355B0002EC56 /* IconManager.swift in Sources */,
 				59B870052C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				596FB9342C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
@@ -476,6 +502,7 @@
 				59FFB4DD2DAC3A390002EC56 /* VolumeSlider.swift in Sources */,
 				59FFB4C82DAC273E0002EC56 /* Button.swift in Sources */,
 				59C0750E2CD32A3D0092DFA9 /* Container.swift in Sources */,
+				59EC389C2DB1346100C674C7 /* ParticleScriptManager.swift in Sources */,
 				59FFB4CA2DAC29F30002EC56 /* VerticalContainer.swift in Sources */,
 				59B8700E2C6564B4001D0DC1 /* Origin.swift in Sources */,
 				59EC388F2DB093D600C674C7 /* ParticlePresets.swift in Sources */,
@@ -483,6 +510,7 @@
 				59EC38852DB0939B00C674C7 /* ParticleEmitter.swift in Sources */,
 				59EC38922DB093E300C674C7 /* ParticleManager.swift in Sources */,
 				59B870142C6564CB001D0DC1 /* TweenManager.swift in Sources */,
+				59EC38A12DB135B000C674C7 /* ScriptParametersPanel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
