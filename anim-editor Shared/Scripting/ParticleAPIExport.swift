@@ -80,6 +80,14 @@ import SpriteKit
         }
         spriteObj?.setValue(addMoveXTween, forProperty: "addMoveXTween")
         
+        
+        let addMoveYTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
+            let easing = self.getEasingFromString(easingStr)
+            sprite.addMoveYTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
+        }
+        spriteObj?.setValue(addMoveYTween, forProperty: "addMoveYTween")
+        
+        
         // Añade todos los demás métodos directamente al objeto sprite...
         
         // addMoveTween
@@ -90,13 +98,7 @@ import SpriteKit
                               endValue: CGPoint(x: endX, y: endY))
         }
         spriteObj?.setValue(addMoveTween, forProperty: "addMoveTween")
-        
-        let addMoveYTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
-            let easing = self.getEasingFromString(easingStr)
-            sprite.addMoveYTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-        }
-        spriteObj?.setValue(addMoveYTween, forProperty: "addMoveYTween")
-        
+
         
         // addScaleTween
         let addScaleTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
@@ -110,6 +112,11 @@ import SpriteKit
             sprite.addRotateTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
         }
         spriteObj?.setValue(addRotateTween, forProperty: "addRotateTween")
+        
+        let addBlendMode: @convention(block) (Int, Int) -> Void = { (startTime, endTime) in
+            sprite.addBlendModeTween(startTime: startTime, endTime: endTime)
+        }
+        spriteObj?.setValue(addBlendMode, forProperty: "addBlendMode")
         
         // setPosition
         let setPosition: @convention(block) (CGFloat, CGFloat) -> Void = { (x, y) in
@@ -168,6 +175,7 @@ import SpriteKit
     func addMoveTween(_ startTime: Int, _ endTime: Int, _ startX: CGFloat, _ startY: CGFloat, _ endX: CGFloat, _ endY: CGFloat, _ easingStr: String)
     func addScaleTween(_ startTime: Int, _ endTime: Int, _ startValue: CGFloat, _ endValue: CGFloat, _ easingStr: String)
     func addFadeTween(_ startTime: Int, _ endTime: Int, _ startValue: CGFloat, _ endValue: CGFloat, _ easingStr: String)
+    func addBlendMode(_startTime: Int, _endTime: Int)
     // Añadir el resto de métodos del sprite...
     func setPosition(_ x: CGFloat, _ y: CGFloat)
     func startLoop(_ startTime: Int, _ loopCount: Int)
@@ -207,6 +215,10 @@ import SpriteKit
     func addFadeTween(_ startTime: Int, _ endTime: Int, _ startValue: CGFloat, _ endValue: CGFloat, _ easingStr: String) {
         let easing = interpreter?.getEasingFromString(easingStr) ?? .linear
         sprite.addScaleTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
+    }
+    
+    func addBlendMode(_startTime: Int, _endTime: Int) {
+        sprite.addBlendModeTween(startTime: _startTime, endTime: _endTime)
     }
     
     // Implementar el resto de métodos del sprite...
