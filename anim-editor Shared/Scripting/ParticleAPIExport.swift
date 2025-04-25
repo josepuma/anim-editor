@@ -282,7 +282,7 @@ struct TextStyleConfig {
             letterLabel.horizontalAlignmentMode = .center
 
             // Calcular el frame de la etiqueta *antes* de añadirla a la escena
-            let labelFrame = letterLabel.calculateAccumulatedFrame()
+            //let labelFrame = letterLabel.calculateAccumulatedFrame()
 
             // Crear escena temporal con un tamaño inicial estimado (suficiente para el carácter base)
             //let initialSceneWidth = labelFrame.width + 5 // Un pequeño margen inicial
@@ -375,6 +375,43 @@ struct TextStyleConfig {
         var maxX: CGFloat = originalPosition.x
         var minY: CGFloat = originalPosition.y
         var maxY: CGFloat = originalPosition.y
+        
+        // ------ BLUR ------
+        if config["blur"] as? Bool == true {
+            // Extraer configuración de blur
+            let blurRadius = CGFloat(config["blurRadius"] as? Double ?? 2.0)
+            
+            // En lugar de aplicar el blur al label directamente, creamos un SKEffectNode
+            // y lo añadimos a la escena en la misma posición que el label existente
+            let effectNode = SKEffectNode()
+            effectNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": blurRadius])
+            effectNode.shouldRasterize = true
+            effectNode.position = originalPosition
+            
+            // Crear una nueva copia del texto para el blur
+            let blurText = SKLabelNode(text: originalText)
+            blurText.fontName = originalFontName
+            blurText.fontSize = originalFontSize
+            blurText.fontColor = label.fontColor
+            blurText.verticalAlignmentMode = label.verticalAlignmentMode
+            blurText.horizontalAlignmentMode = label.horizontalAlignmentMode
+            
+            // Añadir la copia de texto al nodo de efecto
+            effectNode.addChild(blurText)
+            
+            // Añadir el nodo de efecto a la escena
+            scene.addChild(effectNode)
+            
+            // Ocultar el label original si queremos solo mostrar la versión con blur
+            label.isHidden = true
+            
+            // Ajustar los límites para el blur
+            let blurredFrame = effectNode.calculateAccumulatedFrame()
+            minX = min(minX, blurredFrame.minX)
+            maxX = max(maxX, blurredFrame.maxX)
+            minY = min(minY, blurredFrame.minY)
+            maxY = max(maxY, blurredFrame.maxY)
+        }
 
         // ------ SOMBRA ------
         if config["shadow"] as? Bool == true {
