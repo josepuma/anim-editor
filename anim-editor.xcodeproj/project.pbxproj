@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		5903B7772DB1A25B004C29A7 /* ParticleAPIExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5903B7762DB1A253004C29A7 /* ParticleAPIExport.swift */; };
 		5903B7782DB1A25B004C29A7 /* ParticleAPIExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5903B7762DB1A253004C29A7 /* ParticleAPIExport.swift */; };
+		595564B82DBBE3F100A5B2F1 /* TextEffects.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */; };
+		595564B92DBBE3F100A5B2F1 /* TextEffects.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */; };
 		596FB9332C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */; };
 		596FB9342C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */; };
 		596FB9362C74532F00E4733C /* AudioFFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9352C74532F00E4733C /* AudioFFT.swift */; };
@@ -100,6 +102,7 @@
 
 /* Begin PBXFileReference section */
 		5903B7762DB1A253004C29A7 /* ParticleAPIExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleAPIExport.swift; sourceTree = "<group>"; };
+		595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TextEffects.fsh; sourceTree = "<group>"; };
 		596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFTAnalyzer.swift; sourceTree = "<group>"; };
 		596FB9352C74532F00E4733C /* AudioFFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFT.swift; sourceTree = "<group>"; };
 		59B86FCF2C656448001D0DC1 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
@@ -176,6 +179,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		595564B62DBBE3D800A5B2F1 /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
 		596FB9312C744BFF00E4733C /* Audio */ = {
 			isa = PBXGroup;
 			children = (
@@ -311,6 +322,7 @@
 		59FFB4CC2DAC310F0002EC56 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				595564B62DBBE3D800A5B2F1 /* Shaders */,
 				59FFB4CD2DAC31150002EC56 /* Icons */,
 			);
 			path = Assets;
@@ -407,6 +419,7 @@
 				59B86FF42C65644A001D0DC1 /* GameScene.sks in Resources */,
 				59B86FE02C65644A001D0DC1 /* Main.storyboard in Resources */,
 				59B86FF22C65644A001D0DC1 /* Actions.sks in Resources */,
+				595564B82DBBE3F100A5B2F1 /* TextEffects.fsh in Resources */,
 				59B86FE32C65644A001D0DC1 /* LaunchScreen.storyboard in Resources */,
 				59B86FF82C65644A001D0DC1 /* Assets.xcassets in Resources */,
 			);
@@ -417,6 +430,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				59B86FF02C65644A001D0DC1 /* Main.storyboard in Resources */,
+				595564B92DBBE3F100A5B2F1 /* TextEffects.fsh in Resources */,
 				59B86FF52C65644A001D0DC1 /* GameScene.sks in Resources */,
 				59B86FF92C65644A001D0DC1 /* Assets.xcassets in Resources */,
 				59B86FF32C65644A001D0DC1 /* Actions.sks in Resources */,

@@ -100,16 +100,6 @@ class JSInterpreter {
         let randomInt: @convention(block) (Int, Int) -> Int = { (min, max) in
             return Int.random(in: min...max)
         }
-
-        
-        // --- Registro de funciones en la API ---
-        
-        // Utilidades
-        
-        
-        
-        
-        // --- Funciones de manejo de sprites ---
         
         // Función para crear un sprite individual
         let createSprite: @convention(block) (String) -> JSValue = { [weak self] (texturePath) in

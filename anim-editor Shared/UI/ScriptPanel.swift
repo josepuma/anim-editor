@@ -47,6 +47,14 @@ class ScriptPanel: VerticalContainer {
         
         // Cargar scripts iniciales
         refreshScriptList()
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleScriptsUpdated),
+            name: NSNotification.Name("ScriptsListUpdated"),
+            object: nil
+        )
+
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -220,5 +228,9 @@ class ScriptPanel: VerticalContainer {
         }
         
         return scriptManager.executeScript(named: scriptName)
+    }
+    
+    @objc private func handleScriptsUpdated() {
+        refreshScriptList()
     }
 }

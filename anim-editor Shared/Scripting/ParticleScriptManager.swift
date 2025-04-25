@@ -28,6 +28,8 @@ class ParticleScriptManager {
     private var autoReloadTimer: Timer?
     private var lastModificationDates: [String: Date] = [:]
     
+    var onScriptsChanged: (([String]) -> Void)?
+    
     init(particleManager: ParticleManager, scene: SKScene, scriptsFolder: String) {
         self.particleManager = particleManager
         self.scene = scene
@@ -131,41 +133,79 @@ class ParticleScriptManager {
     private func checkForScriptChanges() {
         let fileManager = FileManager.default
         
-        // Verificar si hay scripts nuevos primero
-        let currentScripts = getScriptFilesInFolder()
-        let newScripts = currentScripts.filter { !availableScripts.contains($0) }
+        // Obtener la lista actual de scripts en el directorio
+        let currentScriptsInFolder = getScriptFilesInFolder()
         
-        if !newScripts.isEmpty {
-            print("Se encontraron \(newScripts.count) scripts nuevos. Recargando todos los scripts...")
-            loadAndExecuteAllScripts()
-            return
-        }
+        // Detectar scripts nuevos (están en la carpeta pero no en nuestra lista)
+        let newScripts = currentScriptsInFolder.filter { !availableScripts.contains($0) }
         
-        // Verificar modificaciones en scripts existentes
-        for scriptName in availableScripts {
-                let scriptPath = "\(scriptsFolder)/\(scriptName).js"
-                
-                do {
-                    let attributes = try fileManager.attributesOfItem(atPath: scriptPath)
-                    if let modDate = attributes[.modificationDate] as? Date,
-                       let lastModDate = lastModificationDates[scriptName],
-                       modDate > lastModDate {
-                        
-                        print("Script modificado: \(scriptName), recargando...")
-                        
-                        // Limpiar los sprites existentes antes de recargar el script
-                        interpreter.clearScriptsSprites(scriptName)
-                        
-                        // Recargar y ejecutar solo este script
-                        if interpreter.loadScript(from: scriptPath) {
-                            executeScript(named: scriptName)
-                            lastModificationDates[scriptName] = modDate
+        // Detectar scripts eliminados (están en nuestra lista pero no en la carpeta)
+        let removedScripts = availableScripts.filter { !currentScriptsInFolder.contains($0) }
+        
+        // Si hay scripts nuevos o eliminados, actualizar la lista
+        if !newScripts.isEmpty || !removedScripts.isEmpty {
+            print("Cambios detectados en scripts: \(newScripts.count) nuevos, \(removedScripts.count) eliminados")
+            
+            // Cargar los scripts nuevos
+            for script in newScripts {
+                let scriptPath = "\(scriptsFolder)/\(script).js"
+                if interpreter.loadScript(from: scriptPath) {
+                    print("✅ Nuevo script cargado: \(script)")
+                    
+                    // Ejecutar automáticamente el nuevo script
+                    executeScript(named: script)
+                    
+                    // Registrar fecha de modificación
+                    do {
+                        let attributes = try fileManager.attributesOfItem(atPath: scriptPath)
+                        if let modDate = attributes[.modificationDate] as? Date {
+                            lastModificationDates[script] = modDate
                         }
+                    } catch {
+                        print("Error obteniendo atributos de \(scriptPath): \(error)")
                     }
-                } catch {
-                    print("Error verificando modificaciones de \(scriptPath): \(error)")
                 }
             }
+            
+            // Limpiar scripts eliminados
+            for script in removedScripts {
+                print("🗑️ Script eliminado: \(script)")
+                interpreter.clearScriptsSprites(script)
+                lastModificationDates.removeValue(forKey: script)
+            }
+            
+            // Actualizar lista de scripts disponibles
+            availableScripts = currentScriptsInFolder
+            
+            // Notificar cambios para actualizar la UI
+            notifyScriptsChanged()
+        }
+        
+        // Verificar modificaciones en los scripts existentes (sin cambios en esta parte)
+        for scriptName in availableScripts {
+            let scriptPath = "\(scriptsFolder)/\(scriptName).js"
+            
+            do {
+                let attributes = try fileManager.attributesOfItem(atPath: scriptPath)
+                if let modDate = attributes[.modificationDate] as? Date,
+                   let lastModDate = lastModificationDates[scriptName],
+                   modDate > lastModDate {
+                    
+                    print("📝 Script modificado: \(scriptName), recargando...")
+                    
+                    // Limpiar los sprites existentes antes de recargar el script
+                    interpreter.clearScriptsSprites(scriptName)
+                    
+                    // Recargar y ejecutar solo este script
+                    if interpreter.loadScript(from: scriptPath) {
+                        executeScript(named: scriptName)
+                        lastModificationDates[scriptName] = modDate
+                    }
+                }
+            } catch {
+                print("Error verificando modificaciones de \(scriptPath): \(error)")
+            }
+        }
     }
     
     /// Obtiene la lista de scripts en la carpeta
@@ -282,6 +322,18 @@ class ParticleScriptManager {
         }
         
         return success
+    }
+    
+    private func notifyScriptsChanged() {
+        // Puedes implementar esto de varias maneras:
+        
+        // 1. Usando NotificationCenter (recomendado):
+        NotificationCenter.default.post(name: NSNotification.Name("ScriptsListUpdated"), object: self)
+        
+        // 2. O mediante un callback si prefieres un enfoque más directo:
+        if let callback = onScriptsChanged {
+            callback(availableScripts)
+        }
     }
     
     private func updateScriptFileWithNewParameter(scriptName: String, parameter: String, value: Any) {
