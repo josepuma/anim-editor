@@ -51,7 +51,7 @@ struct TextStyleConfig {
     func random(_ min: Double, _ max: Double) -> Double
     func randomInt(_ min: Int, _ max: Int) -> Int
     func log(_ text: String) -> Void
-    func createStyledText(_ config: [String: Any]) -> JSValue
+    func createText(_ config: [String: Any]) -> JSValue
 }
 
 // 2. Implementar una clase que conforme a este protocolo
@@ -87,160 +87,9 @@ struct TextStyleConfig {
            }
        }
     
-    // Añadir este método a la clase ParticleAPIBridge
-
-    /*func createStyledText(_ config: [String: Any]) -> JSValue {
-        guard let context = JSContext.current(),
-              let particleManager = particleManager else {
-            print("❌ ERROR: No se pudo crear texto estilizado")
-            return JSValue(nullIn: JSContext.current())
-        }
-
-        // Extraer configuración básica
-        let text = config["text"] as? String ?? ""
-        let fontName = config["fontName"] as? String ?? "HelveticaNeue"
-        let fontSize = CGFloat(config["fontSize"] as? Double ?? 24)
-        let textColor = SKColor(rgbaArray: config["color"] as? [Double] ?? [255, 255, 255, 1])
-        let spacing = CGFloat(config["spacing"] as? Double ?? 0)
-        let baselineY = CGFloat(config["baselineY"] as? Double ?? 240) // No se usa directamente, pero se puede pasar al JS si es necesario
-
-        // Extraer configuración de efectos
-        let hasShadow = config["shadow"] as? Bool ?? false
-        let shadowColor = SKColor(rgbaArray: config["shadowColor"] as? [Double] ?? [0, 0, 0, 0.5])
-        let shadowOffset = CGPoint(x: (config["shadowOffset"] as? [CGFloat?])?[0] ?? 2, y: (config["shadowOffset"] as? [CGFloat?])?[1] ?? 2)
-        let shadowBlur = CGFloat(config["shadowBlur"] as? CGFloat ?? 0)
-
-        let hasStroke = config["stroke"] as? Bool ?? false
-        let strokeColor = SKColor(rgbaArray: config["strokeColor"] as? [Double] ?? [0, 0, 0, 1])
-        let strokeWidth = CGFloat(config["strokeWidth"] as? Double ?? 1)
-
-        let hasGlow = config["glow"] as? Bool ?? false
-        let glowColor = SKColor(rgbaArray: config["glowColor"] as? [Double] ?? [255, 255, 255, 0.8])
-        let glowRadius = CGFloat(config["glowRadius"] as? Double ?? 4)
-
-        // Crear array para devolver desde Javascript
-        let jsArray = JSValue(newArrayIn: context)
-
-        // Calcular altura fija
-        let fixedHeight = fontSize * 1.5
-        var currentX: CGFloat = 0
-
-        // Cargar el shader (asumimos que el archivo "TextEffects.fsh" está en el proyecto)
-        let shader = SKShader(fileNamed: "TextEffects.fsh") // Asegúrate de que el nombre del archivo sea correcto
-
-        for (index, char) in text.enumerated() {
-            // Crear escena temporal
-            let sceneWidth = fontSize * 2
-            let scene = SKScene(size: CGSize(width: sceneWidth, height: fixedHeight))
-            scene.backgroundColor = .clear
-
-            // Crear label
-            let letterLabel = SKLabelNode(text: String(char))
-            letterLabel.fontName = fontName
-            letterLabel.fontSize = fontSize
-            letterLabel.fontColor = textColor
-            letterLabel.verticalAlignmentMode = .baseline
-            letterLabel.horizontalAlignmentMode = .center
-            let baselinePosition = fixedHeight * 0.33
-            letterLabel.position = CGPoint(x: sceneWidth / 2, y: baselinePosition)
-
-            // Crear sprite para aplicar el shader
-            let letterSprite = SKSpriteNode(color: .clear, size: CGSize(width: fontSize, height: fixedHeight)) // Tamaño inicial
-            letterSprite.position = CGPoint(x: sceneWidth / 2, y: baselinePosition) // Centrado en la escena
-
-            // Renderizar la etiqueta a una textura
-            let texture = scene.view?.texture(from: letterLabel) ?? SKTexture()
-            letterSprite.texture = texture
-
-            // Configurar el shader
-            var uniforms: [SKUniform] = [
-                SKUniform(name: "u_texture", texture: texture),
-                SKUniform(name: "u_textColor", value: [
-                    Float(textColor.red), Float(textColor.green), Float(textColor.blue), Float(textColor.alpha)
-                ])
-            ]
-
-            // Pasar parámetros de los efectos al shader
-            if hasShadow {
-                uniforms.append(SKUniform(name: "u_hasShadow", value: [1.0]))
-                uniforms.append(SKUniform(name: "u_shadowColor", value: [
-                    Float(shadowColor.red), Float(shadowColor.green), Float(shadowColor.blue), Float(shadowColor.alpha)
-                ]))
-                let shadowOffsetValue: [Float] = [Float(shadowOffset.x), Float(-shadowOffset.y)]
-                uniforms.append(SKUniform(name: "u_shadowOffset", value: shadowOffsetValue)) // y es invertido en SpriteKit
-                uniforms.append(SKUniform(name: "u_shadowBlur", value: [Float(shadowBlur)]))
-            } else {
-                uniforms.append(SKUniform(name: "u_hasShadow", value: [0.0]))
-            }
-
-            if hasStroke {
-                uniforms.append(SKUniform(name: "u_hasStroke", value: [1.0]))
-                uniforms.append(SKUniform(name: "u_strokeColor", value: [
-                    Float(strokeColor.red), Float(strokeColor.green), Float(strokeColor.blue), Float(strokeColor.alpha)
-                ]))
-                uniforms.append(SKUniform(name: "u_strokeWidth", value: [Float(strokeWidth)]))
-            } else {
-                uniforms.append(SKUniform(name: "u_hasStroke", value: [0.0]))
-            }
-
-            if hasGlow {
-                 uniforms.append(SKUniform(name: "u_hasGlow", value: [1.0]))
-                uniforms.append(SKUniform(name: "u_glowColor", value: [
-                    Float(glowColor.red), Float(glowColor.green), Float(glowColor.blue), Float(glowColor.alpha)
-                ]))
-                uniforms.append(SKUniform(name: "u_glowRadius", value: [Float(glowRadius)]))
-            }else{
-                uniforms.append(SKUniform(name: "u_hasGlow", value: [0.0]))
-            }
-            letterSprite.shader = shader
-            letterSprite.setValue(uniforms, forUniform: "u_customUniforms")
-
-            scene.addChild(letterSprite)
-
-            // Ajustar el tamaño de la escena al contenido real
-            let contentFrame = scene.calculateAccumulatedFrame()
-            let adjustedWidth = max(contentFrame.width + 4, 1)
-            scene.size = CGSize(width: adjustedWidth, height: fixedHeight)
-
-            // Re-posicionar el sprite después de ajustar el tamaño de la escena
-           letterSprite.position = CGPoint(x: adjustedWidth / 2, y: baselinePosition)
-
-            // Crear vista para renderizar
-            let view = SKView(frame: CGRect(x: 0, y: 0, width: adjustedWidth, height: fixedHeight))
-
-            // Generar textura
-            let textureFinal = view.texture(from: scene) ?? SKTexture()
-
-            // Crear sprite con la textura
-            let sprite = Sprite(texture: textureFinal)
-
-            // Posicionar sprite
-            let charWidth = textureFinal.size().width
-            sprite.setInitialPosition(position: CGPoint(x: currentX + charWidth / 2, y: 0))
-
-            // Incrementar posición X para el siguiente carácter
-            currentX += charWidth + spacing
-
-            // Añadir a script
-            if let scriptId = interpreter?.currentScriptId {
-                interpreter?.addSpriteToScript(scriptId: scriptId, sprite: sprite)
-            }
-
-            // Añadir a sprite manager
-            particleManager.spriteManager.addSprite(sprite)
-
-            // Crear objeto JS para este sprite
-            let spriteObj = JSValue(newObjectIn: context)
-            spriteObj?.setValue(charWidth, forProperty: "width")
-            spriteObj?.setValue(fixedHeight, forProperty: "height")
-            addSpriteMethods(to: spriteObj, for: sprite)
-            jsArray?.setObject(spriteObj, atIndexedSubscript: Int(UInt32(index)))
-        }
-
-        return jsArray!
-    }*/
+  
     
-    func createStyledText(_ config: [String: Any]) -> JSValue {
+    func createText(_ config: [String: Any]) -> JSValue {
         guard let context = JSContext.current(),
               let particleManager = particleManager else {
             print("❌ ERROR: No se pudo crear texto estilizado")
@@ -304,7 +153,7 @@ struct TextStyleConfig {
             letterLabel.position = CGPoint(x: initialSceneWidth/2, y: baselinePosition)
 
             // Aplicar efectos a la etiqueta
-            applyTextEffects(to: letterLabel, in: scene, config: config)
+            let _ = applyTextEffects(to: letterLabel, in: scene, config: config)
 
             // Añadir la etiqueta a la escena después de aplicar efectos
             scene.addChild(letterLabel)
@@ -589,7 +438,84 @@ struct TextStyleConfig {
         // Devolver la extensión total de los efectos
         return CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
     }
-
+    
+    // Método para crear un JSValue que represente al sprite
+    private func createJSValueForSprite(_ sprite: Sprite) -> JSValue {
+        guard let context = JSContext.current() else {
+            return JSValue(nullIn: JSContext.current())
+        }
+        
+        // Crear objeto JS
+        let spriteObj = JSValue(newObjectIn: context)
+        
+        // Registrar métodos para el sprite - los mismos que ya tienes en tu API
+        // Por ejemplo, addMoveXTween:
+        let addMoveXTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { [weak self] (startTime, endTime, startValue, endValue, easingStr) in
+            let easing = self?.getEasingFromString(easingStr) ?? .linear
+            sprite.addMoveXTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
+        }
+        spriteObj?.setValue(addMoveXTween, forProperty: "addMoveXTween")
+        
+        // Añade el resto de métodos que ya tienes implementados para los sprites normales
+        // ...
+        
+        return spriteObj!
+    }
+    
+    func createSprite(_ texturePath: String) -> JSValue {
+        guard let context = JSContext.current(),
+              let particleManager = particleManager,
+              let texture = particleManager.textureLoader.getTexture(named: texturePath) else {
+            print("❌ ERROR: No se pudo crear sprite con textura: \(texturePath)")
+            return JSValue(nullIn: JSContext.current())
+        }
+        
+        // Crear sprite
+        let sprite = Sprite(texture: texture)
+        
+        // Añadir a lista de sprites del script
+        if let scriptId = interpreter?.currentScriptId { // Usa interpreter?.currentScriptId
+                interpreter?.addSpriteToScript(scriptId: scriptId, sprite: sprite)
+            }
+        
+        // Crear objeto JS para el sprite
+        let spriteObj = JSValue(newObjectIn: context)
+        
+        
+        addSpriteMethods(to: spriteObj, for: sprite)
+        
+        // Añadir sprite al manager
+        particleManager.spriteManager.addSprite(sprite)
+        
+        return spriteObj!
+    }
+    
+    func clearEffects() {
+        guard let interpreter = interpreter,
+              let scriptId = interpreter.currentScriptId,
+              let particleManager = particleManager else {
+            return
+        }
+        
+        interpreter.clearScriptSprites(scriptId: scriptId, spriteManager: particleManager.spriteManager)
+    }
+    
+    func getCurrentTime() -> Int {
+        guard let scene = scene as? GameScene,
+              let audioPlayer = scene.audioPlayer else {
+            return 0
+        }
+        return Int(audioPlayer.currentTime * 1000)
+    }
+    
+    func random(_ min: Double, _ max: Double) -> Double {
+        return Double.random(in: min...max)
+    }
+    
+    func randomInt(_ min: Int, _ max: Int) -> Int {
+        return Int.random(in: min...max)
+    }
+    
     // Función auxiliar para añadir métodos a un objeto sprite JS
     private func addSpriteMethods(to jsObject: JSValue?, for sprite: Sprite) {
         // Método MoveX
@@ -663,222 +589,9 @@ struct TextStyleConfig {
         jsObject?.setValue(sprite.node.size.height, forProperty: "height")
     }
 
-    
-    
-    
-    // Método para crear un JSValue que represente al sprite
-    private func createJSValueForSprite(_ sprite: Sprite) -> JSValue {
-        guard let context = JSContext.current() else {
-            return JSValue(nullIn: JSContext.current())
-        }
-        
-        // Crear objeto JS
-        let spriteObj = JSValue(newObjectIn: context)
-        
-        // Registrar métodos para el sprite - los mismos que ya tienes en tu API
-        // Por ejemplo, addMoveXTween:
-        let addMoveXTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { [weak self] (startTime, endTime, startValue, endValue, easingStr) in
-            let easing = self?.getEasingFromString(easingStr) ?? .linear
-            sprite.addMoveXTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-        }
-        spriteObj?.setValue(addMoveXTween, forProperty: "addMoveXTween")
-        
-        // Añade el resto de métodos que ya tienes implementados para los sprites normales
-        // ...
-        
-        return spriteObj!
-    }
-    
-    func createSprite(_ texturePath: String) -> JSValue {
-        guard let context = JSContext.current(),
-              let particleManager = particleManager,
-              let texture = particleManager.textureLoader.getTexture(named: texturePath) else {
-            print("❌ ERROR: No se pudo crear sprite con textura: \(texturePath)")
-            return JSValue(nullIn: JSContext.current())
-        }
-        
-        // Crear sprite
-        let sprite = Sprite(texture: texture)
-        
-        // Añadir a lista de sprites del script
-        if let scriptId = interpreter?.currentScriptId { // Usa interpreter?.currentScriptId
-                interpreter?.addSpriteToScript(scriptId: scriptId, sprite: sprite)
-            }
-        
-        // Crear objeto JS para el sprite
-        let spriteObj = JSValue(newObjectIn: context)
-        
-        // Añadir métodos directamente al objeto sprite
-        // addFadeTween
-        let addFadeTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
-            let easing = self.getEasingFromString(easingStr)
-            sprite.addFadeTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-        }
-        spriteObj?.setValue(addFadeTween, forProperty: "addFadeTween")
-        
-        // addMoveXTween
-        let addMoveXTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
-            let easing = self.getEasingFromString(easingStr)
-            sprite.addMoveXTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-        }
-        spriteObj?.setValue(addMoveXTween, forProperty: "addMoveXTween")
-        
-        
-        let addMoveYTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
-            let easing = self.getEasingFromString(easingStr)
-            sprite.addMoveYTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-        }
-        spriteObj?.setValue(addMoveYTween, forProperty: "addMoveYTween")
-        
-        
-        // Añade todos los demás métodos directamente al objeto sprite...
-        
-        // addMoveTween
-        let addMoveTween: @convention(block) (Int, Int, CGFloat, CGFloat, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startX, startY, endX, endY, easingStr) in
-            let easing = self.getEasingFromString(easingStr)
-            sprite.addMoveTween(easing: easing, startTime: startTime, endTime: endTime,
-                              startValue: CGPoint(x: startX, y: startY),
-                              endValue: CGPoint(x: endX, y: endY))
-        }
-        spriteObj?.setValue(addMoveTween, forProperty: "addMoveTween")
-
-        
-        // addScaleTween
-        let addScaleTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
-            let easing = self.getEasingFromString(easingStr)
-            sprite.addScaleTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-        }
-        spriteObj?.setValue(addScaleTween, forProperty: "addScaleTween")
-        
-        let addRotateTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
-            let easing = self.getEasingFromString(easingStr)
-            sprite.addRotateTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-        }
-        spriteObj?.setValue(addRotateTween, forProperty: "addRotateTween")
-        
-        let addBlendMode: @convention(block) (Int, Int) -> Void = { (startTime, endTime) in
-            sprite.addBlendModeTween(startTime: startTime, endTime: endTime)
-        }
-        spriteObj?.setValue(addBlendMode, forProperty: "addBlendMode")
-        
-        // setPosition
-        let setPosition: @convention(block) (CGFloat, CGFloat) -> Void = { (x, y) in
-            sprite.setInitialPosition(position: CGPoint(x: x, y: y))
-        }
-        spriteObj?.setValue(setPosition, forProperty: "setPosition")
-        
-        // startLoop y endLoop
-        let startLoop: @convention(block) (Int, Int) -> Void = { (startTime, loopCount) in
-            sprite.startLoop(startTime: startTime, loopCount: loopCount)
-        }
-        spriteObj?.setValue(startLoop, forProperty: "startLoop")
-        
-        let endLoop: @convention(block) () -> Void = {
-            sprite.endLoop()
-        }
-        spriteObj?.setValue(endLoop, forProperty: "endLoop")
-        
-        // Añadir sprite al manager
-        particleManager.spriteManager.addSprite(sprite)
-        
-        return spriteObj!
-    }
-    
-    func clearEffects() {
-        guard let interpreter = interpreter,
-              let scriptId = interpreter.currentScriptId,
-              let particleManager = particleManager else {
-            return
-        }
-        
-        interpreter.clearScriptSprites(scriptId: scriptId, spriteManager: particleManager.spriteManager)
-    }
-    
-    func getCurrentTime() -> Int {
-        guard let scene = scene as? GameScene,
-              let audioPlayer = scene.audioPlayer else {
-            return 0
-        }
-        return Int(audioPlayer.currentTime * 1000)
-    }
-    
-    func random(_ min: Double, _ max: Double) -> Double {
-        return Double.random(in: min...max)
-    }
-    
-    func randomInt(_ min: Int, _ max: Int) -> Int {
-        return Int.random(in: min...max)
-    }
 }
 
-// 3. También necesitamos un Bridge para Sprite
-@objc protocol SpriteExport: JSExport {
-    func addMoveXTween(_ startTime: Int, _ endTime: Int, _ startValue: CGFloat, _ endValue: CGFloat, _ easingStr: String)
-    func addMoveYTween(_ startTime: Int, _ endTime: Int, _ startValue: CGFloat, _ endValue: CGFloat, _ easingStr: String)
-    func addMoveTween(_ startTime: Int, _ endTime: Int, _ startX: CGFloat, _ startY: CGFloat, _ endX: CGFloat, _ endY: CGFloat, _ easingStr: String)
-    func addScaleTween(_ startTime: Int, _ endTime: Int, _ startValue: CGFloat, _ endValue: CGFloat, _ easingStr: String)
-    func addFadeTween(_ startTime: Int, _ endTime: Int, _ startValue: CGFloat, _ endValue: CGFloat, _ easingStr: String)
-    func addBlendMode(_startTime: Int, _endTime: Int)
-    // Añadir el resto de métodos del sprite...
-    func setPosition(_ x: CGFloat, _ y: CGFloat)
-    func startLoop(_ startTime: Int, _ loopCount: Int)
-    func endLoop()
-    
-}
 
-@objc class SpriteBridge: NSObject, SpriteExport {
-    var sprite: Sprite
-    weak var interpreter: JSInterpreter?
-    
-    init(sprite: Sprite, interpreter: JSInterpreter?) {
-        self.sprite = sprite
-        self.interpreter = interpreter
-        super.init()
-    }
-    
-    func addMoveXTween(_ startTime: Int, _ endTime: Int, _ startValue: CGFloat, _ endValue: CGFloat, _ easingStr: String) {
-        let easing = interpreter?.getEasingFromString(easingStr) ?? .linear
-        sprite.addMoveXTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-    }
-    
-    func addMoveYTween(_ startTime: Int, _ endTime: Int, _ startValue: CGFloat, _ endValue: CGFloat, _ easingStr: String) {
-        let easing = interpreter?.getEasingFromString(easingStr) ?? .linear
-        sprite.addMoveYTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-    }
-    
-    func addMoveTween(_ startTime: Int, _ endTime: Int, _ startX: CGFloat, _ startY: CGFloat, _ endX: CGFloat, _ endY: CGFloat, _ easingStr: String) {
-        let easing = interpreter?.getEasingFromString(easingStr) ?? .linear
-        sprite.addMoveTween(easing: easing, startTime: startTime, endTime: endTime, startValue: CGPoint(x: startX, y: startY), endValue: CGPoint(x: endX, y: endY))
-    }
-    
-    func addScaleTween(_ startTime: Int, _ endTime: Int, _ startValue: CGFloat, _ endValue: CGFloat, _ easingStr: String) {
-        let easing = interpreter?.getEasingFromString(easingStr) ?? .linear
-        sprite.addScaleTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-    }
-    
-    func addFadeTween(_ startTime: Int, _ endTime: Int, _ startValue: CGFloat, _ endValue: CGFloat, _ easingStr: String) {
-        let easing = interpreter?.getEasingFromString(easingStr) ?? .linear
-        sprite.addScaleTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-    }
-    
-    func addBlendMode(_startTime: Int, _endTime: Int) {
-        sprite.addBlendModeTween(startTime: _startTime, endTime: _endTime)
-    }
-    
-    // Implementar el resto de métodos del sprite...
-    
-    func setPosition(_ x: CGFloat, _ y: CGFloat) {
-        sprite.setInitialPosition(position: CGPoint(x: x, y: y))
-    }
-    
-    func startLoop(_ startTime: Int, _ loopCount: Int) {
-        sprite.startLoop(startTime: startTime, loopCount: loopCount)
-    }
-    
-    func endLoop() {
-        sprite.endLoop()
-    }
-}
 
 extension SKNode {
     func applySKEffect<T: SKEffectNode>(_ effectNode: T, configure: (T) -> Void) {

@@ -35,15 +35,15 @@ class JSInterpreter {
             scriptSprites[scriptId]?.append(sprite)
         }
         
-        func clearScriptSprites(scriptId: String, spriteManager: SpriteManager) {
-            guard let sprites = scriptSprites[scriptId] else { return }
-            
-            for sprite in sprites {
-                spriteManager.removeSprite(sprite)
-            }
-            
-            scriptSprites[scriptId] = []
+    func clearScriptSprites(scriptId: String, spriteManager: SpriteManager) {
+        guard let sprites = scriptSprites[scriptId] else { return }
+        
+        for sprite in sprites {
+            spriteManager.removeSprite(sprite)
         }
+        
+        scriptSprites[scriptId] = []
+    }
     
     init(particleManager: ParticleManager, scene: SKScene) {
            self.particleManager = particleManager
@@ -62,217 +62,6 @@ class JSInterpreter {
            setupConsoleObject()
        }
     
-    func setupAPIBridge() {
-            guard let particleManager = particleManager, let scene = scene else { return }
-            
-            // Crear el bridge API
-            let apiBridge = ParticleAPIBridge(interpreter: self, particleManager: particleManager, scene: scene)
-            
-            // Registrar el bridge en el contexto global
-            context.setObject(apiBridge, forKeyedSubscript: "ParticleAPI" as NSString)
-        }
-    
-    // MARK: - Registro de funciones de API
-    
-    // Registra las funciones que estarán disponibles para los scripts JS
-    private func registerAPIFunctions() {
-        // Objeto global para la API
-        let api = JSValue(newObjectIn: context)
-        
-        // --- Funciones de utilidad ---
-        
-        // Función para obtener la hora actual
-        let getCurrentTime: @convention(block) () -> Int = { [weak self] in
-            guard let scene = self?.scene,
-                  let gameScene = scene as? GameScene,
-                  let audioPlayer = gameScene.audioPlayer else {
-                return 0
-            }
-            return Int(audioPlayer.currentTime * 1000)
-        }
-        
-        // Función para generar números aleatorios
-        let random: @convention(block) (Double, Double) -> Double = { (min, max) in
-            return Double.random(in: min...max)
-        }
-        
-        // Función para generar números aleatorios enteros
-        let randomInt: @convention(block) (Int, Int) -> Int = { (min, max) in
-            return Int.random(in: min...max)
-        }
-        
-        // Función para crear un sprite individual
-        let createSprite: @convention(block) (String) -> JSValue = { [weak self] (texturePath) in
-            print("creando sprite")
-            guard let self = self,
-                  let particleManager = self.particleManager,
-                  let texture = particleManager.textureLoader.getTexture(named: texturePath) else {
-                print("❌ ERROR: No se pudo crear sprite con textura: \(texturePath)")
-                // Debemos manejar el caso donde self es nil
-                if let ctx = self?.context {
-                    return JSValue(nullIn: ctx)
-                } else {
-                    return JSValue()
-                }
-            }
-            
-            // Crear un nuevo sprite
-            let sprite = Sprite(texture: texture)
-            print("✅ Sprite creado con textura: \(texturePath)")
-            
-            // Añadir a la lista de sprites del script actual
-            if let scriptId = self.currentScriptId {
-                if self.scriptSprites[scriptId] == nil {
-                    self.scriptSprites[scriptId] = []
-                }
-                self.scriptSprites[scriptId]?.append(sprite)
-                print("➕ Sprite añadido a script: \(scriptId), total sprites: \(self.scriptSprites[scriptId]?.count ?? 0)")
-            }
-            
-            // Crear un objeto JS para representar este sprite
-            let spriteObj = JSValue(newObjectIn: self.context)
-            
-            // Registrar métodos para el sprite - MoveX
-            let addMoveXTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
-                let easing = self.getEasingFromString(easingStr)
-                sprite.addMoveXTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-            }
-            spriteObj?.setValue(addMoveXTween, forProperty: "addMoveXTween")
-            
-            // Registrar métodos para el sprite - MoveY
-            let addMoveYTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
-                let easing = self.getEasingFromString(easingStr)
-                sprite.addMoveYTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-            }
-            spriteObj?.setValue(addMoveYTween, forProperty: "addMoveYTween")
-            
-            // Registrar métodos para el sprite - MoveTween combinado
-            let addMoveTween: @convention(block) (Int, Int, CGFloat, CGFloat, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startX, startY, endX, endY, easingStr) in
-                let easing = self.getEasingFromString(easingStr)
-                sprite.addMoveTween(easing: easing, startTime: startTime, endTime: endTime,
-                                  startValue: CGPoint(x: startX, y: startY),
-                                  endValue: CGPoint(x: endX, y: endY))
-            }
-            spriteObj?.setValue(addMoveTween, forProperty: "addMoveTween")
-            
-            // Registrar métodos para el sprite - Scale
-            let addScaleTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
-                let easing = self.getEasingFromString(easingStr)
-                sprite.addScaleTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-            }
-            spriteObj?.setValue(addScaleTween, forProperty: "addScaleTween")
-            
-            // Registrar métodos para el sprite - ScaleVec
-            let addScaleVecTween: @convention(block) (Int, Int, CGFloat, CGFloat, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startX, startY, endX, endY, easingStr) in
-                let easing = self.getEasingFromString(easingStr)
-                sprite.addScaleVecTween(easing: easing, startTime: startTime, endTime: endTime,
-                                     startValue: CGPoint(x: startX, y: startY),
-                                     endValue: CGPoint(x: endX, y: endY))
-            }
-            spriteObj?.setValue(addScaleVecTween, forProperty: "addScaleVecTween")
-            
-            // Registrar métodos para el sprite - Rotate
-            let addRotateTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
-                let easing = self.getEasingFromString(easingStr)
-                sprite.addRotateTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-            }
-            spriteObj?.setValue(addRotateTween, forProperty: "addRotateTween")
-            
-            // Registrar métodos para el sprite - Fade
-            let addFadeTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { (startTime, endTime, startValue, endValue, easingStr) in
-                let easing = self.getEasingFromString(easingStr)
-                sprite.addFadeTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
-            }
-            spriteObj?.setValue(addFadeTween, forProperty: "addFadeTween")
-            
-            // Registrar métodos para el sprite - Color
-            let addColorTween: @convention(block) (Int, Int, [NSNumber], [NSNumber], String) -> Void = { (startTime, endTime, startRGB, endRGB, easingStr) in
-                let easing = self.getEasingFromString(easingStr)
-                
-                // Validar arrays RGB
-                guard startRGB.count >= 3, endRGB.count >= 3 else { return }
-                
-                let startColor = SKColor(
-                    red: CGFloat(startRGB[0].doubleValue / 255.0),
-                    green: CGFloat(startRGB[1].doubleValue / 255.0),
-                    blue: CGFloat(startRGB[2].doubleValue / 255.0),
-                    alpha: 1.0
-                )
-                
-                let endColor = SKColor(
-                    red: CGFloat(endRGB[0].doubleValue / 255.0),
-                    green: CGFloat(endRGB[1].doubleValue / 255.0),
-                    blue: CGFloat(endRGB[2].doubleValue / 255.0),
-                    alpha: 1.0
-                )
-                
-                sprite.addColorTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startColor, endValue: endColor)
-            }
-            spriteObj?.setValue(addColorTween, forProperty: "addColorTween")
-            
-            // Método para loop
-            let startLoop: @convention(block) (Int, Int) -> Void = { (startTime, loopCount) in
-                sprite.startLoop(startTime: startTime, loopCount: loopCount)
-            }
-            spriteObj?.setValue(startLoop, forProperty: "startLoop")
-            
-            let endLoop: @convention(block) () -> Void = {
-                sprite.endLoop()
-            }
-            spriteObj?.setValue(endLoop, forProperty: "endLoop")
-            
-            // Método para modo de mezcla (blend mode)
-            let addBlendMode: @convention(block) (Int, Int) -> Void = { (startTime, endTime) in
-                sprite.addBlendModeTween(startTime: startTime, endTime: endTime)
-            }
-            spriteObj?.setValue(addBlendMode, forProperty: "addBlendMode")
-            
-            // Método para establecer posición inicial
-            let setPosition: @convention(block) (CGFloat, CGFloat) -> Void = { (x, y) in
-                sprite.setInitialPosition(position: CGPoint(x: x, y: y))
-            }
-            spriteObj?.setValue(setPosition, forProperty: "setPosition")
-            
-            // Añadir el sprite al spriteManager
-            particleManager.spriteManager.addSprite(sprite)
-            print("🔄 Sprite añadido al SpriteManager, total: \(particleManager.spriteManager.sprites.count)")
-            
-            return spriteObj!
-        }
-        
-        // Función para limpiar efectos (sprites) creados por el script actual
-        let clearEffects: @convention(block) () -> Void = { [weak self] in
-            guard let self = self,
-                  let scriptId = self.currentScriptId,
-                  let sprites = self.scriptSprites[scriptId],
-                  let particleManager = self.particleManager else {
-                return
-            }
-            
-            // Eliminar todos los sprites del script actual
-            for sprite in sprites {
-                particleManager.spriteManager.removeSprite(sprite)
-            }
-            
-            // Limpiar lista
-            self.scriptSprites[scriptId] = []
-        }
-        
-        // --- Registro de funciones en la API ---
-        
-        // Utilidades
-        api?.setValue(getCurrentTime, forProperty: "getCurrentTime")
-        api?.setValue(random, forProperty: "random")
-        api?.setValue(randomInt, forProperty: "randomInt")
-        
-        // Manejo de sprites
-        api?.setValue(createSprite, forProperty: "createSprite")
-        print("✅ Función createSprite registrada en la API")
-        api?.setValue(clearEffects, forProperty: "clearEffects")
-        
-        context.setObject(api, forKeyedSubscript: "ParticleAPI" as NSString)
-        print("✅ ParticleAPI registrado en el contexto principal con claves: \(api?.objectForKeyedSubscript(nil).toArray() ?? [])")
-    }
     
     // MARK: - Funciones auxiliares
     
@@ -334,7 +123,7 @@ class JSInterpreter {
                 }
                 
                 let apiBridge = ParticleAPIBridge(interpreter: self, particleManager: particleManager, scene: scene)
-                scriptContext.setObject(apiBridge, forKeyedSubscript: "ParticleAPI" as NSString)
+                scriptContext.setObject(apiBridge, forKeyedSubscript: "Sprite" as NSString)
                 
                 // Verificar
                 print("✅ API Bridge configurado para script \(fileName)")
@@ -465,20 +254,7 @@ class JSInterpreter {
         }
     }
 
-    
-    // Limpia los sprites creados por un script específico
-    private func clearScriptSprites(_ scriptName: String) {
-        guard let sprites = scriptSprites[scriptName],
-              let particleManager = particleManager else {
-            return
-        }
-        
-        for sprite in sprites {
-            particleManager.spriteManager.removeSprite(sprite)
-        }
-        
-        scriptSprites[scriptName] = []
-    }
+
     
     // MARK: - Gestión de parámetros
     
@@ -576,8 +352,8 @@ extension JSInterpreter {
 
         // Inyectar la ParticleAPI en el contexto de prueba
         testContext.globalObject.setObject(
-            context.globalObject.objectForKeyedSubscript("ParticleAPI"),
-            forKeyedSubscript: "ParticleAPI" as NSString
+            context.globalObject.objectForKeyedSubscript("Sprite"),
+            forKeyedSubscript: "Sprite" as NSString
         )
 
         print("🧪 Ejecutando script de prueba:\n\(scriptContent)")

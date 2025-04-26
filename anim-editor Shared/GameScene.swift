@@ -52,7 +52,7 @@ class GameScene: SKScene {
         return scene
     }
     
-    let path = "/Users/josepuma/Downloads/183467 Marika - quantum jump/"
+    let path = "/Users/josepuma/Documents/storyboards/freda-maybe/"
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         backgroundColor = .black
@@ -445,7 +445,7 @@ class GameScene: SKScene {
     
     func setupScriptButtons() {
         // Crear botón para mostrar/ocultar paneles de scripts
-        let toggleScriptsButton = ToggleButton(
+        /*let toggleScriptsButton = ToggleButton(
             size: 32,
             onIconName: "file-code-2",
             offIconName: "file-code-2",
@@ -462,7 +462,7 @@ class GameScene: SKScene {
         
         // Añadir a la fila de herramientas
         // (Esto debería añadirse en el punto adecuado de tu código)
-        toogleOptions.addNode(toggleScriptsButton)
+        toogleOptions.addNode(toggleScriptsButton)*/
     }
     
     func toggleScriptPanelsVisibility(visible: Bool) {
