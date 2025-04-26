@@ -135,15 +135,14 @@ class ScriptPanel: VerticalContainer {
         addNode(Separator(width: 250, height: 1, color: backgroundColorButton))
     }
     
-    // Refresca la lista de scripts disponibles
     func refreshScriptList() {
         guard let scriptManager = scriptManager else { return }
         
         // Limpiar la lista actual
         scriptListContainer.clearNodes()
         
-        // Obtener scripts disponibles
-        let scripts = scriptManager.getAvailableScripts()
+        // Obtener scripts disponibles ordenados
+        let scripts = scriptManager.getOrderedScripts()
         
         if scripts.isEmpty {
             // Mostrar mensaje si no hay scripts
@@ -153,29 +152,72 @@ class ScriptPanel: VerticalContainer {
             emptyLabel.fontColor = buttonColorText
             scriptListContainer.addNode(emptyLabel)
         } else {
-            // Crear un botón para cada script
+            // Crear un contenedor para cada script con botones para reordenar
             for script in scripts {
-                let scriptButton = Button(
-                    text: script,
-                    padding: CGSize(width: 10, height: 6),
+                // Contenedor horizontal para script y botones
+                let scriptRow = HorizontalContainer(
+                    spacing: 5,
+                    padding: CGSize(width: 2, height: 2),
+                    verticalAlignment: .center,
+                    horizontalAlignment: .left,
+                    showBackground: false
+                )
+                
+                // Botones para subir/bajar
+                let upButton = Button(
+                    text: "↑",
+                    padding: CGSize(width: 6, height: 6),
                     buttonColor: backgroundColorButton,
                     buttonBorderColor: backgroundColorButton,
                     textColor: buttonColorText,
+                    fontSize: 10
+                )
+                
+                let downButton = Button(
+                    text: "↓",
+                    padding: CGSize(width: 6, height: 6),
+                    buttonColor: backgroundColorButton,
+                    buttonBorderColor: backgroundColorButton,
+                    textColor: buttonColorText,
+                    fontSize: 10
+                )
+                
+                // Configurar acciones para los botones
+                upButton.onPress = { [weak self] in
+                    guard let self = self, let scriptManager = self.scriptManager else { return }
+                    if scriptManager.moveScriptUp(script) {
+                        self.refreshScriptList()
+                        scriptManager.reorderAndReexecuteScripts()
+                    }
+                }
+                
+                downButton.onPress = { [weak self] in
+                    guard let self = self, let scriptManager = self.scriptManager else { return }
+                    if scriptManager.moveScriptDown(script) {
+                        self.refreshScriptList()
+                        scriptManager.reorderAndReexecuteScripts()
+                    }
+                }
+                
+                // Botón del script
+                let scriptButton = Button(
+                    text: script,
+                    padding: CGSize(width: 10, height: 6),
+                    buttonColor: script == selectedScript ? accent : backgroundColorButton,
+                    buttonBorderColor: script == selectedScript ? accent : backgroundColorButton,
+                    textColor: script == selectedScript ? .black : buttonColorText,
                     fontSize: 12
                 )
                 
-                // Si es el script seleccionado, resaltar
-                if script == selectedScript {
-                    scriptButton.setButtonColor(color: accent)
-                    scriptButton.setTextColor(color: .black)
-                }
-                
-                // Configurar acción al presionar
                 scriptButton.onPress = { [weak self] in
                     self?.selectScript(script)
                 }
                 
-                scriptListContainer.addNode(scriptButton)
+                // Añadir componentes a la fila
+                scriptRow.addNodes([upButton, downButton, scriptButton])
+                
+                // Añadir la fila al contenedor
+                scriptListContainer.addNode(scriptRow)
             }
         }
         

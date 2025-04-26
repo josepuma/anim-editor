@@ -7,9 +7,9 @@ class SpriteManager {
     private var scale: CGFloat = 1
 
     func addSprite(_ sprite: Sprite) {
-        sprite.zPosition = currentZPosition
+        //sprite.zPosition = currentZPosition
         sprites.append(sprite)
-        currentZPosition += 1
+        //currentZPosition += 1
         if let scene = parentScene {
             scene.addChild(sprite.node)
         }

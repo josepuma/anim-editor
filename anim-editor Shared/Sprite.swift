@@ -155,7 +155,7 @@ class Sprite : Equatable {
         let newSprite = Sprite(texture: textureCopy, origin: Origin(rawValue: textureNode.anchorPoint.x == 0.5 && textureNode.anchorPoint.y == 0.5 ? "centre" : "custom") ?? .centre)
         
         // Copiar las propiedades directamente
-        newSprite.zPosition = self.zPosition
+        //newSprite.zPosition = self.zPosition
         newSprite.setInitialPosition(position: self.initialPosition)
         
         // Clonar el nodo de textura con todas sus propiedades

@@ -10,6 +10,15 @@ import SpriteKit
 
 /// Clase encargada de gestionar los scripts de efectos de partículas con ejecución automática
 class ParticleScriptManager {
+    
+    private var scriptExecutionOrder: [String] = []
+    private let scriptOrderKey = "com.animeditor.scriptExecutionOrder"
+
+    // Método para guardar el orden en UserDefaults
+    private func saveScriptOrder() {
+        UserDefaults.standard.set(scriptExecutionOrder, forKey: scriptOrderKey)
+    }
+    
     // Intérprete JavaScript
     private let interpreter: JSInterpreter
     
@@ -47,6 +56,20 @@ class ParticleScriptManager {
         
         // Configurar timer para recarga automática
         setupAutoReloadTimer()
+    }
+    
+    private func loadScriptOrder() {
+        if let savedOrder = UserDefaults.standard.array(forKey: scriptOrderKey) as? [String] {
+            // Filtrar para mantener solo scripts que existen
+            scriptExecutionOrder = savedOrder.filter { availableScripts.contains($0) }
+            
+            // Añadir scripts nuevos al final del orden
+            let newScripts = availableScripts.filter { !scriptExecutionOrder.contains($0) }
+            scriptExecutionOrder.append(contentsOf: newScripts)
+        } else {
+            // Primera vez: usar el orden actual
+            scriptExecutionOrder = availableScripts
+        }
     }
     
     /// Asegura que existan los directorios necesarios
@@ -92,15 +115,46 @@ class ParticleScriptManager {
         // Cargar scripts
         availableScripts = interpreter.loadScripts(fromFolder: scriptsFolder)
         
+        // Cargar el orden guardado
+        loadScriptOrder()
+        
         // Registrar fechas de modificación
         updateModificationDates()
         
-        // Ejecutar todos los scripts automáticamente
-        for scriptName in availableScripts {
-            executeScript(named: scriptName)
+        // Ejecutar scripts en el orden guardado
+        for scriptName in scriptExecutionOrder where availableScripts.contains(scriptName) {
+            let _ = executeScript(named: scriptName)
         }
         
         print("Se cargaron y ejecutaron \(availableScripts.count) scripts automáticamente")
+    }
+    
+    func moveScriptUp(_ scriptName: String) -> Bool {
+        guard let index = scriptExecutionOrder.firstIndex(of: scriptName), index > 0 else {
+            return false
+        }
+        
+        scriptExecutionOrder.remove(at: index)
+        scriptExecutionOrder.insert(scriptName, at: index - 1)
+        saveScriptOrder()
+        return true
+    }
+
+    func moveScriptDown(_ scriptName: String) -> Bool {
+        guard let index = scriptExecutionOrder.firstIndex(of: scriptName),
+              index < scriptExecutionOrder.count - 1 else {
+            return false
+        }
+        
+        scriptExecutionOrder.remove(at: index)
+        scriptExecutionOrder.insert(scriptName, at: index + 1)
+        saveScriptOrder()
+        return true
+    }
+
+    // Obtener la lista ordenada
+    func getOrderedScripts() -> [String] {
+        return scriptExecutionOrder
     }
     
     /// Actualiza los registros de fechas de modificación de los scripts
@@ -129,6 +183,27 @@ class ParticleScriptManager {
         }
     }
     
+    // En ParticleScriptManager.swift
+    func reorderAndReexecuteScripts() {
+        // 1. Detener cualquier timer en ejecución para evitar conflictos
+        autoReloadTimer?.invalidate()
+        
+        // 2. Limpiar todos los sprites existentes de todos los scripts
+        for scriptName in availableScripts {
+            interpreter.clearScriptsSprites(scriptName)
+        }
+        
+        // 3. Ejecutar los scripts en el nuevo orden definido
+        for scriptName in scriptExecutionOrder where availableScripts.contains(scriptName) {
+            let _ = executeScript(named: scriptName)
+        }
+        
+        // 4. Reiniciar el timer
+        setupAutoReloadTimer()
+        
+        print("✅ Scripts reordenados y re-ejecutados en nuevo orden")
+    }
+    
     /// Revisa si hay cambios en los scripts y los recarga si es necesario
     private func checkForScriptChanges() {
         let fileManager = FileManager.default
@@ -152,6 +227,11 @@ class ParticleScriptManager {
                 if interpreter.loadScript(from: scriptPath) {
                     print("✅ Nuevo script cargado: \(script)")
                     
+                    // Añadir a la lista de scripts ordenados
+                    if !scriptExecutionOrder.contains(script) {
+                        scriptExecutionOrder.append(script)
+                    }
+                    
                     // Ejecutar automáticamente el nuevo script
                     executeScript(named: script)
                     
@@ -172,16 +252,27 @@ class ParticleScriptManager {
                 print("🗑️ Script eliminado: \(script)")
                 interpreter.clearScriptsSprites(script)
                 lastModificationDates.removeValue(forKey: script)
+                
+                // Remover del orden de ejecución
+                if let index = scriptExecutionOrder.firstIndex(of: script) {
+                    scriptExecutionOrder.remove(at: index)
+                }
             }
             
             // Actualizar lista de scripts disponibles
             availableScripts = currentScriptsInFolder
             
+            saveScriptOrder()
+            
             // Notificar cambios para actualizar la UI
             notifyScriptsChanged()
         }
         
-        // Verificar modificaciones en los scripts existentes (sin cambios en esta parte)
+        // En ParticleScriptManager.swift, modificar checkForScriptChanges():
+
+        // Verificar modificaciones en los scripts existentes
+        var anyScriptModified = false
+
         for scriptName in availableScripts {
             let scriptPath = "\(scriptsFolder)/\(scriptName).js"
             
@@ -193,17 +284,35 @@ class ParticleScriptManager {
                     
                     print("📝 Script modificado: \(scriptName), recargando...")
                     
-                    // Limpiar los sprites existentes antes de recargar el script
+                    // Limpiar los sprites existentes de este script
                     interpreter.clearScriptsSprites(scriptName)
                     
-                    // Recargar y ejecutar solo este script
+                    // Recargar el script
                     if interpreter.loadScript(from: scriptPath) {
-                        executeScript(named: scriptName)
+                        // Marcar que hubo modificaciones
+                        anyScriptModified = true
+                        
+                        // Actualizar fecha de modificación
                         lastModificationDates[scriptName] = modDate
                     }
                 }
             } catch {
                 print("Error verificando modificaciones de \(scriptPath): \(error)")
+            }
+        }
+
+        // Si cualquier script fue modificado, volver a ejecutar todos en orden
+        if anyScriptModified {
+            print("🔄 Re-ejecutando todos los scripts en orden...")
+            
+            // Limpiar todos los sprites
+            for scriptName in availableScripts {
+                interpreter.clearScriptsSprites(scriptName)
+            }
+            
+            // Ejecutar scripts en el orden definido
+            for scriptName in scriptExecutionOrder where availableScripts.contains(scriptName) {
+                executeScript(named: scriptName)
             }
         }
     }
