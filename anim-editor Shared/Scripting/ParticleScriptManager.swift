@@ -11,16 +11,12 @@ import SpriteKit
 /// Clase encargada de gestionar los scripts de efectos de partículas con ejecución automática
 class ParticleScriptManager {
     
-    private var scriptExecutionOrder: [String] = []
-    private let scriptOrderKey = "com.animeditor.scriptExecutionOrder"
-
-    // Método para guardar el orden en UserDefaults
-    private func saveScriptOrder() {
-        UserDefaults.standard.set(scriptExecutionOrder, forKey: scriptOrderKey)
-    }
+    private var configManager: ProjectConfigManager
     
     // Intérprete JavaScript
     private let interpreter: JSInterpreter
+    private var scriptScenes: [String: ScriptScene] = [:]
+    private var scriptExecutionOrder: [String] = []
     
     // Directorios de trabajo
     private let scriptsFolder: String
@@ -37,6 +33,8 @@ class ParticleScriptManager {
     private var autoReloadTimer: Timer?
     private var lastModificationDates: [String: Date] = [:]
     
+    
+    
     var onScriptsChanged: (([String]) -> Void)?
     
     init(particleManager: ParticleManager, scene: SKScene, scriptsFolder: String) {
@@ -45,31 +43,47 @@ class ParticleScriptManager {
         self.scriptsFolder = scriptsFolder
         self.templatesFolder = scriptsFolder + "/templates"
         
-        // Asegurarse de que existan las carpetas
-
+        // Inicializar el gestor de configuración
+        let projectPath = scriptsFolder.components(separatedBy: "/scripts")[0]
+        let projectName = URL(fileURLWithPath: projectPath).lastPathComponent
+        self.configManager = ProjectConfigManager(projectPath: projectPath, projectName: projectName)
         
         // Inicializar el intérprete
         self.interpreter = JSInterpreter(particleManager: particleManager, scene: scene)
-        ensureDirectoriesExist()
-        // Cargar y ejecutar scripts disponibles
-        loadAndExecuteAllScripts()
         
-        // Configurar timer para recarga automática
+        ensureDirectoriesExist()
+        loadAndExecuteAllScripts()
         setupAutoReloadTimer()
     }
     
     private func loadScriptOrder() {
-        if let savedOrder = UserDefaults.standard.array(forKey: scriptOrderKey) as? [String] {
-            // Filtrar para mantener solo scripts que existen
-            scriptExecutionOrder = savedOrder.filter { availableScripts.contains($0) }
+        // Obtener scripts de la configuración
+        let configScripts = configManager.getScripts()
+        
+        if !configScripts.isEmpty {
+            // Usar el orden definido en la configuración
+            scriptExecutionOrder = configScripts
+                .sorted { $0.zIndex < $1.zIndex }
+                .map { $0.name }
+                .filter { availableScripts.contains($0) }
             
-            // Añadir scripts nuevos al final del orden
-            let newScripts = availableScripts.filter { !scriptExecutionOrder.contains($0) }
+            // Añadir scripts nuevos al final
+            let existingNames = Set(scriptExecutionOrder)
+            let newScripts = availableScripts.filter { !existingNames.contains($0) }
             scriptExecutionOrder.append(contentsOf: newScripts)
         } else {
             // Primera vez: usar el orden actual
             scriptExecutionOrder = availableScripts
+            
+            // Guardar orden inicial en la configuración
+            for script in availableScripts {
+                configManager.addOrUpdateScript(name: script)
+            }
         }
+    }
+    
+    private func saveScriptOrder() {
+        configManager.updateScriptOrder(newOrder: scriptExecutionOrder)
     }
     
     /// Asegura que existan los directorios necesarios
@@ -121,36 +135,81 @@ class ParticleScriptManager {
         // Registrar fechas de modificación
         updateModificationDates()
         
-        // Ejecutar scripts en el orden guardado
+        // Crear escenas para cada script y ejecutarlos en orden
         for scriptName in scriptExecutionOrder where availableScripts.contains(scriptName) {
-            let _ = executeScript(named: scriptName)
+            createScriptSceneIfNeeded(scriptName)
+            executeScript(named: scriptName)
         }
         
         print("Se cargaron y ejecutaron \(availableScripts.count) scripts automáticamente")
     }
     
-    func moveScriptUp(_ scriptName: String) -> Bool {
-        guard let index = scriptExecutionOrder.firstIndex(of: scriptName), index > 0 else {
-            return false
-        }
-        
-        scriptExecutionOrder.remove(at: index)
-        scriptExecutionOrder.insert(scriptName, at: index - 1)
-        saveScriptOrder()
-        return true
+    func getScriptScenes() -> [String: ScriptScene] {
+        return scriptScenes
     }
+    
+    private func createScriptSceneIfNeeded(_ scriptName: String) {
+        guard scriptScenes[scriptName] == nil, let scene = self.scene else { return }
+        
+        // Crear nueva escena para este script
+        let scriptScene = ScriptScene(scriptName: scriptName)
+        scriptScenes[scriptName] = scriptScene
+        
+        // Registrar la escena con el intérprete
+        interpreter.registerScriptScene(scriptName, scene: scriptScene)
+        
+        // Añadir a la escena principal en el orden correcto
+        scene.addChild(scriptScene)
+        
+        // Establecer la escala
+        if let gameScene = scene as? GameScene {
+            scriptScene.setContentScale(gameScene.spriteManager.getScale())
+        }
+    }
+    
+    func reorderScriptScenes() {
+            guard let scene = self.scene else { return }
+            
+            // Reordenar las escenas según el orden definido
+            for scriptName in scriptExecutionOrder {
+                if let scriptScene = scriptScenes[scriptName] {
+                    // Remover y volver a añadir para que quede al final (encima)
+                    scriptScene.removeFromParent()
+                    scene.addChild(scriptScene)
+                }
+            }
+        }
+    
+    func moveScriptUp(_ scriptName: String) -> Bool {
+         guard let index = scriptExecutionOrder.firstIndex(of: scriptName), index > 0 else {
+             return false
+         }
+         
+         scriptExecutionOrder.remove(at: index)
+         scriptExecutionOrder.insert(scriptName, at: index - 1)
+         saveScriptOrder()
+         
+         // Reordenar las escenas
+         reorderScriptScenes()
+         
+         return true
+     }
 
     func moveScriptDown(_ scriptName: String) -> Bool {
-        guard let index = scriptExecutionOrder.firstIndex(of: scriptName),
-              index < scriptExecutionOrder.count - 1 else {
-            return false
+            guard let index = scriptExecutionOrder.firstIndex(of: scriptName),
+                  index < scriptExecutionOrder.count - 1 else {
+                return false
+            }
+            
+            scriptExecutionOrder.remove(at: index)
+            scriptExecutionOrder.insert(scriptName, at: index + 1)
+            saveScriptOrder()
+            
+            // Reordenar las escenas
+            reorderScriptScenes()
+            
+            return true
         }
-        
-        scriptExecutionOrder.remove(at: index)
-        scriptExecutionOrder.insert(scriptName, at: index + 1)
-        saveScriptOrder()
-        return true
-    }
 
     // Obtener la lista ordenada
     func getOrderedScripts() -> [String] {
@@ -229,11 +288,13 @@ class ParticleScriptManager {
                     
                     // Añadir a la lista de scripts ordenados
                     if !scriptExecutionOrder.contains(script) {
+                        configManager.addOrUpdateScript(name: script)
                         scriptExecutionOrder.append(script)
                     }
                     
                     // Ejecutar automáticamente el nuevo script
                     executeScript(named: script)
+                    createScriptSceneIfNeeded(script)
                     
                     // Registrar fecha de modificación
                     do {
@@ -256,6 +317,7 @@ class ParticleScriptManager {
                 // Remover del orden de ejecución
                 if let index = scriptExecutionOrder.firstIndex(of: script) {
                     scriptExecutionOrder.remove(at: index)
+                    configManager.removeScript(name: script)
                 }
             }
             
@@ -270,9 +332,6 @@ class ParticleScriptManager {
         
         // En ParticleScriptManager.swift, modificar checkForScriptChanges():
 
-        // Verificar modificaciones en los scripts existentes
-        var anyScriptModified = false
-
         for scriptName in availableScripts {
             let scriptPath = "\(scriptsFolder)/\(scriptName).js"
             
@@ -284,13 +343,16 @@ class ParticleScriptManager {
                     
                     print("📝 Script modificado: \(scriptName), recargando...")
                     
-                    // Limpiar los sprites existentes de este script
-                    interpreter.clearScriptsSprites(scriptName)
+                    // PRIMERO: Limpiar explícitamente la escena de este script
+                    if let scriptScene = scriptScenes[scriptName] {
+                        print("🧽 Limpiando escena \(scriptName) antes de recargar")
+                        scriptScene.clearAllSprites()
+                    }
                     
-                    // Recargar el script
+                    // DESPUÉS: Recargar el script
                     if interpreter.loadScript(from: scriptPath) {
-                        // Marcar que hubo modificaciones
-                        anyScriptModified = true
+                        // Ejecutar el script
+                        let _ = executeScript(named: scriptName)
                         
                         // Actualizar fecha de modificación
                         lastModificationDates[scriptName] = modDate
@@ -298,21 +360,6 @@ class ParticleScriptManager {
                 }
             } catch {
                 print("Error verificando modificaciones de \(scriptPath): \(error)")
-            }
-        }
-
-        // Si cualquier script fue modificado, volver a ejecutar todos en orden
-        if anyScriptModified {
-            print("🔄 Re-ejecutando todos los scripts en orden...")
-            
-            // Limpiar todos los sprites
-            for scriptName in availableScripts {
-                interpreter.clearScriptsSprites(scriptName)
-            }
-            
-            // Ejecutar scripts en el orden definido
-            for scriptName in scriptExecutionOrder where availableScripts.contains(scriptName) {
-                executeScript(named: scriptName)
             }
         }
     }
@@ -421,16 +468,30 @@ class ParticleScriptManager {
     
     /// Actualiza un parámetro en un script
     func updateScriptParameter(script: String, parameter: String, value: Any) -> Bool {
-
-        // 1. Actualizar el parámetro en el contexto JavaScript actual
-        let success = interpreter.updateScriptParameter(script: script, parameter: parameter, value: value)
+        configManager.updateScriptSetting(scriptName: script, key: parameter, value: value)
         
-        if success {
-            // 2. Actualizar el archivo JS en disco
-            updateScriptFileWithNewParameter(scriptName: script, parameter: parameter, value: value)
+        return interpreter.updateScriptParameter(script: script, parameter: parameter, value: value)
+    }
+    
+    private func handleRemovedScript(_ scriptName: String) {
+        interpreter.clearScriptsSprites(scriptName)
+        configManager.removeScript(name: scriptName)
+        
+        // Remover del orden
+        if let index = scriptExecutionOrder.firstIndex(of: scriptName) {
+            scriptExecutionOrder.remove(at: index)
+            saveScriptOrder()
         }
+    }
+    
+    private func handleNewScript(_ scriptName: String) {
+        configManager.addOrUpdateScript(name: scriptName)
         
-        return success
+        // Si no está en el orden, añadirlo
+        if !scriptExecutionOrder.contains(scriptName) {
+            scriptExecutionOrder.append(scriptName)
+            saveScriptOrder()
+        }
     }
     
     private func notifyScriptsChanged() {

@@ -28,22 +28,8 @@ class JSInterpreter {
     // ID del script actual que se está ejecutando
     internal var currentScriptId: String?
     
-    func addSpriteToScript(scriptId: String, sprite: Sprite) {
-            if scriptSprites[scriptId] == nil {
-                scriptSprites[scriptId] = []
-            }
-            scriptSprites[scriptId]?.append(sprite)
-        }
-        
-    func clearScriptSprites(scriptId: String, spriteManager: SpriteManager) {
-        guard let sprites = scriptSprites[scriptId] else { return }
-        
-        for sprite in sprites {
-            spriteManager.removeSprite(sprite)
-        }
-        
-        scriptSprites[scriptId] = []
-    }
+    private var scriptScenes: [String: ScriptScene] = [:]
+    
     
     init(particleManager: ParticleManager, scene: SKScene) {
            self.particleManager = particleManager
@@ -62,8 +48,21 @@ class JSInterpreter {
            setupConsoleObject()
        }
     
+    func registerScriptScene(_ scriptName: String, scene: ScriptScene) {
+       scriptScenes[scriptName] = scene
+   }
     
-    // MARK: - Funciones auxiliares
+    func addSpriteToScript(scriptId: String, sprite: Sprite) {
+            if let scriptScene = scriptScenes[scriptId] {
+                scriptScene.addSprite(sprite)
+            }
+        }
+        
+    func clearScriptsSprites(scriptId: String) {
+        if let scriptScene = scriptScenes[scriptId] {
+            scriptScene.clearAllSprites()
+        }
+    }
     
     // Convierte un string de easing a la enumeración Easing
     func getEasingFromString(_ string: String) -> Easing {
@@ -99,8 +98,6 @@ class JSInterpreter {
         default: return .linear
         }
     }
-    
-    // MARK: - Carga y ejecución de scripts
     
     func loadScript(from filePath: String) -> Bool {
             do {
@@ -205,19 +202,13 @@ class JSInterpreter {
         }
     }
     
-    func clearScriptsSprites(_ scriptName: String) {
-        guard let sprites = scriptSprites[scriptName],
-              let particleManager = particleManager else {
-            return
+    func clearScriptsSprites(_ scriptId: String) {
+        if let scriptScene = scriptScenes[scriptId] {
+            print("🧹 Limpiando escena para script: \(scriptId)")
+            scriptScene.clearAllSprites()
+        } else {
+            print("⚠️ No se encontró escena para el script: \(scriptId)")
         }
-        
-        print("🧹 Limpiando \(sprites.count) sprites existentes del script \(scriptName)")
-        
-        for sprite in sprites {
-            particleManager.spriteManager.removeSprite(sprite)
-        }
-        
-        scriptSprites[scriptName] = []
     }
     
     // Ejecuta un script específico por nombre
@@ -254,9 +245,6 @@ class JSInterpreter {
         }
     }
 
-
-    
-    // MARK: - Gestión de parámetros
     
     // Obtiene los parámetros definidos para un script
     func getScriptParameters(for scriptName: String) -> [String: Any] {
@@ -334,42 +322,3 @@ class JSInterpreter {
         context.setObject(consoleObject, forKeyedSubscript: "console" as NSString)
     }
 }
-
-
-extension JSInterpreter {
-    func testScript(scriptContent: String) {
-        guard let testContext = JSContext() else {
-            print("❌ Error al crear contexto de prueba")
-            return
-        }
-
-        // Configurar manejador de excepciones para el contexto de prueba
-        testContext.exceptionHandler = { _, exception in
-            if let exc = exception {
-                print("⚠️ [Test Script Error]: \(exc.toString() ?? "Unknown error")")
-            }
-        }
-
-        // Inyectar la ParticleAPI en el contexto de prueba
-        testContext.globalObject.setObject(
-            context.globalObject.objectForKeyedSubscript("Sprite"),
-            forKeyedSubscript: "Sprite" as NSString
-        )
-
-        print("🧪 Ejecutando script de prueba:\n\(scriptContent)")
-        let result = testContext.evaluateScript(scriptContent)
-        print("✅ Resultado del script de prueba: \(result ?? JSValue(undefinedIn: testContext)!)")
-
-        // Intentar ejecutar la función main si está definida
-        if let mainFn = testContext.objectForKeyedSubscript("main"),
-           mainFn.isObject,
-           !mainFn.isUndefined && mainFn.hasProperty("call") {
-            print("📞 Llamando a la función main() en el script de prueba")
-            mainFn.call(withArguments: [])
-            print("✅ Función main() del script de prueba ejecutada")
-        } else {
-            print("⚠️ Advertencia: Función main() no encontrada en el script de prueba")
-        }
-    }
-}
-

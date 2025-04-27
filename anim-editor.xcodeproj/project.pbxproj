@@ -15,6 +15,12 @@
 		596FB9342C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */; };
 		596FB9362C74532F00E4733C /* AudioFFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9352C74532F00E4733C /* AudioFFT.swift */; };
 		596FB9372C74532F00E4733C /* AudioFFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9352C74532F00E4733C /* AudioFFT.swift */; };
+		5989E1DB2DBE8E9100FA6B71 /* ScriptScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5989E1DA2DBE8E8F00FA6B71 /* ScriptScene.swift */; };
+		5989E1DC2DBE8E9100FA6B71 /* ScriptScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5989E1DA2DBE8E8F00FA6B71 /* ScriptScene.swift */; };
+		5989E1DF2DBE95E900FA6B71 /* ProjectConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5989E1DE2DBE95E600FA6B71 /* ProjectConfig.swift */; };
+		5989E1E02DBE95E900FA6B71 /* ProjectConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5989E1DE2DBE95E600FA6B71 /* ProjectConfig.swift */; };
+		5989E1E22DBE960D00FA6B71 /* ProjectConfigManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5989E1E12DBE960600FA6B71 /* ProjectConfigManager.swift */; };
+		5989E1E32DBE960D00FA6B71 /* ProjectConfigManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5989E1E12DBE960600FA6B71 /* ProjectConfigManager.swift */; };
 		59B86FDB2C65644A001D0DC1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B86FDA2C65644A001D0DC1 /* AppDelegate.swift */; };
 		59B86FDD2C65644A001D0DC1 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B86FDC2C65644A001D0DC1 /* GameViewController.swift */; };
 		59B86FE02C65644A001D0DC1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 59B86FDE2C65644A001D0DC1 /* Main.storyboard */; };
@@ -105,6 +111,9 @@
 		595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TextEffects.fsh; sourceTree = "<group>"; };
 		596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFTAnalyzer.swift; sourceTree = "<group>"; };
 		596FB9352C74532F00E4733C /* AudioFFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFT.swift; sourceTree = "<group>"; };
+		5989E1DA2DBE8E8F00FA6B71 /* ScriptScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptScene.swift; sourceTree = "<group>"; };
+		5989E1DE2DBE95E600FA6B71 /* ProjectConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectConfig.swift; sourceTree = "<group>"; };
+		5989E1E12DBE960600FA6B71 /* ProjectConfigManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectConfigManager.swift; sourceTree = "<group>"; };
 		59B86FCF2C656448001D0DC1 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
 		59B86FD02C656448001D0DC1 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
 		59B86FD12C656448001D0DC1 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -196,6 +205,15 @@
 			path = Audio;
 			sourceTree = "<group>";
 		};
+		5989E1DD2DBE95E000FA6B71 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				5989E1E12DBE960600FA6B71 /* ProjectConfigManager.swift */,
+				5989E1DE2DBE95E600FA6B71 /* ProjectConfig.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		59B86FC92C656448001D0DC1 = {
 			isa = PBXGroup;
 			children = (
@@ -210,6 +228,7 @@
 		59B86FCE2C656448001D0DC1 /* anim-editor Shared */ = {
 			isa = PBXGroup;
 			children = (
+				5989E1DD2DBE95E000FA6B71 /* Settings */,
 				59EC38962DB1341500C674C7 /* Scripting */,
 				59FFB4CC2DAC310F0002EC56 /* Assets */,
 				59BEB06E2D24B1380072974F /* EffectSystem */,
@@ -312,6 +331,7 @@
 		59EC38962DB1341500C674C7 /* Scripting */ = {
 			isa = PBXGroup;
 			children = (
+				5989E1DA2DBE8E8F00FA6B71 /* ScriptScene.swift */,
 				5903B7762DB1A253004C29A7 /* ParticleAPIExport.swift */,
 				59EC389A2DB1345C00C674C7 /* ParticleScriptManager.swift */,
 				59EC38972DB1341C00C674C7 /* JSInterpreter.swift */,
@@ -451,12 +471,14 @@
 				59B870192C6564F6001D0DC1 /* Texture.swift in Sources */,
 				59EC389F2DB1359600C674C7 /* ScriptPanel.swift in Sources */,
 				59FFB4B82DAB0A770002EC56 /* Grid.swift in Sources */,
+				5989E1E32DBE960D00FA6B71 /* ProjectConfigManager.swift in Sources */,
 				59BEB0772D24B4CE0072974F /* Effect.swift in Sources */,
 				59BEB0792D24B4E10072974F /* Rain.swift in Sources */,
 				59B870072C65649D001D0DC1 /* SpriteManager.swift in Sources */,
 				59FFB4B32DAAF2510002EC56 /* Timeline.swift in Sources */,
 				59EC38982DB1341F00C674C7 /* JSInterpreter.swift in Sources */,
 				59EC38822DAF619B00C674C7 /* SpriteInfoPanel.swift in Sources */,
+				5989E1DF2DBE95E900FA6B71 /* ProjectConfig.swift in Sources */,
 				59BEB07F2D24B8900072974F /* EffectsTableNode.swift in Sources */,
 				59FFB4C22DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */,
 				59FFB4DA2DAC355B0002EC56 /* IconManager.swift in Sources */,
@@ -470,6 +492,7 @@
 				59B86FDB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
 				59B870102C6564BE001D0DC1 /* Easing.swift in Sources */,
 				59FFB4E62DAC4CF50002EC56 /* Text.swift in Sources */,
+				5989E1DC2DBE8E9100FA6B71 /* ScriptScene.swift in Sources */,
 				59FFB4C42DAC26420002EC56 /* ToggleButton.swift in Sources */,
 				59FFB4DC2DAC3A380002EC56 /* VolumeSlider.swift in Sources */,
 				59FFB4C72DAC273E0002EC56 /* Button.swift in Sources */,
@@ -498,12 +521,14 @@
 				59B8701A2C6564F6001D0DC1 /* Texture.swift in Sources */,
 				59EC389E2DB1359600C674C7 /* ScriptPanel.swift in Sources */,
 				59FFB4B92DAB0A770002EC56 /* Grid.swift in Sources */,
+				5989E1E22DBE960D00FA6B71 /* ProjectConfigManager.swift in Sources */,
 				59BEB0762D24B4CE0072974F /* Effect.swift in Sources */,
 				59BEB07A2D24B4E10072974F /* Rain.swift in Sources */,
 				59B870082C65649D001D0DC1 /* SpriteManager.swift in Sources */,
 				59FFB4B22DAAF2510002EC56 /* Timeline.swift in Sources */,
 				59EC38992DB1341F00C674C7 /* JSInterpreter.swift in Sources */,
 				59EC38812DAF619B00C674C7 /* SpriteInfoPanel.swift in Sources */,
+				5989E1E02DBE95E900FA6B71 /* ProjectConfig.swift in Sources */,
 				59BEB0802D24B8900072974F /* EffectsTableNode.swift in Sources */,
 				59FFB4C12DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */,
 				59FFB4D92DAC355B0002EC56 /* IconManager.swift in Sources */,
@@ -517,6 +542,7 @@
 				59B86FEB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
 				59B870112C6564BE001D0DC1 /* Easing.swift in Sources */,
 				59FFB4E52DAC4CF50002EC56 /* Text.swift in Sources */,
+				5989E1DB2DBE8E9100FA6B71 /* ScriptScene.swift in Sources */,
 				59FFB4C52DAC26420002EC56 /* ToggleButton.swift in Sources */,
 				59FFB4DD2DAC3A390002EC56 /* VolumeSlider.swift in Sources */,
 				59FFB4C82DAC273E0002EC56 /* Button.swift in Sources */,

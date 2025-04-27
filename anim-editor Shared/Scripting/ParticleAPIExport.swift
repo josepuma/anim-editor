@@ -72,38 +72,26 @@ struct TextStyleConfig {
     }
     
     func getEasingFromString(_ string: String) -> Easing {
-           // Si tienes acceso al método del intérprete, úsalo
-           if let easing = interpreter?.getEasingFromString(string) {
-               return easing
-           }
-           
-           // De lo contrario, implementa la lógica aquí
-           switch string.lowercased() {
-           case "linear": return .linear
-           case "easein", "easing_in": return .easingIn
-           case "easeout", "easing_out": return .easingOut
-           // Añade aquí todos los casos necesarios...
-           default: return .linear
-           }
+       // Si tienes acceso al método del intérprete, úsalo
+       if let easing = interpreter?.getEasingFromString(string) {
+           return easing
        }
-    
-  
+    return .linear
+   }
     
     func createText(_ config: [String: Any]) -> JSValue {
         guard let context = JSContext.current(),
-              let particleManager = particleManager else {
+              let _ = particleManager else {
             print("❌ ERROR: No se pudo crear texto estilizado")
             return JSValue(nullIn: JSContext.current())
         }
-        
+
         // Extraer configuración básica
         let text = config["text"] as? String ?? ""
         let fontName = config["fontName"] as? String ?? "HelveticaNeue"
         let fontSize = CGFloat(config["fontSize"] as? Double ?? 24)
         let colorArray = config["color"] as? [Double] ?? [255, 255, 255, 1]
-        let spacing = CGFloat(config["spacing"] as? Double ?? 0)
-        //let baselineY = CGFloat(config["baselineY"] as? Double ?? 240)
-        
+
         // Extraer configuración de color
         let textColor = SKColor(
             red: CGFloat(colorArray[0] / 255.0),
@@ -111,16 +99,15 @@ struct TextStyleConfig {
             blue: CGFloat(colorArray[2] / 255.0),
             alpha: colorArray.count > 3 ? CGFloat(colorArray[3]) : 1.0
         )
-        
+
         // Crear array para devolver
         let jsArray = JSValue(newArrayIn: context)
-        
+
         // Calcular altura fija para todos los caracteres (para consistencia)
         let fixedHeight = fontSize * 1.5
-        
+        let baselinePosition = fixedHeight * 0.33
+
         // Procesar cada carácter
-        var currentX: CGFloat = 0
-        
         for (index, char) in text.enumerated() {
             // Crear label con el carácter
             let letterLabel = SKLabelNode(text: String(char))
@@ -130,27 +117,12 @@ struct TextStyleConfig {
             letterLabel.verticalAlignmentMode = .baseline
             letterLabel.horizontalAlignmentMode = .center
 
-            // Calcular el frame de la etiqueta *antes* de añadirla a la escena
-            //let labelFrame = letterLabel.calculateAccumulatedFrame()
+            // Calcular un ancho inicial estimado para la escena
+            let initialSceneWidth: CGFloat = (char == " ") ? fontSize * 0.5 : letterLabel.calculateAccumulatedFrame().width + 10
 
-            // Crear escena temporal con un tamaño inicial estimado (suficiente para el carácter base)
-            //let initialSceneWidth = labelFrame.width + 5 // Un pequeño margen inicial
-            
-            let initialSceneWidth: CGFloat
-            if char == " " {
-                // Si el carácter es un espacio, asigna un ancho basado en el tamaño de la fuente
-                initialSceneWidth = fontSize * 0.5 // Puedes ajustar este factor
-            } else {
-                let initialLabelFrame = letterLabel.calculateAccumulatedFrame()
-                initialSceneWidth = initialLabelFrame.width + 5 // Margen inicial
-            }
-            
             let scene = SKScene(size: CGSize(width: initialSceneWidth, height: fixedHeight))
             scene.backgroundColor = .clear
-
-            // La línea base estará a 1/3 desde la parte inferior
-            let baselinePosition = fixedHeight * 0.33
-            letterLabel.position = CGPoint(x: initialSceneWidth/2, y: baselinePosition)
+            letterLabel.position = CGPoint(x: scene.size.width / 2, y: baselinePosition)
 
             // Aplicar efectos a la etiqueta
             let _ = applyTextEffects(to: letterLabel, in: scene, config: config)
@@ -162,16 +134,16 @@ struct TextStyleConfig {
             let contentFrameWithEffects = scene.calculateAccumulatedFrame()
 
             // Ajustar el ancho de la escena al contenido con efectos + un margen adicional
-            let adjustedWidth = max(contentFrameWithEffects.width + 8, 1) // Aumentamos el margen
+            let adjustedWidth = max(contentFrameWithEffects.width + 10, 1)
 
             // Ajustar el tamaño de la escena al contenido real con efectos y margen
             scene.size = CGSize(width: adjustedWidth, height: fixedHeight)
 
             // Re-centrar la etiqueta dentro de la escena ajustada
-            letterLabel.position = CGPoint(x: adjustedWidth/2, y: baselinePosition)
+            letterLabel.position = CGPoint(x: adjustedWidth / 2, y: baselinePosition)
 
             // Crear vista para renderizar
-            let view = SKView(frame: CGRect(x: 0, y: 0, width: adjustedWidth, height: fixedHeight))
+            let view = SKView(frame: CGRect(x: 0, y: 0, width: adjustedWidth, height: fixedHeight + 5))
 
             // Generar textura
             let texture = view.texture(from: scene) ?? SKTexture()
@@ -179,26 +151,16 @@ struct TextStyleConfig {
             // Crear sprite con la textura
             let sprite = Sprite(texture: texture)
 
-            // Posicionar sprite (posición inicial, se ajustará en JavaScript)
-            let charWidth = texture.size().width
-            sprite.setInitialPosition(position: CGPoint(x: currentX + charWidth/2, y: 0))
-
-            // Incrementar posición X para el siguiente carácter
-            currentX += charWidth + spacing
-
             // Añadir a script
             if let scriptId = interpreter?.currentScriptId {
                 interpreter?.addSpriteToScript(scriptId: scriptId, sprite: sprite)
             }
 
-            // Añadir a sprite manager
-            particleManager.spriteManager.addSprite(sprite)
-
             // Crear objeto JS para este sprite
             let spriteObj = JSValue(newObjectIn: context)
 
             // Añadir propiedades de dimensión
-            spriteObj?.setValue(charWidth, forProperty: "width")
+            spriteObj?.setValue(texture.size().width, forProperty: "width")
             spriteObj?.setValue(fixedHeight, forProperty: "height")
 
             // Añadir métodos al objeto sprite JS
@@ -207,9 +169,10 @@ struct TextStyleConfig {
             // Añadir al array
             jsArray?.setObject(spriteObj, atIndexedSubscript: Int(UInt32(index)))
         }
-        
+
         return jsArray!
     }
+    
 
     /// Función para aplicar efectos de texto
 
@@ -474,9 +437,9 @@ struct TextStyleConfig {
         let sprite = Sprite(texture: texture)
         
         // Añadir a lista de sprites del script
-        if let scriptId = interpreter?.currentScriptId { // Usa interpreter?.currentScriptId
-                interpreter?.addSpriteToScript(scriptId: scriptId, sprite: sprite)
-            }
+        if let scriptId = interpreter?.currentScriptId {
+            interpreter?.addSpriteToScript(scriptId: scriptId, sprite: sprite)
+        }
         
         // Crear objeto JS para el sprite
         let spriteObj = JSValue(newObjectIn: context)
@@ -492,12 +455,12 @@ struct TextStyleConfig {
     
     func clearEffects() {
         guard let interpreter = interpreter,
-              let scriptId = interpreter.currentScriptId,
-              let particleManager = particleManager else {
+              let scriptId = interpreter.currentScriptId else {
             return
         }
         
-        interpreter.clearScriptSprites(scriptId: scriptId, spriteManager: particleManager.spriteManager)
+        // Limpiar los sprites de la escena actual
+        interpreter.clearScriptsSprites(scriptId)
     }
     
     func getCurrentTime() -> Int {
@@ -531,6 +494,23 @@ struct TextStyleConfig {
             sprite.addMoveYTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startValue, endValue: endValue)
         }
         jsObject?.setValue(addMoveYTween, forProperty: "addMoveYTween")
+        
+        let addScaleVecTween: @convention(block) (Int, Int, CGFloat, CGFloat, CGFloat, CGFloat, String) -> Void = { [weak self] (startTime, endTime, startX, startY, endX, endY, easingStr) in
+            let easing = self?.getEasingFromString(easingStr) ?? .linear
+            sprite.addScaleVecTween(easing: easing, startTime: startTime, endTime: endTime,
+                              startValue: CGPoint(x: startX, y: startY),
+                              endValue: CGPoint(x: endX, y: endY))
+        }
+        jsObject?.setValue(addScaleVecTween, forProperty: "addScaleVecTween")
+        
+        let addColorTween: @convention(block) (Int, Int, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, String) -> Void = { [weak self] (startTime, endTime, startX, startY, startZ, endX, endY, endZ, easingStr) in
+            let easing = self?.getEasingFromString(easingStr) ?? .linear
+            let startColor = SKColor(red: startX / 255, green: startY / 255, blue: startZ / 255, alpha: 1)
+            let endColor = SKColor(red: endX / 255, green: endY / 255, blue: endZ / 255, alpha: 1)
+            sprite.addColorTween(easing: easing, startTime: startTime, endTime: endTime, startValue: startColor, endValue: endColor)
+        }
+        jsObject?.setValue(addColorTween, forProperty: "addColorTween")
+        
         
         // Método Fade
         let addFadeTween: @convention(block) (Int, Int, CGFloat, CGFloat, String) -> Void = { [weak self] (startTime, endTime, startValue, endValue, easingStr) in

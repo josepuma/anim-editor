@@ -8,22 +8,26 @@ class SpriteManager {
 
     func addSprite(_ sprite: Sprite) {
         //sprite.zPosition = currentZPosition
-        sprites.append(sprite)
+        //sprites.append(sprite)
         //currentZPosition += 1
-        if let scene = parentScene {
-            scene.addChild(sprite.node)
+        if let scene = parentScene, sprite.node.parent == nil {
+            //scene.addChild(sprite.node)
         }
     }
     
     func addSprites(_ spritesList: [Sprite]){
-        sprites.append(contentsOf: spritesList)
+        //sprites.append(contentsOf: spritesList)
+    }
+    
+    func getScale() -> CGFloat {
+        return scale
     }
 
     func addToScene(scene: SKScene) {
         self.parentScene = scene
-        for sprite in sprites {
+        /*for sprite in sprites {
             scene.addChild(sprite.node)
-        }
+        }*/
     }
     
     func updateSize(){
@@ -33,9 +37,9 @@ class SpriteManager {
     }
     
     func updateAll(currentTime: Int) {
-        for sprite in sprites {
+        /*for sprite in sprites {
             sprite.update(currentTime: currentTime, scale: scale)
-        }
+        }*/
     }
     
     func removeSprite(_ sprite: Sprite) {

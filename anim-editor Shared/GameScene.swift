@@ -27,6 +27,7 @@ class GameScene: SKScene {
     private var volumeContainer: HorizontalContainer!
     private var particleManager: ParticleManager!
     private var positionButton: Button!
+    private var projectConfigManager: ProjectConfigManager?
     
     private var scriptManager: ParticleScriptManager!
     private var scriptPanel: ScriptPanel!
@@ -56,11 +57,9 @@ class GameScene: SKScene {
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         backgroundColor = .black
-        
+        projectConfigManager = ProjectConfigManager(projectPath: path)
         IconManager.shared.preloadAllIcons(colors: [.white, .green, .blue])
-        
-            
-            // Crea un NSTrackingArea que abarque toda la vista
+
         let trackingArea = NSTrackingArea(
             rect: view.visibleRect,  // Usa visibleRect en lugar de bounds
             options: [.activeAlways, .mouseMoved, .enabledDuringMouseDrag, .inVisibleRect],
@@ -74,9 +73,6 @@ class GameScene: SKScene {
 
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
- 
-        //spriteParser = SpriteParser(spriteManager: spriteManager, filePath: path + "Marika - quantum jump (Shurelia).osb")
-        //spriteParser.parseSprites()
         spriteManager.addToScene(scene: self)
         
         
@@ -86,6 +82,23 @@ class GameScene: SKScene {
         setupScriptSystem()
         setupScriptButtons()
 
+        if let preferences = projectConfigManager?.getPreferences() {
+           // Aplicar preferencias
+           if let player = audioPlayer {
+               player.volume = Float(preferences.defaultVolume)
+               volumeSlider?.setVolume(CGFloat(preferences.defaultVolume), animated: false)
+           }
+           
+           // Configurar grid
+           gridToggleButton.setState(isToggled: preferences.defaultGridVisible)
+           toggleGridVisibility(visible: preferences.defaultGridVisible)
+       }
+        
+        projectConfigManager?.updatePreference(key: "lastOpenedTime", value: Date())
+    }
+    
+    func updateProjectPreference<T>(key: String, value: T) {
+        projectConfigManager?.updatePreference(key: key, value: value)
     }
     
     func setupTimeline() {
@@ -338,26 +351,13 @@ class GameScene: SKScene {
             Button(text: "Open Project Folder", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12),
             createNewScriptButton,
         ])
-        // Posicionar el contenedor en la esquina superior derecha
-
-        /*toolsContainer.position = CGPoint(
-            x: self.size.width/2 - margin - toolsContainer.getSize().width/2,
-            y: self.size.height/2 - margin - toolsContainer.getSize().height/2
-        )*/
 
         toolsContainer.zPosition = 100
         addChild(toolsContainer)
         
         spriteInfoPanel = SpriteInfoPanel()
         spriteInfoPanel.zPosition = 100
-        /*spriteInfoPanel.position = CGPoint(
-            x: self.size.width/2 - margin - toolsContainer.getSize().width/2,
-            y: self.size.height/2 - margin - toolsContainer.getSize().height/2
-        )*/
-        //spriteInfoPanel.alpha = 0 // Inicialmente invisible
         addChild(spriteInfoPanel)
-        //setupParticleButtons()
-        //addChild(effectsTableNode)
     }
 
     
@@ -441,28 +441,17 @@ class GameScene: SKScene {
        
         calculateSpriteInfoPanelPosition()
         spriteManager.updateSize()
+        if let scriptManager = scriptManager {
+            let newScale = spriteManager.getScale() // Asumiendo que añadimos este getter
+            
+            // Actualizar todas las escenas de scripts
+            for (_, scriptScene) in scriptManager.getScriptScenes() {
+                scriptScene.setContentScale(newScale)
+            }
+        }
    }
     
     func setupScriptButtons() {
-        // Crear botón para mostrar/ocultar paneles de scripts
-        /*let toggleScriptsButton = ToggleButton(
-            size: 32,
-            onIconName: "file-code-2",
-            offIconName: "file-code-2",
-            isInitiallyToggled: false,
-            buttonColor: .clear,
-            buttonBorderColor: .clear,
-            iconColor: NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1)
-        )
-        
-        // Configurar callback
-        toggleScriptsButton.onToggle = { [weak self] isVisible in
-            self?.toggleScriptPanelsVisibility(visible: isVisible)
-        }
-        
-        // Añadir a la fila de herramientas
-        // (Esto debería añadirse en el punto adecuado de tu código)
-        toogleOptions.addNode(toggleScriptsButton)*/
     }
     
     func toggleScriptPanelsVisibility(visible: Bool) {
@@ -495,7 +484,12 @@ class GameScene: SKScene {
         super.update(currentTime)
         if audioPlayer != nil{
             let gameTime = Int(audioPlayer.currentTime * 1000) // Convert to milliseconds or your desired unit
-            spriteManager.updateAll(currentTime: gameTime)
+            
+            if let scriptManager = scriptManager {
+                for (_, scriptScene) in scriptManager.getScriptScenes() {
+                    scriptScene.update(atTime: gameTime)
+                }
+            }
             
             if let hoveredSprite = currentHoveredSprite {
                 if hoveredSprite.isActive(at: gameTime) {

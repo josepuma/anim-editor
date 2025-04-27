@@ -92,8 +92,8 @@ class ScriptParametersPanel: VerticalContainer {
         }
         
         // Añadir botones al header
-        headerContainer.addNodes([titleLabel, runButton, editButton])
-        addNode(headerContainer)
+        //headerContainer.addNodes([titleLabel, runButton, editButton])
+        //addNode(headerContainer)
         
         // Separador
         addNode(Separator(width: 250, height: 1, color: backgroundColorButton))
