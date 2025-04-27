@@ -45,7 +45,7 @@ struct TextStyleConfig {
 
 // 1. Definir un protocolo que extienda JSExport con todos los métodos que necesitamos
 @objc protocol ParticleAPIExport: JSExport {
-    func createSprite(_ texturePath: String) -> JSValue
+    func createSprite(_ texturePath: String, _ origin: String) -> JSValue
     func clearEffects()
     func getCurrentTime() -> Int
     func random(_ min: Double, _ max: Double) -> Double
@@ -425,16 +425,16 @@ struct TextStyleConfig {
         return spriteObj!
     }
     
-    func createSprite(_ texturePath: String) -> JSValue {
+    func createSprite(_ texturePath: String, _ origin: String) -> JSValue {
         guard let context = JSContext.current(),
               let particleManager = particleManager,
               let texture = particleManager.textureLoader.getTexture(named: texturePath) else {
             print("❌ ERROR: No se pudo crear sprite con textura: \(texturePath)")
             return JSValue(nullIn: JSContext.current())
         }
-        
+        let originSprite = Origin(rawValue: origin) ?? .centre
         // Crear sprite
-        let sprite = Sprite(texture: texture)
+        let sprite = Sprite(texture: texture, origin: originSprite)
         
         // Añadir a lista de sprites del script
         if let scriptId = interpreter?.currentScriptId {

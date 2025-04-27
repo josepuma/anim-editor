@@ -74,7 +74,7 @@ class JSInterpreter {
         case "quadin": return .quadIn
         case "quadout": return .quadOut
         case "quadinout": return .quadInout
-        case "cubicin": return .cubicIn
+        case "cubicin": return .cubicIn 
         case "cubicout": return .cubicOut
         case "cubicinout": return .cubicInOut
         case "sinein": return .sineIn
