@@ -86,16 +86,16 @@ class ScriptPanel: VerticalContainer {
         scriptsSection.addNode(scriptListContainer)
         
         // Botones de acción
-        let buttonsRow = HorizontalContainer(
+        /*let buttonsRow = HorizontalContainer(
             spacing: 8,
             padding: CGSize(width: 0, height: 0),
             verticalAlignment: .center,
             horizontalAlignment: .left,
             showBackground: false
-        )
+        )*/
         
         // Botón crear nuevo script
-        createScriptButton = Button(
+        /*createScriptButton = Button(
             text: "Nuevo Script",
             padding: CGSize(width: 12, height: 8),
             buttonColor: accent,
@@ -120,13 +120,13 @@ class ScriptPanel: VerticalContainer {
         openFolderButton.setIcon(name: "folder-open", size: 16, color: buttonColorText)
         openFolderButton.onPress = { [weak self] in
             self?.openScriptsFolder()
-        }
+        }*/
         
         // Añadir botones a la fila
-        buttonsRow.addNodes([createScriptButton, openFolderButton])
+        //buttonsRow.addNodes([createScriptButton, openFolderButton])
         
         // Añadir la fila al contenedor principal
-        scriptsSection.addNode(buttonsRow)
+        //scriptsSection.addNode(buttonsRow)
         
         // Añadir todo al panel
         addNode(scriptsSection)
@@ -165,22 +165,42 @@ class ScriptPanel: VerticalContainer {
                 
                 // Botones para subir/bajar
                 let upButton = Button(
-                    text: "↑",
-                    padding: CGSize(width: 6, height: 6),
+                    text: "",
+                    padding: CGSize(width: 20, height: 8),
                     buttonColor: backgroundColorButton,
                     buttonBorderColor: backgroundColorButton,
                     textColor: buttonColorText,
                     fontSize: 10
                 )
+                upButton.setIcon(name: "arrow-move-up", size: 16, color: buttonColorText)
                 
                 let downButton = Button(
-                    text: "↓",
-                    padding: CGSize(width: 6, height: 6),
+                    text: "",
+                    padding: CGSize(width: 20, height: 8),
                     buttonColor: backgroundColorButton,
                     buttonBorderColor: backgroundColorButton,
                     textColor: buttonColorText,
                     fontSize: 10
                 )
+                downButton.setIcon(name: "arrow-move-down", size: 16, color: buttonColorText)
+                
+                let editParametersButton = Button(
+                    text: "",
+                    padding: CGSize(width: 20, height: 8),
+                    buttonColor: backgroundColorButton,
+                    buttonBorderColor: backgroundColorButton,
+                    textColor: buttonColorText
+                )
+                editParametersButton.setIcon(name: "photo-edit", size: 16, color: buttonColorText)
+                
+                let openCodeEditorButton = Button(
+                    text: "",
+                    padding: CGSize(width: 20, height: 8),
+                    buttonColor: backgroundColorButton,
+                    buttonBorderColor: backgroundColorButton,
+                    textColor: buttonColorText
+                )
+                openCodeEditorButton.setIcon(name: "file-code-2", size: 16, color: buttonColorText)
                 
                 // Configurar acciones para los botones
                 upButton.onPress = { [weak self] in
@@ -209,12 +229,12 @@ class ScriptPanel: VerticalContainer {
                     fontSize: 12
                 )
                 
-                scriptButton.onPress = { [weak self] in
+                /*scriptButton.onPress = { [weak self] in
                     self?.selectScript(script)
-                }
+                }*/
                 
                 // Añadir componentes a la fila
-                scriptRow.addNodes([upButton, downButton, scriptButton])
+                scriptRow.addNodes([upButton, downButton, editParametersButton, openCodeEditorButton, scriptButton])
                 
                 // Añadir la fila al contenedor
                 scriptListContainer.addNode(scriptRow)

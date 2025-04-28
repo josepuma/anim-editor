@@ -61,7 +61,7 @@ class ScriptParametersPanel: VerticalContainer {
         )
         
         // Título
-        titleLabel = Text(text: "Parámetros", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
+        titleLabel = Text(text: "Parameters", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
         
         // Botón ejecutar
         runButton = Button(
@@ -197,15 +197,10 @@ class ScriptParametersPanel: VerticalContainer {
         } else {
             // Mostrar título por defecto
             titleLabel.removeFromParent()
-            titleLabel = Text(text: "Parámetros", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
+            titleLabel = Text(text: "Parameters", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
             insertChild(titleLabel, at: 0)
             
             // Mostrar mensaje de selección
-            let selectLabel = SKLabelNode(text: "Selecciona un script para ver sus parámetros")
-            selectLabel.fontName = "HelveticaNeue"
-            selectLabel.fontSize = 12
-            selectLabel.fontColor = buttonColorText
-            parametersContainer.addNode(selectLabel)
             
             // Deshabilitar botones
             updateButtonsState(false)
