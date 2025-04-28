@@ -65,14 +65,15 @@ class HorizontalContainer: SKNode {
     // Add a single node
     func addNode(_ node: SKNode) {
         childNodes.append(node)
+        adjustVerticalAlignmentForNode(node)
         addChild(node)
         updateLayout()
     }
-    
-    // Add multiple nodes at once
+
     func addNodes(_ nodes: [SKNode]) {
         for node in nodes {
             childNodes.append(node)
+            adjustVerticalAlignmentForNode(node)
             addChild(node)
         }
         updateLayout()
@@ -106,12 +107,12 @@ class HorizontalContainer: SKNode {
             return
         }
         
-        // Calculate the height based on the tallest child
+        // Calcular la altura basándose en el hijo más alto
         let containerHeight = childNodes.map { node -> CGFloat in
             return node.calculateAccumulatedFrame().height
         }.max() ?? 0
         
-        // Calculate the total width
+        // Calcular el ancho total
         var totalWidth: CGFloat = 0
         for (index, node) in childNodes.enumerated() {
             totalWidth += node.calculateAccumulatedFrame().width
@@ -120,13 +121,13 @@ class HorizontalContainer: SKNode {
             }
         }
         
-        // Update container size with padding
+        // Actualizar el tamaño del contenedor con padding
         containerSize = CGSize(
             width: totalWidth + padding.width * 2,
             height: containerHeight + padding.height * 2
         )
         
-        // Update background if needed
+        // Actualizar fondo si es necesario
         if showBackground, let backgroundNode = backgroundNode {
             let backgroundPath = CGPath(
                 roundedRect: CGRect(x: -containerSize.width/2, y: -containerSize.height/2, width: containerSize.width, height: containerSize.height),
@@ -137,10 +138,10 @@ class HorizontalContainer: SKNode {
             backgroundNode.path = backgroundPath
         }
         
-        // Position each node
+        // Posicionar cada nodo
         var currentX: CGFloat
         
-        // Set starting X position based on horizontal alignment
+        // Establecer posición X inicial según la alineación horizontal
         switch horizontalAlignment {
         case .left:
             currentX = -containerSize.width/2 + padding.width
@@ -151,10 +152,11 @@ class HorizontalContainer: SKNode {
         }
         
         for node in childNodes {
-            let nodeHeight = node.calculateAccumulatedFrame().height
-            let nodeWidth = node.calculateAccumulatedFrame().width
+            let nodeFrame = node.calculateAccumulatedFrame()
+            let nodeHeight = nodeFrame.height
+            let nodeWidth = nodeFrame.width
             
-            // Set Y position based on vertical alignment
+            // Calcular la posición Y según la alineación vertical
             var yPos: CGFloat
             switch verticalAlignment {
             case .top:
@@ -165,12 +167,48 @@ class HorizontalContainer: SKNode {
                 yPos = -containerSize.height/2 + padding.height + nodeHeight/2
             }
             
-            // Position the node
+            // Ajuste especial para SKLabelNode que tiene un manejo diferente de alineación
+            if let labelNode = node as? SKLabelNode {
+                // Ajustar posición Y según el modo de alineación vertical del label
+                switch labelNode.verticalAlignmentMode {
+                case .baseline:
+                    // Para baseline, ajustar según la línea base de texto
+                    yPos += nodeHeight * 0.2 // Ajuste aproximado para la línea base
+                case .center:
+                    // Ya está centrado, no necesita ajuste
+                    break
+                case .top:
+                    // Para alineación superior, subir el nodo
+                    yPos += nodeHeight / 2
+                case .bottom:
+                    // Para alineación inferior, bajar el nodo
+                    yPos -= nodeHeight / 2
+                default:
+                    break
+                }
+            }
+            
+            // Posicionar el nodo
             node.position = CGPoint(x: currentX + nodeWidth/2, y: yPos)
             
-            // Move right for the next node
+            // Mover a la derecha para el siguiente nodo
             currentX += nodeWidth + spacing
         }
+    }
+    
+    func adjustVerticalAlignmentForNode(_ node: SKNode) {
+        // Configurar alineación vertical para tipos específicos de nodos
+        if let labelNode = node as? SKLabelNode {
+            switch verticalAlignment {
+            case .top:
+                labelNode.verticalAlignmentMode = .top
+            case .center:
+                labelNode.verticalAlignmentMode = .center
+            case .bottom:
+                labelNode.verticalAlignmentMode = .bottom
+            }
+        }
+        // Puedes añadir más casos para otros tipos de nodos aquí
     }
     
     // Toggle background visibility

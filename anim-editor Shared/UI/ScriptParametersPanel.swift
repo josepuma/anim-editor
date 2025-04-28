@@ -10,7 +10,7 @@ import SpriteKit
 class ScriptParametersPanel: VerticalContainer {
     // Manejador de scripts
     private weak var scriptManager: ParticleScriptManager?
-    
+    private weak var scriptPanel: SKNode?
     // Script actual
     private var currentScript: String?
     
@@ -50,16 +50,12 @@ class ScriptParametersPanel: VerticalContainer {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func setScriptPanel(_ panel: SKNode) {
+        self.scriptPanel = panel
+    }
+    
     private func setupUI() {
-        // Título y botones de acción
-        let headerContainer = HorizontalContainer(
-            spacing: 8,
-            padding: CGSize(width: 0, height: 0),
-            verticalAlignment: .center,
-            horizontalAlignment: .center,
-            showBackground: false
-        )
-        
+
         // Título
         titleLabel = Text(text: "Parameters", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
         
@@ -96,7 +92,7 @@ class ScriptParametersPanel: VerticalContainer {
         //addNode(headerContainer)
         
         // Separador
-        addNode(Separator(width: 250, height: 1, color: backgroundColorButton))
+        //addNode(Separator(width: 250, height: 1, color: backgroundColorButton))
         
         // Contenedor de parámetros
         parametersContainer = VerticalContainer(
@@ -209,6 +205,42 @@ class ScriptParametersPanel: VerticalContainer {
         // Actualizar layout
         parametersContainer.updateLayout()
         updateLayout()
+        
+        updatePositionRelativeToScriptPanel()
+    }
+    
+    func updatePositionRelativeToScriptPanel() {
+        guard let scriptPanel = scriptPanel else { return }
+        
+        // Asegurar que el layout esté actualizado primero
+        updateLayout()
+        
+        // Margen entre paneles
+        let parametersMargin: CGFloat = 10
+        
+        // Obtener dimensiones de ambos paneles
+        let scriptPanelFrame = scriptPanel.calculateAccumulatedFrame()
+        let thisFrame = self.calculateAccumulatedFrame()
+        
+        // Calcular nueva posición X (igual que antes)
+        let newX = scriptPanel.position.x + scriptPanelFrame.width/2 + parametersMargin + thisFrame.width/2
+        
+        // Calcular posición Y para alinear los bordes superiores
+        // 1. Encontrar el borde superior del script panel en relación a su centro
+        let scriptPanelTopEdgeOffset = scriptPanelFrame.height/2
+        // 2. Encontrar el borde superior de este panel en relación a su centro
+        let thisTopEdgeOffset = thisFrame.height/2
+        // 3. Calcular la diferencia para alinear los bordes superiores
+        let topAlignmentDifference = scriptPanelTopEdgeOffset - thisTopEdgeOffset
+        // 4. La nueva posición Y será la posición Y del scriptPanel más la diferencia
+        let newY = scriptPanel.position.y + topAlignmentDifference
+        
+        // Actualizar posición
+        self.position = CGPoint(x: newX, y: newY)
+        
+        // Log para depuración
+        print("Script panel position: \(scriptPanel.position), height: \(scriptPanelFrame.height)")
+        print("Parameters panel new position: \(CGPoint(x: newX, y: newY)), height: \(thisFrame.height)")
     }
     
     // Cuando cambia un parámetro

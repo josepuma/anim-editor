@@ -132,7 +132,7 @@ class ScriptPanel: VerticalContainer {
         addNode(scriptsSection)
         
         // Separador
-        addNode(Separator(width: 250, height: 1, color: backgroundColorButton))
+        //addNode(Separator(width: 250, height: 1, color: backgroundColorButton))
     }
     
     func refreshScriptList() {
@@ -154,6 +154,7 @@ class ScriptPanel: VerticalContainer {
         } else {
             // Crear un contenedor para cada script con botones para reordenar
             for script in scripts {
+                
                 // Contenedor horizontal para script y botones
                 let scriptRow = HorizontalContainer(
                     spacing: 5,
@@ -162,6 +163,17 @@ class ScriptPanel: VerticalContainer {
                     horizontalAlignment: .left,
                     showBackground: false
                 )
+                
+                /*let scriptButton = Text(
+                    text: script,
+                    padding: CGSize(width: 10, height: 6),
+                    buttonColor: script == selectedScript ? accent : backgroundColorButton,
+                    buttonBorderColor: script == selectedScript ? accent : backgroundColorButton,
+                    textColor: script == selectedScript ? .black : buttonColorText,
+                    fontSize: 12
+                )*/
+                
+                let scriptTitle = Text(text: script, fontSize: 14, color: script == selectedScript ? accent : buttonColorText, type: .paragraph, letterSpacing: -2, width: 100)
                 
                 // Botones para subir/bajar
                 let upButton = Button(
@@ -192,6 +204,9 @@ class ScriptPanel: VerticalContainer {
                     textColor: buttonColorText
                 )
                 editParametersButton.setIcon(name: "photo-edit", size: 16, color: buttonColorText)
+                editParametersButton.onPress = { [weak self] in
+                    self?.selectScript(script)
+                }
                 
                 let openCodeEditorButton = Button(
                     text: "",
@@ -220,21 +235,14 @@ class ScriptPanel: VerticalContainer {
                 }
                 
                 // Botón del script
-                let scriptButton = Button(
-                    text: script,
-                    padding: CGSize(width: 10, height: 6),
-                    buttonColor: script == selectedScript ? accent : backgroundColorButton,
-                    buttonBorderColor: script == selectedScript ? accent : backgroundColorButton,
-                    textColor: script == selectedScript ? .black : buttonColorText,
-                    fontSize: 12
-                )
+                
                 
                 /*scriptButton.onPress = { [weak self] in
                     self?.selectScript(script)
                 }*/
                 
                 // Añadir componentes a la fila
-                scriptRow.addNodes([upButton, downButton, editParametersButton, openCodeEditorButton, scriptButton])
+                scriptRow.addNodes([scriptTitle, upButton, downButton, editParametersButton, openCodeEditorButton])
                 
                 // Añadir la fila al contenedor
                 scriptListContainer.addNode(scriptRow)

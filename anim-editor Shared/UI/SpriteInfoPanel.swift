@@ -147,32 +147,6 @@ class SpriteInfoPanel: VerticalContainer {
             Button(text: formatValue(tween.endValue), padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12),
         ])
         
-        // Añadir icono de edición
-        /*let editButton = Button(
-            text: "",
-            shape: .circle,
-            size: CGSize(width: 16, height: 16),
-            buttonColor: NSColor(red: 202/255, green: 217/255, blue: 91/255, alpha: 1)
-        )
-        editButton.setIcon(name: "volume", size: 10, color: .black)
-        
-        // Configurar callback para edición
-        editButton.onPress = { [weak self] in
-            self?.editTween(type: type, index: index)
-        }
-        
-        // Crear texto con la información del tween
-        let infoText = SKLabelNode(text: formatTweenInfo(tween))
-        infoText.fontName = "HelveticaNeue"
-        infoText.fontSize = 11
-        infoText.fontColor = .white
-        infoText.horizontalAlignmentMode = .left
-        infoText.verticalAlignmentMode = .center
-        
-        // Añadir a la fila horizontal
-        tweenDisplay.addNode(editButton)
-        tweenDisplay.addNode(infoText)*/
-        
         return tweenDisplay
     }
     

@@ -34,7 +34,6 @@ class GameScene: SKScene {
     private var scriptParametersPanel: ScriptParametersPanel!
     
     private var toolsContainer: VerticalContainer!
-    private var spriteInfoPanel: SpriteInfoPanel!
     private var currentHoveredSprite: Sprite?
     private var currentSelectedSprite: Sprite?
     
@@ -165,10 +164,6 @@ class GameScene: SKScene {
         
         // Crear el panel de scripts
         scriptPanel = ScriptPanel(scriptManager: scriptManager)
-        scriptPanel.position = CGPoint(
-            x: -self.size.width/2 + 16 + scriptPanel.getSize().width/2,
-            y: 0 // Centro vertical
-        )
         scriptPanel.zPosition = 100
         addChild(scriptPanel)
         
@@ -179,10 +174,7 @@ class GameScene: SKScene {
         
         // Crear el panel de parámetros
         scriptParametersPanel = ScriptParametersPanel(scriptManager: scriptManager)
-        scriptParametersPanel.position = CGPoint(
-            x: -self.size.width/2 + 16 + scriptParametersPanel.getSize().width/2,
-            y: -120 // Debajo del panel de scripts
-        )
+        scriptParametersPanel.setScriptPanel(scriptPanel)
         scriptParametersPanel.zPosition = 100
         addChild(scriptParametersPanel)
         
@@ -355,9 +347,6 @@ class GameScene: SKScene {
         toolsContainer.zPosition = 100
         addChild(toolsContainer)
         
-        spriteInfoPanel = SpriteInfoPanel()
-        spriteInfoPanel.zPosition = 100
-        addChild(spriteInfoPanel)
     }
 
     
@@ -425,21 +414,24 @@ class GameScene: SKScene {
         }
         
         if scriptPanel != nil {
-                scriptPanel.position = CGPoint(
-                    x: -self.size.width/2 + 16 + scriptPanel.getSize().width/2,
-                    y: 0 // Centro vertical
-                )
+            scriptPanel.position = CGPoint(
+                x: -self.size.width/2 + 16 + scriptPanel.getSize().width/2,
+                y: self.size.height/2 - 16 - scriptPanel.getSize().height/2
+            )
+            if let parametersPanel = scriptParametersPanel {
+                parametersPanel.updatePositionRelativeToScriptPanel()
             }
-            
-            // Posicionar panel de parámetros
-            if scriptParametersPanel != nil {
-                scriptParametersPanel.position = CGPoint(
-                    x: -self.size.width/2 + 16 + scriptParametersPanel.getSize().width/2,
-                    y: -120 // Debajo del panel de scripts
-                )
-            }
+        }
+        
+        // Posicionar panel de parámetros
+        /*if scriptParametersPanel != nil {
+            let parametersMargin = 10 // Espacio entre paneles
+            let scriptPanelRightEdge = -self.size.width/2 + 16 + scriptPanel.getSize().width
+            let parametersPanelX = scriptPanelRightEdge + CGFloat(parametersMargin) + scriptParametersPanel.getSize().width/2
+            let parametersPanelY = self.size.height/2 - 16 - scriptParametersPanel.getSize().height/2
+            scriptParametersPanel.position = CGPoint(x: parametersPanelX, y: parametersPanelY)
+        }*/
        
-        calculateSpriteInfoPanelPosition()
         spriteManager.updateSize()
         if let scriptManager = scriptManager {
             let newScale = spriteManager.getScale() // Asumiendo que añadimos este getter
@@ -470,16 +462,6 @@ class GameScene: SKScene {
         }
     }
     
-    func calculateSpriteInfoPanelPosition(){
-        let margin: CGFloat = 16
-        if spriteInfoPanel != nil {
-            spriteInfoPanel.position = CGPoint(
-                x: -self.size.width/2 + margin + spriteInfoPanel.getSize().width/2,
-                y: self.size.height/2 - margin - spriteInfoPanel.getSize().height/2
-            )
-        }
-    }
-    
     override func update(_ currentTime: TimeInterval) {
         super.update(currentTime)
         if audioPlayer != nil{
@@ -506,9 +488,7 @@ class GameScene: SKScene {
                 } else {
                     selectedSprite.removeSelectionBorder()
                     currentSelectedSprite = nil
-                    
-                    // Opcional: ocultar el panel de información si el sprite seleccionado ya no está activo
-                    spriteInfoPanel?.run(SKAction.fadeOut(withDuration: 0.3))
+            
                 }
             }
         }
@@ -610,15 +590,10 @@ extension GameScene {
                // Marcar como seleccionado
                sprite.setSelected(true)
                // Mostrar y actualizar panel de información
-               spriteInfoPanel?.updateWithSprite(sprite)
-               calculateSpriteInfoPanelPosition()
-               // Hacer visible el panel si estaba oculto
-               if (spriteInfoPanel?.alpha ?? 0) < 0.1 {
-                   spriteInfoPanel?.run(SKAction.fadeIn(withDuration: 0.3))
-               }
+
            } else {
                // Ocultar panel si no hay selección
-               spriteInfoPanel?.run(SKAction.fadeOut(withDuration: 0.3))
+
            }
     }
     
