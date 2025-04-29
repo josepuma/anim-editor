@@ -54,4 +54,28 @@ class ScriptScene: SKNode {
     func getSprites() -> [Sprite] {
         return sprites
     }
+    
+    func fadeOut(duration: TimeInterval = 0.2, completion: (() -> Void)? = nil) {
+        let fadeOutAction = SKAction.fadeOut(withDuration: duration)
+        
+        if let completion = completion {
+            // Añadir una acción de función para llamar al completion
+            let completeAction = SKAction.run(completion)
+            let sequence = SKAction.sequence([fadeOutAction, completeAction])
+            self.run(sequence)
+        } else {
+            self.run(fadeOutAction)
+        }
+    }
+
+    /// Aplica un efecto de fade in
+    /// - Parameter duration: Duración de la animación en segundos
+    func fadeIn(duration: TimeInterval = 0.3) {
+        // Asegurarse de que la escena comienza invisible
+        self.alpha = 0
+        
+        // Aplicar fade in
+        let fadeInAction = SKAction.fadeIn(withDuration: duration)
+        self.run(fadeInAction)
+    }
 }

@@ -222,7 +222,7 @@ class ScriptPanel: VerticalContainer {
                     guard let self = self, let scriptManager = self.scriptManager else { return }
                     if scriptManager.moveScriptUp(script) {
                         self.refreshScriptList()
-                        scriptManager.reorderAndReexecuteScripts()
+                        scriptManager.reorderAndReexecuteScriptsNonBlocking()
                     }
                 }
                 
@@ -230,7 +230,7 @@ class ScriptPanel: VerticalContainer {
                     guard let self = self, let scriptManager = self.scriptManager else { return }
                     if scriptManager.moveScriptDown(script) {
                         self.refreshScriptList()
-                        scriptManager.reorderAndReexecuteScripts()
+                        scriptManager.reorderAndReexecuteScriptsNonBlocking()
                     }
                 }
                 

@@ -232,6 +232,118 @@ class JSInterpreter {
         return success
     }
     
+    func executeScriptAsync(named scriptName: String, completion: @escaping (Bool) -> Void) {
+        // Ejecutar en una cola de fondo para no bloquear el hilo principal
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else {
+                DispatchQueue.main.async {
+                    completion(false)
+                }
+                return
+            }
+            
+            // Limpiar los sprites existentes en el hilo principal
+            DispatchQueue.main.sync {
+                self.clearScriptsSprites(scriptName)
+            }
+            
+            // Establecer el ID del script actual
+            self.currentScriptId = scriptName
+            
+            // Obtener el contexto del script
+            guard let scriptContext = self.scriptCache[scriptName] else {
+                print("❌ Error: Script \(scriptName) no está cargado")
+                self.currentScriptId = nil
+                DispatchQueue.main.async {
+                    completion(false)
+                }
+                return
+            }
+            
+            // Ejecutar el script
+            let success = self.executeMainFunction(in: scriptContext)
+            
+            // Limpiar script ID
+            self.currentScriptId = nil
+            
+            // Llamar al completion en el hilo principal
+            DispatchQueue.main.async {
+                completion(success)
+            }
+        }
+    }
+    
+    func loadScriptAsync(from filePath: String, completion: @escaping (Bool) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else {
+                DispatchQueue.main.async {
+                    completion(false)
+                }
+                return
+            }
+            
+            do {
+                let scriptContent = try String(contentsOfFile: filePath, encoding: .utf8)
+                let fileName = URL(fileURLWithPath: filePath).deletingPathExtension().lastPathComponent
+                
+                // Crear un nuevo contexto
+                guard let scriptContext = JSContext() else {
+                    print("Error: No se pudo crear el contexto para el script \(fileName)")
+                    DispatchQueue.main.async {
+                        completion(false)
+                    }
+                    return
+                }
+                
+                // Configuraciones que requieren el hilo principal
+                var apiBridge: ParticleAPIBridge?
+                DispatchQueue.main.sync {
+                    // Configurar console
+                    self.setupConsoleForContext(scriptContext, scriptName: fileName)
+                    
+                    // Crear y configurar el bridge para este contexto
+                    guard let particleManager = self.particleManager, let scene = self.scene else {
+                        print("Error: particleManager o scene son nil")
+                        completion(false)
+                        return
+                    }
+                    
+                    apiBridge = ParticleAPIBridge(interpreter: self, particleManager: particleManager, scene: scene)
+                    scriptContext.setObject(apiBridge, forKeyedSubscript: "Sprite" as NSString)
+                }
+                
+                // Evaluar el script
+                scriptContext.evaluateScript(scriptContent)
+                
+                // Guardar en caché
+                DispatchQueue.main.sync {
+                    self.scriptCache[fileName] = scriptContext
+                    self.scriptSprites[fileName] = []
+                }
+                
+                // Ejecutar init en el hilo principal si es necesario
+                let success: Bool = {
+                    if let initFn = scriptContext.objectForKeyedSubscript("init"),
+                       initFn.isObject,
+                       !initFn.isUndefined {
+                        initFn.call(withArguments: [])
+                    }
+                    return true
+                }()
+                
+                DispatchQueue.main.async {
+                    completion(success)
+                }
+                
+            } catch {
+                print("Error cargando script \(filePath): \(error)")
+                DispatchQueue.main.async {
+                    completion(false)
+                }
+            }
+        }
+    }
+    
     // Ejecuta la función main() de un contexto
     private func executeMainFunction(in scriptContext: JSContext) -> Bool {
         if let mainFn = scriptContext.objectForKeyedSubscript("main"), mainFn.isObject, !mainFn.isUndefined && mainFn.hasProperty("call") {

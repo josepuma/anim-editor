@@ -34,7 +34,8 @@ class ParticleScriptManager {
     private var autoReloadTimer: Timer?
     private var lastModificationDates: [String: Date] = [:]
     
-    
+    private let scriptProcessingQueue = OperationQueue()
+    private let mainThreadSemaphore = DispatchSemaphore(value: 1)
     
     var onScriptsChanged: (([String]) -> Void)?
     
@@ -51,6 +52,9 @@ class ParticleScriptManager {
         
         // Inicializar el intérprete
         self.interpreter = JSInterpreter(particleManager: particleManager, scene: scene)
+        
+        scriptProcessingQueue.name = "com.animeditor.scriptprocessing"
+        scriptProcessingQueue.maxConcurrentOperationCount = 1
         
         ensureDirectoriesExist()
         loadAndExecuteAllScripts()
@@ -142,7 +146,17 @@ class ParticleScriptManager {
             executeScript(named: scriptName)
         }
         
-        print("Se cargaron y ejecutaron \(availableScripts.count) scripts automáticamente")
+        // Después de cargar todos los scripts, hacer fade in a todas las escenas
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.fadeInAllScriptScenes()
+        }
+    
+    }
+    
+    private func fadeInAllScriptScenes() {
+        for (_, scene) in scriptScenes {
+            scene.fadeIn(duration: 0.4)
+        }
     }
     
     func getScriptScenes() -> [String: ScriptScene] {
@@ -150,10 +164,16 @@ class ParticleScriptManager {
     }
     
     private func createScriptSceneIfNeeded(_ scriptName: String) {
-        guard scriptScenes[scriptName] == nil, let scene = self.scene else { return }
+        // Si la escena ya existe, no hacer nada
+        if scriptScenes[scriptName] != nil {
+            return
+        }
+        
+        guard let scene = self.scene else { return }
         
         // Crear nueva escena para este script
         let scriptScene = ScriptScene(scriptName: scriptName)
+        scriptScene.alpha = 0.0 // Iniciar invisible solo para nuevas escenas
         scriptScenes[scriptName] = scriptScene
         
         // Registrar la escena con el intérprete
@@ -264,6 +284,120 @@ class ParticleScriptManager {
         print("✅ Scripts reordenados y re-ejecutados en nuevo orden")
     }
     
+    func reorderAndReexecuteScriptsNonBlocking() {
+        // Detener cualquier timer en ejecución para evitar conflictos
+        autoReloadTimer?.invalidate()
+        
+        // Aplicar fade out a todas las escenas de scripts
+        fadeOutScriptScenes {
+            // Una vez que el fade out haya terminado, continuar con la ejecución
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                
+                // Limpiar sprites en el hilo principal
+                for scriptName in self.availableScripts {
+                    self.interpreter.clearScriptsSprites(scriptName)
+                }
+                
+                // Reordenar las escenas
+                self.reorderScriptScenes()
+                
+                // Ejecutar los scripts uno por uno con pequeños retrasos entre ellos
+                self.executeScriptsWithDelay()
+            }
+        }
+    }
+    
+    private func fadeOutScriptScenes(completion: @escaping () -> Void) {
+        let fadeOutDuration: TimeInterval = 0.2
+        
+        // Si no hay escenas, llamar directamente al completion
+        guard !scriptScenes.isEmpty else {
+            completion()
+            return
+        }
+        
+        // Contador para saber cuándo todas las escenas han terminado su animación
+        var completedCount = 0
+        let totalCount = scriptScenes.count
+        
+        // Aplicar fade out a cada escena
+        for (_, scene) in scriptScenes {
+            let fadeOut = SKAction.fadeAlpha(to: 0.0, duration: fadeOutDuration)
+            scene.run(fadeOut) {
+                completedCount += 1
+                if completedCount >= totalCount {
+                    completion()
+                }
+            }
+        }
+    }
+
+    private func finishScriptExecution() {
+        // Reiniciar el timer
+        setupAutoReloadTimer()
+        
+        // Aplicar fade in a todas las escenas de scripts
+        fadeInScriptScenes()
+        
+        print("✅ Scripts reordenados y re-ejecutados en nuevo orden")
+    }
+
+    /// Aplica un efecto de fade in a todas las escenas de scripts
+    private func fadeInScriptScenes() {
+        let fadeInDuration: TimeInterval = 0.3
+        
+        for (_, scene) in scriptScenes {
+            // Asegurarse de que la escena esté inicialmente invisible (alpha 0)
+            scene.alpha = 0.0
+            
+            // Aplicar fade in
+            let fadeIn = SKAction.fadeAlpha(to: 1.0, duration: fadeInDuration)
+            scene.run(fadeIn)
+        }
+    }
+
+    // Modificar el executeScriptsSequentiallyWithDelay para que no aplique fade in/out durante la ejecución
+    private func executeScriptsSequentiallyWithDelay(scripts: [String], index: Int) {
+        guard index < scripts.count else {
+            // Terminamos de ejecutar todos los scripts
+            finishScriptExecution()
+            return
+        }
+        
+        // Ejecutar el script actual
+        let currentScript = scripts[index]
+        _ = executeScript(named: currentScript)
+        
+        // Programar la ejecución del siguiente script con un pequeño retraso
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { [weak self] in
+            self?.executeScriptsSequentiallyWithDelay(scripts: scripts, index: index + 1)
+        }
+    }
+
+    /// Ejecuta los scripts secuencialmente con pequeños retrasos para evitar bloqueos
+    private func executeScriptsWithDelay() {
+        let scriptsToExecute = scriptExecutionOrder.filter { availableScripts.contains($0) }
+        guard !scriptsToExecute.isEmpty else {
+            finishScriptExecution()
+            return
+        }
+        
+        // Ejecutar el primer script y programar los siguientes recursivamente
+        executeScriptsSequentiallyWithDelay(scripts: scriptsToExecute, index: 0)
+    }
+
+    // Métodos para notificar el inicio/fin del procesamiento (implementar según necesites)
+    private func notifyScriptProcessingStarted() {
+        // Mostrar un indicador de "cargando" si lo deseas
+        // Esto se ejecuta en el hilo principal y es seguro
+    }
+
+    private func notifyScriptProcessingCompleted() {
+        // Ocultar el indicador de "cargando"
+        // Esto se ejecuta en el hilo principal y es seguro
+    }
+    
     /// Revisa si hay cambios en los scripts y los recarga si es necesario
     private func checkForScriptChanges() {
         let fileManager = FileManager.default
@@ -279,15 +413,16 @@ class ParticleScriptManager {
         
         // Si hay scripts nuevos o eliminados, actualizar la lista
         if !newScripts.isEmpty || !removedScripts.isEmpty {
-            print("Cambios detectados en scripts: \(newScripts.count) nuevos, \(removedScripts.count) eliminados")
-            
-            // Cargar los scripts nuevos
+            // Procesar scripts nuevos
             for script in newScripts {
                 let scriptPath = "\(scriptsFolder)/\(script).js"
                 if interpreter.loadScript(from: scriptPath) {
                     print("✅ Nuevo script cargado: \(script)")
                     
-                    // Añadir a la lista de scripts ordenados
+                    // Crear escena para el script nuevo (con alpha=0 para fade in)
+                    createScriptSceneIfNeeded(script)
+                    
+                    // Añadir a la configuración y listas
                     if !scriptExecutionOrder.contains(script) {
                         configManager.addOrUpdateScript(name: script)
                         scriptExecutionOrder.append(script)
@@ -295,31 +430,45 @@ class ParticleScriptManager {
                     
                     // Ejecutar automáticamente el nuevo script
                     executeScript(named: script)
-                    createScriptSceneIfNeeded(script)
+                    
+                    // Aplicar fade in a la escena
+                    if let scriptScene = scriptScenes[script] {
+                        scriptScene.fadeIn()
+                    }
                     
                     // Registrar fecha de modificación
-                    do {
-                        let attributes = try fileManager.attributesOfItem(atPath: scriptPath)
-                        if let modDate = attributes[.modificationDate] as? Date {
-                            lastModificationDates[script] = modDate
-                        }
-                    } catch {
-                        print("Error obteniendo atributos de \(scriptPath): \(error)")
-                    }
+                    registerScriptModificationDate(script, scriptPath)
                 }
             }
             
-            // Limpiar scripts eliminados
+            // Procesar scripts eliminados
             for script in removedScripts {
                 print("🗑️ Script eliminado: \(script)")
-                interpreter.clearScriptsSprites(script)
-                lastModificationDates.removeValue(forKey: script)
                 
-                // Remover del orden de ejecución
-                if let index = scriptExecutionOrder.firstIndex(of: script) {
-                    scriptExecutionOrder.remove(at: index)
-                    configManager.removeScript(name: script)
+                // Aplicar fade out antes de eliminar
+                if let scriptScene = scriptScenes[script] {
+                    scriptScene.fadeOut { [weak self] in
+                        guard let self = self else { return }
+                        
+                        // Eliminar escena después del fade out
+                        scriptScene.removeFromParent()
+                        self.scriptScenes.removeValue(forKey: script)
+                        
+                        // Eliminar del orden y configuración
+                        if let index = self.scriptExecutionOrder.firstIndex(of: script) {
+                            self.scriptExecutionOrder.remove(at: index)
+                            self.configManager.removeScript(name: script)
+                        }
+                    }
+                } else {
+                    // Si no hay escena, simplemente eliminar referencias
+                    if let index = scriptExecutionOrder.firstIndex(of: script) {
+                        scriptExecutionOrder.remove(at: index)
+                        configManager.removeScript(name: script)
+                    }
                 }
+                
+                lastModificationDates.removeValue(forKey: script)
             }
             
             // Actualizar lista de scripts disponibles
@@ -331,8 +480,7 @@ class ParticleScriptManager {
             notifyScriptsChanged()
         }
         
-        // En ParticleScriptManager.swift, modificar checkForScriptChanges():
-
+        // Verificar scripts modificados
         for scriptName in availableScripts {
             let scriptPath = "\(scriptsFolder)/\(scriptName).js"
             
@@ -344,24 +492,52 @@ class ParticleScriptManager {
                     
                     print("📝 Script modificado: \(scriptName), recargando...")
                     
-                    // PRIMERO: Limpiar explícitamente la escena de este script
+                    // Aplicar fade out a la escena antes de actualizarla
                     if let scriptScene = scriptScenes[scriptName] {
-                        print("🧽 Limpiando escena \(scriptName) antes de recargar")
-                        scriptScene.clearAllSprites()
-                    }
-                    
-                    // DESPUÉS: Recargar el script
-                    if interpreter.loadScript(from: scriptPath) {
-                        // Ejecutar el script
-                        let _ = executeScript(named: scriptName)
-                        
-                        // Actualizar fecha de modificación
-                        lastModificationDates[scriptName] = modDate
+                        // Usar el método fadeOut con un completion handler
+                        scriptScene.fadeOut { [weak self] in
+                            guard let self = self else { return }
+                            
+                            // PRIMERO: Limpiar explícitamente la escena de este script
+                            scriptScene.clearAllSprites()
+                            
+                            // DESPUÉS: Recargar el script
+                            if self.interpreter.loadScript(from: scriptPath) {
+                                // Ejecutar el script
+                                let _ = self.executeScript(named: scriptName)
+                                
+                                // Actualizar fecha de modificación
+                                self.lastModificationDates[scriptName] = modDate
+                                
+                                // Aplicar fade in después de un breve retraso
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                    scriptScene.fadeIn()
+                                }
+                            }
+                        }
+                    } else {
+                        // Si no existe la escena por alguna razón
+                        if interpreter.loadScript(from: scriptPath) {
+                            let _ = executeScript(named: scriptName)
+                            lastModificationDates[scriptName] = modDate
+                        }
                     }
                 }
             } catch {
                 print("Error verificando modificaciones de \(scriptPath): \(error)")
             }
+        }
+    }
+    
+    private func registerScriptModificationDate(_ scriptName: String, _ scriptPath: String) {
+        do {
+            let fileManager = FileManager.default
+            let attributes = try fileManager.attributesOfItem(atPath: scriptPath)
+            if let modDate = attributes[.modificationDate] as? Date {
+                lastModificationDates[scriptName] = modDate
+            }
+        } catch {
+            print("Error obteniendo atributos de \(scriptPath): \(error)")
         }
     }
     
