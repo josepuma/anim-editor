@@ -14,6 +14,7 @@ class InputFieldNode: SKNode {
     private let textNode: SKLabelNode
     private var textField: NSTextField?
     private var isEditing = false
+    private var scrollView: NSScrollView?
     
     var value: String
     private weak var parentWindow: NSWindow?
@@ -26,7 +27,7 @@ class InputFieldNode: SKNode {
         
         backgroundNode = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 5)
         backgroundNode.fillColor = NSColor(red: 28 / 255, green: 28 / 255, blue: 42 / 255, alpha: 1)
-        backgroundNode.strokeColor = NSColor(white: 0.5, alpha: 0.5)
+        backgroundNode.strokeColor = .clear
         backgroundNode.lineWidth = 1
         
         textNode = SKLabelNode(text: text)
@@ -35,6 +36,7 @@ class InputFieldNode: SKNode {
         textNode.fontColor = .white
         textNode.verticalAlignmentMode = .center
         textNode.horizontalAlignmentMode = .left
+        textNode.numberOfLines = 1
         
         super.init()
         
@@ -47,6 +49,7 @@ class InputFieldNode: SKNode {
         if name == nil {
             name = "input_" + UUID().uuidString
         }
+        updateDisplayedText()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -72,31 +75,66 @@ class InputFieldNode: SKNode {
         let scenePoint = self.convert(.zero, to: self.scene!)
         let viewPoint = view.convert(scenePoint, from: self.scene!)
         
-        let yPosition = viewPoint.y - backgroundNode.frame.height / 2
-        let xPosition = viewPoint.x - backgroundNode.frame.width / 2
+        let padding: CGFloat = 0
+        let textSize = textNode.frame.size
+        let width = max(backgroundNode.frame.width, textSize.width + padding * 2)
+        let height = max(backgroundNode.frame.height, textSize.height + padding * 2)
+        
+        print(height)
+        
+        let xPosition = (viewPoint.x - width / 2) + 5
+        let yPosition = (viewPoint.y - height / 2) + 5
         
         let textField = NSTextField(frame: NSRect(
             x: xPosition,
             y: yPosition,
-            width: backgroundNode.frame.width,
-            height: backgroundNode.frame.height
+            width: backgroundNode.frame.width - 10,
+            height: textNode.frame.height
         ))
         
         textField.stringValue = value
         textField.font = NSFont(name: "Helvetica", size: 12)
         textField.isBezeled = false
         textField.drawsBackground = true
-        textField.backgroundColor = NSColor(red: 28 / 255, green: 28 / 255, blue: 42 / 255, alpha: 1)
+        textField.backgroundColor = .clear
         textField.textColor = .white
-        textField.isBordered = true
+        textField.isBordered = false
         textField.focusRingType = .none
         textField.alignment = .left
+        textField.focusRingType = .none
+        textField.isEditable = true
+        textField.isSelectable = true
+        textField.usesSingleLineMode = true
         
         textField.delegate = self as? NSTextFieldDelegate
         textField.target = self
         textField.action = #selector(textFieldAction)
         
-        view.addSubview(textField)
+        print("textField.intrinsicContentSize after setup: \(textField.intrinsicContentSize)")
+        
+        //view.addSubview(textField)
+        let textHeight = textField.intrinsicContentSize.height
+
+       let scrollView = NSScrollView(frame: NSRect(
+           x: xPosition,
+           y: yPosition,
+           width: backgroundNode.frame.width - 10,
+           height: textHeight // Usar la altura intrínseca
+       ))
+        scrollView.borderType = .noBorder
+        scrollView.hasHorizontalScroller = true
+        scrollView.hasVerticalScroller = false
+        scrollView.autohidesScrollers = true
+        scrollView.documentView = textField
+        scrollView.drawsBackground = false
+        scrollView.focusRingType = .none
+        
+        print("textField.frame.height after creation: \(textField.frame.height)")
+
+        view.addSubview(scrollView)
+        self.scrollView = scrollView
+        self.textField = textField
+        
         view.window?.makeFirstResponder(textField)
         self.textField = textField
         
@@ -113,6 +151,36 @@ class InputFieldNode: SKNode {
             name: NSWindow.didResizeNotification,
             object: view.window
         )
+    }
+    
+    private func updateDisplayedText() {
+        let maxWidth = backgroundNode.frame.width - 10 // padding
+        let fullText = value
+        
+        // Crear un label temporal para medir el ancho
+        let tempLabel = SKLabelNode(fontNamed: textNode.fontName)
+        tempLabel.fontSize = textNode.fontSize
+        tempLabel.text = fullText
+        tempLabel.horizontalAlignmentMode = .left
+        tempLabel.verticalAlignmentMode = .center
+        
+        // Medir el ancho
+        let textWidth = tempLabel.frame.width
+        
+        if textWidth <= maxWidth {
+            textNode.text = fullText
+        } else {
+            // Truncar manualmente
+            var truncatedText = fullText
+            while truncatedText.count > 0 {
+                truncatedText.removeLast()
+                tempLabel.text = truncatedText + "…"
+                if tempLabel.frame.width <= maxWidth {
+                    break
+                }
+            }
+            textNode.text = truncatedText + "…"
+        }
     }
     
     @objc func windowDidResize(notification: Notification) {
@@ -144,7 +212,8 @@ class InputFieldNode: SKNode {
         if !textField.stringValue.isEmpty {
             let oldValue = value
             value = textField.stringValue
-            textNode.text = value
+            //textNode.text = value
+            updateDisplayedText()
             
             // Notificar al callback del cambio
             if oldValue != value && onTextChanged != nil {
@@ -178,7 +247,9 @@ class InputFieldNode: SKNode {
         textNode.isHidden = false
         
         // Limpiar
-        textField.removeFromSuperview()
+        //textField.removeFromSuperview()
+        scrollView?.removeFromSuperview()
+        scrollView = nil
         self.textField = nil
         
         // Eliminar las notificaciones

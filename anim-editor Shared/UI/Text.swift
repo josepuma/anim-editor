@@ -89,6 +89,20 @@ class Text: SKNode {
             addChild(backgroundNode)
         }
         
+        // Calcular altura promedio de las letras para poder centrar verticalmente
+        var maxLetterHeight: CGFloat = 0
+        for character in textToRender {
+            let letterLabel = SKLabelNode(text: String(character))
+            letterLabel.fontName = fontName
+            letterLabel.fontSize = processedFontSize
+            let height = letterLabel.calculateAccumulatedFrame().height
+            if height > maxLetterHeight {
+                maxLetterHeight = height
+            }
+        }
+        
+        let verticalOffset = (processedFontSize - maxLetterHeight) / 2
+        
         // Posicionar cada letra
         var currentX: CGFloat = -totalWidth / 2 // Iniciar desde la izquierda
         for character in textToRender {
@@ -101,7 +115,7 @@ class Text: SKNode {
             letterLabel.horizontalAlignmentMode = .left
             letterLabel.verticalAlignmentMode = .baseline // Usar baseline en lugar de top
             
-            letterLabel.position = CGPoint(x: currentX, y: 0)
+            letterLabel.position = CGPoint(x: currentX, y: -maxLetterHeight / 2 + verticalOffset)
             addChild(letterLabel)
 
             currentX += letterLabel.calculateAccumulatedFrame().width + letterSpacing

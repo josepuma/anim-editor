@@ -57,10 +57,10 @@ class ScriptParametersPanel: VerticalContainer {
     private func setupUI() {
 
         // Título
-        titleLabel = Text(text: "Parameters", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
+        //titleLabel = Text(text: "Parameters", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
         
         // Botón ejecutar
-        runButton = Button(
+        /*runButton = Button(
             text: "Ejecutar",
             padding: CGSize(width: 12, height: 6),
             buttonColor: accent,
@@ -85,7 +85,7 @@ class ScriptParametersPanel: VerticalContainer {
         editButton.setIcon(name: "volume", size: 14, color: buttonColorText)
         editButton.onPress = { [weak self] in
             self?.editScript()
-        }
+        }*/
         
         // Añadir botones al header
         //headerContainer.addNodes([titleLabel, runButton, editButton])
@@ -110,7 +110,7 @@ class ScriptParametersPanel: VerticalContainer {
     
     // Actualiza el estado de los botones
     private func updateButtonsState(_ hasScript: Bool) {
-        runButton.isUserInteractionEnabled = hasScript
+        /*runButton.isUserInteractionEnabled = hasScript
         editButton.isUserInteractionEnabled = hasScript
         
         if !hasScript {
@@ -119,7 +119,7 @@ class ScriptParametersPanel: VerticalContainer {
         } else {
             runButton.setButtonColor(color: accent)
             editButton.setButtonColor(color: backgroundColorButton)
-        }
+        }*/
     }
     
     // Actualizar para mostrar parámetros de un nuevo script
@@ -135,9 +135,9 @@ class ScriptParametersPanel: VerticalContainer {
         
         // Actualizar título
         if let scriptName = scriptName {
-            titleLabel.removeFromParent()
-            titleLabel = Text(text: scriptName, fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
-            insertChild(titleLabel, at: 0)
+            //titleLabel.removeFromParent()
+            //titleLabel = Text(text: scriptName, fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
+            //insertChild(titleLabel, at: 0)
             
             // Obtener parámetros del script
             let parameters = scriptManager.getScriptParameters(for: scriptName)
@@ -154,13 +154,7 @@ class ScriptParametersPanel: VerticalContainer {
                         showBackground: false
                     )
                     
-                    // Etiqueta del parámetro
-                    let paramLabel = SKLabelNode(text: "\(name):")
-                    paramLabel.fontName = "HelveticaNeue"
-                    paramLabel.fontSize = 12
-                    paramLabel.fontColor = buttonColorText
-                    paramLabel.horizontalAlignmentMode = .left
-                    paramLabel.verticalAlignmentMode = .center
+                    let paramLabel = Text(text: name, fontSize: 14, color: buttonColorText, type: .paragraph, letterSpacing: -2, width: 100)
                     
                     // Campo de entrada
                     let inputField = InputFieldNode(text: "\(value)", width: 100, height: 24)
@@ -192,9 +186,9 @@ class ScriptParametersPanel: VerticalContainer {
             updateButtonsState(true)
         } else {
             // Mostrar título por defecto
-            titleLabel.removeFromParent()
-            titleLabel = Text(text: "Parameters", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
-            insertChild(titleLabel, at: 0)
+            //titleLabel.removeFromParent()
+            //titleLabel = Text(text: "Parameters", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
+            //insertChild(titleLabel, at: 0)
             
             // Mostrar mensaje de selección
             
