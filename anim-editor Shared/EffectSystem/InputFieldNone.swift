@@ -110,7 +110,6 @@ class InputFieldNode: SKNode {
         textField.target = self
         textField.action = #selector(textFieldAction)
         
-        print("textField.intrinsicContentSize after setup: \(textField.intrinsicContentSize)")
         
         //view.addSubview(textField)
         let textHeight = textField.intrinsicContentSize.height
@@ -129,7 +128,6 @@ class InputFieldNode: SKNode {
         scrollView.drawsBackground = false
         scrollView.focusRingType = .none
         
-        print("textField.frame.height after creation: \(textField.frame.height)")
 
         view.addSubview(scrollView)
         self.scrollView = scrollView

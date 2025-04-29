@@ -7,6 +7,7 @@
 
 import Foundation
 import SpriteKit
+import Darwin
 
 /// Clase encargada de gestionar los scripts de efectos de partículas con ejecución automática
 class ParticleScriptManager {
@@ -237,7 +238,7 @@ class ParticleScriptManager {
     /// Configura un timer para revisar cambios en los scripts
     private func setupAutoReloadTimer() {
         // Revisar cada 5 segundos si hay cambios en los scripts
-        autoReloadTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
+        autoReloadTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             self?.checkForScriptChanges()
         }
     }
@@ -469,7 +470,7 @@ class ParticleScriptManager {
     /// Actualiza un parámetro en un script
     func updateScriptParameter(script: String, parameter: String, value: Any) -> Bool {
         configManager.updateScriptSetting(scriptName: script, key: parameter, value: value)
-        
+        updateScriptFileWithNewParameter(scriptName: script, parameter: parameter, value: value)
         return interpreter.updateScriptParameter(script: script, parameter: parameter, value: value)
     }
     

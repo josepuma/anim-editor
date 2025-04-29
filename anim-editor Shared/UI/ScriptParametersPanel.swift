@@ -231,10 +231,6 @@ class ScriptParametersPanel: VerticalContainer {
         
         // Actualizar posición
         self.position = CGPoint(x: newX, y: newY)
-        
-        // Log para depuración
-        print("Script panel position: \(scriptPanel.position), height: \(scriptPanelFrame.height)")
-        print("Parameters panel new position: \(CGPoint(x: newX, y: newY)), height: \(thisFrame.height)")
     }
     
     // Cuando cambia un parámetro

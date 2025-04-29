@@ -36,59 +36,59 @@ class Text: SKNode {
             processedText = text.uppercased()
         }
 
-        // Verificar si necesitamos truncar el texto
         var textToRender = processedText
-
-        
-        // Calcular el ancho total del texto
-        var totalWidth: CGFloat = 0
+        var renderWidth: CGFloat = 0 // Ancho del texto que realmente se renderizará
         var characterWidths: [CGFloat] = []
-        
-        // Primero calculamos el ancho de cada caracter
-        for character in processedText {
-            let letterLabel = SKLabelNode(text: String(character))
-            letterLabel.fontSize = processedFontSize
-            letterLabel.fontName = fontName
-            let charWidth = letterLabel.calculateAccumulatedFrame().width + letterSpacing
-            characterWidths.append(charWidth)
-            totalWidth += charWidth
+
+        // Función para calcular el ancho de un texto con la fuente y tamaño dados
+        func calculateTextWidth(for text: String) -> CGFloat {
+            var width: CGFloat = 0
+            for (index, character) in text.enumerated() {
+                let letterLabel = SKLabelNode(text: String(character))
+                letterLabel.fontSize = processedFontSize
+                letterLabel.fontName = fontName
+                width += letterLabel.calculateAccumulatedFrame().width
+                if index < text.count - 1 {
+                    width += letterSpacing
+                }
+            }
+            return width
         }
-        totalWidth -= letterSpacing // Ajustar el ancho total para el último caracter
-        
-        // Si se especificó un ancho máximo, usarlo
+
+        // Si se especificó un ancho máximo, truncar el texto si es necesario
         if let maxWidth = width {
-            // Si el texto es más largo que el ancho máximo, truncarlo
-            if totalWidth > maxWidth {
-                var availableWidth = maxWidth - letterSpacing * 3 // Espacio para "..."
+            let originalWidth = calculateTextWidth(for: processedText)
+            if originalWidth > maxWidth {
                 var truncatedText = ""
-                
-                for (index, character) in processedText.enumerated() {
-                    if availableWidth - characterWidths[index] >= 0 {
+                var currentWidth: CGFloat = 0
+
+                for character in processedText {
+                    let tempText = truncatedText + String(character)
+                    let tempWidth = calculateTextWidth(for: tempText)
+                    if tempWidth + calculateTextWidth(for: "...") <= maxWidth {
                         truncatedText.append(character)
-                        availableWidth -= characterWidths[index]
+                        currentWidth = tempWidth
                     } else {
                         break
                     }
                 }
-                
                 textToRender = truncatedText + "..."
-                
-                // Recalcular el ancho total para el texto truncado
-                totalWidth = maxWidth
+                renderWidth = calculateTextWidth(for: textToRender)
             } else {
-                // Si el texto es más corto que el ancho máximo, usar el ancho máximo
-                totalWidth = maxWidth
+                textToRender = processedText
+                renderWidth = originalWidth
             }
-        }
-        
-        // Crear un nodo de fondo para ocupar el ancho completo si se especificó
-        if let maxWidth = width {
+
+            // Crear y posicionar el nodo de fondo
             let backgroundNode = SKShapeNode(rectOf: CGSize(width: maxWidth, height: processedFontSize))
-            backgroundNode.fillColor = .red
-            backgroundNode.strokeColor = .red
+            backgroundNode.fillColor = .clear
+            backgroundNode.strokeColor = .clear
             addChild(backgroundNode)
+
+        } else {
+            renderWidth = calculateTextWidth(for: processedText)
         }
-        
+
         // Calcular altura promedio de las letras para poder centrar verticalmente
         var maxLetterHeight: CGFloat = 0
         for character in textToRender {
@@ -100,28 +100,30 @@ class Text: SKNode {
                 maxLetterHeight = height
             }
         }
-        
+
         let verticalOffset = (processedFontSize - maxLetterHeight) / 2
-        
+
         // Posicionar cada letra
-        var currentX: CGFloat = -totalWidth / 2 // Iniciar desde la izquierda
+        var currentX: CGFloat = -renderWidth / 2 // Centrar el texto dentro de su ancho calculado
+        if let maxWidth = width {
+            currentX = -maxWidth / 2 // Si hay un ancho máximo, centrar el texto dentro de ese ancho
+        }
+
         for character in textToRender {
             let letterLabel = SKLabelNode(text: String(character))
             letterLabel.fontColor = color
             letterLabel.fontSize = processedFontSize
             letterLabel.fontName = fontName
-            
-            // Cambiar los modos de alineación para corregir el problema
+
             letterLabel.horizontalAlignmentMode = .left
-            letterLabel.verticalAlignmentMode = .baseline // Usar baseline en lugar de top
-            
+            letterLabel.verticalAlignmentMode = .baseline
+
             letterLabel.position = CGPoint(x: currentX, y: -maxLetterHeight / 2 + verticalOffset)
             addChild(letterLabel)
 
             currentX += letterLabel.calculateAccumulatedFrame().width + letterSpacing
         }
     }
-    
 
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
