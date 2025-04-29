@@ -29,16 +29,10 @@ class ScriptScene: SKNode {
     }
     
     func clearAllSprites() {
-        // Remover cada sprite de forma explícita
         for sprite in sprites {
             sprite.node.removeFromParent()
         }
-        
-        // Limpiar el array
         sprites.removeAll()
-        
-        // Depuración
-        print("🧹 Escena \(scriptName): Se eliminaron \(sprites.count) sprites")
     }
     
     func update(atTime time: Int) {

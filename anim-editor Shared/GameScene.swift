@@ -143,9 +143,7 @@ class GameScene: SKScene {
             // Primero, crear una copia del tamaño para la vista previa (más pequeño)
             let previewSize = CGSize(width: 256, height: 144)
             
-            // Generar la textura usando el método existente en SpriteManager
-            self.spriteManager.textureForTime(time: timeMilliseconds, size: previewSize) { texture in
-                // Completar con la textura generada
+            self.scriptManager.textureForTime(time: timeMilliseconds, size: previewSize) { texture in
                 completion(texture)
             }
         }
@@ -473,7 +471,7 @@ class GameScene: SKScene {
                 }
             }
             
-            if let hoveredSprite = currentHoveredSprite {
+            /*if let hoveredSprite = currentHoveredSprite {
                 if hoveredSprite.isActive(at: gameTime) {
                     hoveredSprite.updateHoverBorder()
                 } else {
@@ -490,7 +488,7 @@ class GameScene: SKScene {
                     currentSelectedSprite = nil
             
                 }
-            }
+            }*/
         }
     }
     

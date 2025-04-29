@@ -143,7 +143,7 @@ class ParticleScriptManager {
         // Crear escenas para cada script y ejecutarlos en orden
         for scriptName in scriptExecutionOrder where availableScripts.contains(scriptName) {
             createScriptSceneIfNeeded(scriptName)
-            executeScript(named: scriptName)
+            let _ = executeScript(named: scriptName)
         }
         
         // Después de cargar todos los scripts, hacer fade in a todas las escenas
@@ -429,7 +429,7 @@ class ParticleScriptManager {
                     }
                     
                     // Ejecutar automáticamente el nuevo script
-                    executeScript(named: script)
+                    let _ = executeScript(named: script)
                     
                     // Aplicar fade in a la escena
                     if let scriptScene = scriptScenes[script] {
@@ -810,6 +810,61 @@ class ParticleScriptManager {
     /// Obtiene la lista de scripts disponibles
     func getAvailableScripts() -> [String] {
         return availableScripts
+    }
+    
+    func textureForTime(time: Int, size: CGSize, completion: @escaping (SKTexture) -> Void) {
+        DispatchQueue.main.async {
+            let scale = CGFloat(854 / 256)
+            
+            let popupScene = SKScene(size: size)
+            popupScene.backgroundColor = .black
+            popupScene.scaleMode = .aspectFit
+            popupScene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+            
+            let sceneDictionaries = self.getScriptScenes()
+
+            // Combinar todos los ScriptScenes en un solo array
+            let allScenes = sceneDictionaries.compactMap { $0 } // eliminar nils si hay
+                .compactMap { $0.value }
+
+            // Ordenarlos según scriptExecutionOrder
+            let orderedScenes = allScenes.sorted { first, second in
+                guard let firstIndex = self.scriptExecutionOrder.firstIndex(of: first.scriptName),
+                      let secondIndex = self.scriptExecutionOrder.firstIndex(of: second.scriptName) else {
+                    return false
+                }
+                return firstIndex < secondIndex
+            }
+
+            // Ahora iterar sobre las escenas en orden
+            for scriptScene in orderedScenes {
+                let activeSpritesAtPosition = scriptScene.getSprites().filter { $0.isActive(at: time) }
+                
+                for sprite in activeSpritesAtPosition {
+                    let spriteCopy = sprite.clone()
+                    spriteCopy.update(currentTime: time, scale: scale)
+                    popupScene.addChild(spriteCopy.node)
+                }
+            }
+            
+            let view = SKView()
+            if let texture = view.texture(from: popupScene) {
+                completion(texture)
+            } else {
+                // Textura de respaldo en caso de error
+                let fallbackScene = SKScene(size: size)
+                fallbackScene.backgroundColor = .darkGray
+                
+                let errorLabel = SKLabelNode(text: "Preview unavailable")
+                errorLabel.fontColor = .white
+                errorLabel.fontSize = 14
+                errorLabel.position = CGPoint(x: size.width/2, y: size.height/2)
+                fallbackScene.addChild(errorLabel)
+                
+                let fallbackTexture = view.texture(from: fallbackScene)!
+                completion(fallbackTexture)
+            }
+        }
     }
     
     /// Detiene el timer de recarga automática
