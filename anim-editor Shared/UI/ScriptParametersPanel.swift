@@ -26,8 +26,9 @@ class ScriptParametersPanel: VerticalContainer {
     private var backgroundColorButton = NSColor(red: 28 / 255, green: 28 / 255, blue: 42 / 255, alpha: 1)
     private var buttonColorText = NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1)
     
-    // Mapeo de InputFieldNodes a sus parámetros
+    // Mapeo de controles a sus parámetros
     private var parameterFields: [String: InputFieldNode] = [:]
+    private var parameterToggles: [String: ToggleButton] = [:]
     
     init(scriptManager: ParticleScriptManager) {
         // Inicializar con el mismo estilo que otros contenedores
@@ -38,7 +39,7 @@ class ScriptParametersPanel: VerticalContainer {
             horizontalAlignment: .left,
             showBackground: true,
             backgroundColor: NSColor(red: 7 / 255, green: 7 / 255, blue: 13 / 255, alpha: 1),
-            cornerRadius: 8
+            cornerRadius: 0
         )
         
         self.scriptManager = scriptManager
@@ -55,45 +56,6 @@ class ScriptParametersPanel: VerticalContainer {
     }
     
     private func setupUI() {
-
-        // Título
-        //titleLabel = Text(text: "Parameters", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
-        
-        // Botón ejecutar
-        /*runButton = Button(
-            text: "Ejecutar",
-            padding: CGSize(width: 12, height: 6),
-            buttonColor: accent,
-            buttonBorderColor: accent,
-            textColor: .black,
-            fontSize: 12
-        )
-        runButton.setIcon(name: "play", size: 14, color: .black)
-        runButton.onPress = { [weak self] in
-            self?.runScript()
-        }
-        
-        // Botón editar
-        editButton = Button(
-            text: "Editar",
-            padding: CGSize(width: 12, height: 6),
-            buttonColor: backgroundColorButton,
-            buttonBorderColor: backgroundColorButton,
-            textColor: buttonColorText,
-            fontSize: 12
-        )
-        editButton.setIcon(name: "volume", size: 14, color: buttonColorText)
-        editButton.onPress = { [weak self] in
-            self?.editScript()
-        }*/
-        
-        // Añadir botones al header
-        //headerContainer.addNodes([titleLabel, runButton, editButton])
-        //addNode(headerContainer)
-        
-        // Separador
-        //addNode(Separator(width: 250, height: 1, color: backgroundColorButton))
-        
         // Contenedor de parámetros
         parametersContainer = VerticalContainer(
             spacing: 8,
@@ -103,23 +65,6 @@ class ScriptParametersPanel: VerticalContainer {
             showBackground: false
         )
         addNode(parametersContainer)
-        
-        // Estado inicial
-        updateButtonsState(false)
-    }
-    
-    // Actualiza el estado de los botones
-    private func updateButtonsState(_ hasScript: Bool) {
-        /*runButton.isUserInteractionEnabled = hasScript
-        editButton.isUserInteractionEnabled = hasScript
-        
-        if !hasScript {
-            runButton.setButtonColor(color: accent.withAlphaComponent(0.5))
-            editButton.setButtonColor(color: backgroundColorButton.withAlphaComponent(0.5))
-        } else {
-            runButton.setButtonColor(color: accent)
-            editButton.setButtonColor(color: backgroundColorButton)
-        }*/
     }
     
     // Actualizar para mostrar parámetros de un nuevo script
@@ -132,15 +77,14 @@ class ScriptParametersPanel: VerticalContainer {
         // Limpiar la vista
         parametersContainer.clearNodes()
         parameterFields.removeAll()
+        parameterToggles.removeAll()
         
         // Actualizar título
         if let scriptName = scriptName {
-            //titleLabel.removeFromParent()
-            //titleLabel = Text(text: scriptName, fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
-            //insertChild(titleLabel, at: 0)
-            
             // Obtener parámetros del script
             let parameters = scriptManager.getScriptParameters(for: scriptName)
+            
+            print(parameters)
             
             if !parameters.isEmpty {
                 // Crear campos para cada parámetro
@@ -156,19 +100,44 @@ class ScriptParametersPanel: VerticalContainer {
                     
                     let paramLabel = Text(text: name, fontSize: 14, color: buttonColorText, type: .paragraph, letterSpacing: -2, width: 100)
                     
-                    // Campo de entrada
-                    let inputField = InputFieldNode(text: "\(value)", width: 100, height: 24)
-                    
-                    // Guardar referencia al campo
-                    parameterFields[name] = inputField
-                    
-                    // Añadir listener para cambios
-                    inputField.onTextChanged = { [weak self] newValue in
-                        self?.parameterChanged(name: name, value: newValue)
+                    // Verificar el tipo del valor
+                    if type(of: value) == Bool.self, let boolValue = value as? Bool {
+                        // Para valores booleanos, usar ToggleButton
+                        let toggleButton = ToggleButton(
+                            size: 32,
+                            onIconName: "square-check",
+                            offIconName: "square-dashed",
+                            isInitiallyToggled: boolValue,
+                            buttonColor: .clear,
+                            buttonBorderColor: .clear,
+                            iconColor: accent
+                        )
+                        
+                        // Guardar referencia al toggle
+                        parameterToggles[name] = toggleButton
+                        
+                        // Añadir listener para cambios
+                        toggleButton.onToggle = { [weak self] isToggled in
+                            self?.parameterChanged(name: name, value: isToggled)
+                        }
+                        
+                        // Añadir a la fila
+                        paramRow.addNodes([paramLabel, toggleButton])
+                    } else {
+                        // Para otros tipos, usar InputFieldNode
+                        let inputField = InputFieldNode(text: "\(value)", width: 100, height: 24)
+                        
+                        // Guardar referencia al campo
+                        parameterFields[name] = inputField
+                        
+                        // Añadir listener para cambios
+                        inputField.onTextChanged = { [weak self] newValue in
+                            self?.parameterChanged(name: name, value: newValue)
+                        }
+                        
+                        // Añadir a la fila
+                        paramRow.addNodes([paramLabel, inputField])
                     }
-                    
-                    // Añadir a la fila
-                    paramRow.addNodes([paramLabel, inputField])
                     
                     // Añadir fila al contenedor
                     parametersContainer.addNode(paramRow)
@@ -181,19 +150,13 @@ class ScriptParametersPanel: VerticalContainer {
                 noParamsLabel.fontColor = buttonColorText
                 parametersContainer.addNode(noParamsLabel)
             }
-            
-            // Habilitar botones
-            updateButtonsState(true)
         } else {
-            // Mostrar título por defecto
-            //titleLabel.removeFromParent()
-            //titleLabel = Text(text: "Parameters", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0)
-            //insertChild(titleLabel, at: 0)
-            
             // Mostrar mensaje de selección
-            
-            // Deshabilitar botones
-            updateButtonsState(false)
+            let selectScriptLabel = SKLabelNode(text: "Selecciona un script para ver sus parámetros")
+            selectScriptLabel.fontName = "HelveticaNeue"
+            selectScriptLabel.fontSize = 12
+            selectScriptLabel.fontColor = buttonColorText
+            parametersContainer.addNode(selectScriptLabel)
         }
         
         // Actualizar layout
@@ -210,7 +173,7 @@ class ScriptParametersPanel: VerticalContainer {
         updateLayout()
         
         // Margen entre paneles
-        let parametersMargin: CGFloat = 10
+        let parametersMargin: CGFloat = 0
         
         // Obtener dimensiones de ambos paneles
         let scriptPanelFrame = scriptPanel.calculateAccumulatedFrame()
@@ -234,51 +197,34 @@ class ScriptParametersPanel: VerticalContainer {
     }
     
     // Cuando cambia un parámetro
-    private func parameterChanged(name: String, value: String) {
+    private func parameterChanged(name: String, value: Any) {
         guard let scriptName = currentScript,
-              let scriptManager = scriptManager else { return }
+              let scriptManager = scriptManager else {
+            return
+        }
         
-        // Convertir el valor según el tipo adecuado
+        // Convertir valores de texto según sea necesario
         let typedValue: Any
         
-        if let intValue = Int(value) {
-            typedValue = intValue
-        } else if let doubleValue = Double(value) {
-            typedValue = doubleValue
-        } else if value.lowercased() == "true" {
-            typedValue = true
-        } else if value.lowercased() == "false" {
-            typedValue = false
+        if let boolValue = value as? Bool {
+            // Los valores booleanos ya vienen correctamente tipados del toggle
+            typedValue = boolValue
+        } else if let stringValue = value as? String {
+            // Para valores de texto, intentar convertir a tipos numéricos
+            if let intValue = Int(stringValue) {
+                typedValue = intValue
+            } else if let doubleValue = Double(stringValue) {
+                typedValue = doubleValue
+            } else {
+                // Si no se puede convertir a número, mantener como string
+                typedValue = stringValue
+            }
         } else {
+            // Para otros tipos, usar el valor tal cual
             typedValue = value
         }
         
         // Actualizar el parámetro en el script
         scriptManager.updateScriptParameter(script: scriptName, parameter: name, value: typedValue)
     }
-    
-    // Ejecutar el script actual
-    private func runScript() {
-        guard let scriptName = currentScript,
-              let scriptManager = scriptManager else { return }
-        
-        // Ejecutar el script
-        if scriptManager.executeScript(named: scriptName) {
-            // Efecto visual de confirmación
-            let scaleDown = SKAction.scale(to: 0.9, duration: 0.1)
-            let scaleUp = SKAction.scale(to: 1.0, duration: 0.1)
-            runButton.run(SKAction.sequence([scaleDown, scaleUp]))
-        }
-    }
-    
-    // Abrir el script en el editor
-    private func editScript() {
-        guard let scriptName = currentScript,
-              let scriptManager = scriptManager else { return }
-        
-        // Abrir el script
-        scriptManager.editScript(named: scriptName)
-    }
 }
-
-// Esta parte se implementará como una actualización a InputFieldNode.swift

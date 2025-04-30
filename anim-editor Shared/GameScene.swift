@@ -52,7 +52,7 @@ class GameScene: SKScene {
         return scene
     }
     
-    let path = "/Users/josepuma/Documents/storyboards/freda-maybe/"
+    let path = "/Users/josepuma/Documents/Github/anim-editor-storyboard-tests/freda-maybe/"
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         backgroundColor = .black
@@ -73,13 +73,12 @@ class GameScene: SKScene {
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
         spriteManager.addToScene(scene: self)
+
         
         
         setupGrid()
         setupControls()
 
-        setupScriptSystem()
-        setupScriptButtons()
 
         if let preferences = projectConfigManager?.getPreferences() {
            // Aplicar preferencias
@@ -151,22 +150,14 @@ class GameScene: SKScene {
     
     func setupScriptSystem() {
         // Asegurarse de que existe la carpeta de scripts
-        let scriptsFolder = path + "/scripts"
         
-        // Crear el administrador de scripts
-        scriptManager = ParticleScriptManager(
-            particleManager: particleManager,
-            scene: self,
-            scriptsFolder: scriptsFolder
-        )
         
         // Crear el panel de scripts
-        scriptPanel = ScriptPanel(scriptManager: scriptManager)
-        scriptPanel.zPosition = 100
-        addChild(scriptPanel)
+        
+        //addChild(scriptPanel)
         
         // Configurar callback para selección de script
-        scriptPanel.onScriptSelected = { [weak self] scriptName in
+        /*scriptPanel.onScriptSelected = { [weak self] scriptName in
             self?.scriptParametersPanel.updateWithScript(scriptName)
         }
         
@@ -174,18 +165,28 @@ class GameScene: SKScene {
         scriptParametersPanel = ScriptParametersPanel(scriptManager: scriptManager)
         scriptParametersPanel.setScriptPanel(scriptPanel)
         scriptParametersPanel.zPosition = 100
-        addChild(scriptParametersPanel)
+        addChild(scriptParametersPanel)*/
         
         // Inicializar sin script seleccionado
-        scriptParametersPanel.updateWithScript(nil)
+        //scriptParametersPanel.updateWithScript(nil)
     }
     
     func setupControls() {
+        let scriptsFolder = path + "/scripts"
+        
         particleManager = ParticleManager(
             spriteManager: spriteManager,
             scene: self,
-            texturesPath: path // Asumiendo que tienes una variable 'path' como ruta base
+            texturesPath: path
         )
+        
+        scriptManager = ParticleScriptManager(
+            particleManager: particleManager,
+            scene: self,
+            scriptsFolder: scriptsFolder
+        )
+        
+        scriptPanel = ScriptPanel(scriptManager: scriptManager)
         
         effectsTableNode = EffectsTableNode()
         effectsTableNode.spriteManager = spriteManager
@@ -201,7 +202,8 @@ class GameScene: SKScene {
             horizontalAlignment: .left,
             showBackground: true,
             backgroundColor: NSColor(red: 7 / 255, green: 7 / 255, blue: 13 / 255, alpha: 1),
-            cornerRadius: 8
+            cornerRadius: 0,
+            fullHeight: true
         )
         
         volumeSlider = VolumeSlider(width: 150, height: 4, knobSize: 12)
@@ -214,7 +216,7 @@ class GameScene: SKScene {
         if let player = audioPlayer {
             volumeSlider.setVolume(CGFloat(player.volume), animated: false)
         } else {
-            volumeSlider.setVolume(0.5, animated: false) // Valor predeterminado
+            volumeSlider.setVolume(0, animated: false) // Valor predeterminado
         }
         
         let volumeIcon = IconManager.shared.getIcon(named: "volume", size: 16, color: NSColor(red: 195 / 255, green: 195 / 255, blue: 208 / 255, alpha: 1))
@@ -340,11 +342,11 @@ class GameScene: SKScene {
             Text(text: "System", fontSize: 10, color: backgroundColorAccent, type: .capitalTitle, letterSpacing: 2.0),
             Button(text: "Open Project Folder", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12),
             createNewScriptButton,
+            //scriptPanel
         ])
 
         toolsContainer.zPosition = 100
         addChild(toolsContainer)
-        
     }
 
     
@@ -403,23 +405,24 @@ class GameScene: SKScene {
             )
         }
         
-        let margin: CGFloat = 16
+        //let margin: CGFloat = 16
         if toolsContainer != nil {
             toolsContainer.position = CGPoint(
-                x: self.size.width/2 - margin - toolsContainer.getSize().width/2,
-                y: self.size.height/2 - margin - toolsContainer.getSize().height/2
+                x: self.size.width/2 - toolsContainer.getSize().width/2,
+                y: self.size.height/2 - toolsContainer.getSize().height/2
             )
+            toolsContainer.adjustSize()
         }
         
-        if scriptPanel != nil {
+        /*if scriptPanel != nil {
             scriptPanel.position = CGPoint(
-                x: -self.size.width/2 + 16 + scriptPanel.getSize().width/2,
-                y: self.size.height/2 - 16 - scriptPanel.getSize().height/2
+                x: -self.size.width/2 + scriptPanel.getSize().width/2,
+                y: self.size.height/2 - scriptPanel.getSize().height/2
             )
             if let parametersPanel = scriptParametersPanel {
                 parametersPanel.updatePositionRelativeToScriptPanel()
             }
-        }
+        }*/
         
         // Posicionar panel de parámetros
         /*if scriptParametersPanel != nil {
@@ -499,8 +502,8 @@ class GameScene: SKScene {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             totalDuration = audioPlayer.duration
             // Cambiar esto para no establecer volumen a 0
-            audioPlayer.volume = 0.5 // Volumen predeterminado al 50%
-            audioPlayer.play()
+            audioPlayer.volume = 0 // Volumen predeterminado al 50%
+            //audioPlayer.play()
             // Configurar el timeline después de inicializar el audio
             setupTimelineWithPreview()
             timelineComponent.updatePlayPauseButton(isPlaying: true)

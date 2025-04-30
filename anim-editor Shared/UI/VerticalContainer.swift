@@ -20,6 +20,15 @@ enum HorizontalAlignment {
 }
 
 class VerticalContainer: SKNode {
+    
+    private var containerHeight: CGFloat = 0
+    private var contentNode: SKNode = SKNode()
+    private var scrollEnabled: Bool = false
+    private var scrollOffset: CGFloat = 0
+    private var scrollMask: SKShapeNode?
+    private var cropNode: SKCropNode?
+    private var touchStartPoint: CGPoint?
+    
     // Configuration
     private var spacing: CGFloat
     private var padding: CGSize
@@ -35,6 +44,7 @@ class VerticalContainer: SKNode {
     private var showBackground: Bool
     private var backgroundColor: SKColor
     private var cornerRadius: CGFloat
+    private var fullHeight: Bool = false
     
     init(
         spacing: CGFloat = 10,
@@ -43,7 +53,8 @@ class VerticalContainer: SKNode {
         horizontalAlignment: HorizontalAlignment = .center,
         showBackground: Bool = false,
         backgroundColor: SKColor = SKColor(white: 0.1, alpha: 0.5),
-        cornerRadius: CGFloat = 8
+        cornerRadius: CGFloat = 8,
+        fullHeight: Bool = false
     ) {
         self.spacing = spacing
         self.padding = padding
@@ -52,6 +63,7 @@ class VerticalContainer: SKNode {
         self.showBackground = showBackground
         self.backgroundColor = backgroundColor
         self.cornerRadius = cornerRadius
+        self.fullHeight = fullHeight
         
         super.init()
         
@@ -77,7 +89,8 @@ class VerticalContainer: SKNode {
     // Add a single node
     func addNode(_ node: SKNode) {
         childNodes.append(node)
-        addChild(node)
+        //addChild(node)
+        contentNode.addChild(node)
         updateLayout()
     }
     
@@ -85,7 +98,7 @@ class VerticalContainer: SKNode {
     func addNodes(_ nodes: [SKNode]) {
         for node in nodes {
             childNodes.append(node)
-            addChild(node)
+            contentNode.addChild(node) // Añadir al contentNode
         }
         updateLayout()
     }
@@ -94,18 +107,18 @@ class VerticalContainer: SKNode {
     func removeNode(_ node: SKNode) {
         if let index = childNodes.firstIndex(of: node) {
             childNodes.remove(at: index)
-            node.removeFromParent()
+            node.removeFromParent() // Remover del contentNode
             updateLayout()
         }
     }
     
     // Clear all nodes
     func clearNodes() {
-        // Eliminar todos los nodos hijos
         for node in childNodes {
-            node.removeFromParent()
+            node.removeFromParent() // Remover del contentNode
         }
         childNodes.removeAll()
+        updateLayout()
     }
     
     func getAvailableInnerWidth() -> CGFloat {
@@ -163,6 +176,42 @@ class VerticalContainer: SKNode {
         
         // PASO 4: Recalcular posiciones después del ajuste de anchos
         positionAllNodes(totalHeight: newHeight)
+        
+        if cropNode == nil {
+            cropNode = SKCropNode()
+            addChild(cropNode!)
+            contentNode.removeFromParent()
+            cropNode?.addChild(contentNode)
+            cropNode?.zPosition = zPosition
+        }
+
+        // Crear la máscara del cropNode con una altura de 100
+        /*let cropHeight: CGFloat = newHeight
+        let mask = SKShapeNode(rect: CGRect(x: -containerSize.width / 2, y: -cropHeight / 2, width: containerSize.width, height: cropHeight))
+  
+        mask.strokeColor = .red
+        mask.lineWidth = 2*/
+        
+
+        let mask = SKShapeNode(rect: CGRect(
+            x: -containerSize.width / 2,
+            y: -containerHeight / 2,  // empieza desde y = 0 hacia arriba
+            width: containerSize.width,
+            height: containerHeight
+        ))
+
+        mask.fillColor = .white  // Necesario para que funcione como máscara
+        mask.strokeColor = .clear
+        mask.lineWidth = 0
+
+        cropNode?.maskNode = mask
+
+        // Asegurarse de que contentNode esté alineado con la máscara
+        contentNode.position = CGPoint(x: 0, y: (containerHeight / 2) - (newHeight / 2) - padding.height * 2)
+        
+        print("altura mascara:", mask.frame.height)
+        print("altura total:", containerHeight)
+        print("altura contenido:", newHeight)
     }
 
 
@@ -192,7 +241,7 @@ class VerticalContainer: SKNode {
         // Update background if needed
         if showBackground, let backgroundNode = backgroundNode {
             let backgroundPath = CGPath(
-                roundedRect: CGRect(x: -containerSize.width/2, y: -containerSize.height/2, width: containerSize.width, height: containerSize.height),
+                roundedRect: CGRect(x: -containerSize.width/2, y: -containerHeight/2, width: containerSize.width, height: containerHeight),
                 cornerWidth: cornerRadius,
                 cornerHeight: cornerRadius,
                 transform: nil
@@ -202,6 +251,64 @@ class VerticalContainer: SKNode {
         
         return totalHeight
     }
+    
+    func adjustSize(){
+        if let scene = scene {
+            let sceneSize = scene.size
+            if fullHeight{
+                containerHeight = sceneSize.height
+            }else{
+                containerHeight = containerSize.height
+            }
+            updateLayout()
+        }
+    }
+    
+    private func updateScrolling(contentHeight: CGFloat, viewHeight: CGFloat) {
+        if contentHeight > viewHeight && !scrollEnabled {
+            enableScrolling(viewSize: CGSize(width: containerSize.width, height: viewHeight))
+        } else if contentHeight <= viewHeight && scrollEnabled {
+            disableScrolling()
+        } else if scrollEnabled, let cropNode = cropNode, let mask = scrollMask {
+            mask.path = CGPath(rect: CGRect(origin: CGPoint(x: -containerSize.width / 2, y: -viewHeight / 2), size: CGSize(width: containerSize.width, height: viewHeight)), transform: nil)
+            cropNode.maskNode = mask
+        } else if !scrollEnabled, let cropNode = cropNode {
+            // Asegurar que el contentNode esté directamente como hijo si no hay scroll
+            contentNode.removeFromParent()
+            addChild(contentNode)
+            cropNode.removeFromParent()
+            self.cropNode = nil
+            self.scrollMask = nil
+            contentNode.position = .zero
+        }
+    }
+    
+    private func enableScrolling(viewSize: CGSize) {
+        scrollEnabled = true
+        cropNode = SKCropNode()
+        scrollMask = SKShapeNode(rect: CGRect(origin: CGPoint(x: -containerSize.width / 2, y: -viewSize.height / 2), size: viewSize))
+        cropNode?.maskNode = scrollMask
+        contentNode.removeFromParent()
+        cropNode?.addChild(contentNode)
+        addChild(cropNode!)
+        cropNode?.zPosition = zPosition // Mantener el mismo zPosition
+        contentNode.position = CGPoint(x: 0, y: 0) // Resetear la posición del contenido
+        scrollOffset = 0
+    }
+
+    private func disableScrolling() {
+        scrollEnabled = false
+        if let cn = cropNode {
+            contentNode.removeFromParent()
+            addChild(contentNode)
+            cn.removeFromParent()
+            cropNode = nil
+            scrollMask = nil
+            contentNode.position = CGPoint(x: 0, y: 0) // Resetear la posición
+        }
+        scrollOffset = 0
+    }
+
 
     // Posiciona todos los nodos según la alineación configurada
     private func positionAllNodes(totalHeight: CGFloat) {
@@ -293,6 +400,14 @@ class VerticalContainer: SKNode {
     
     // Get container size
     func getSize() -> CGSize {
+        if let scene = scene {
+            let sceneSize = scene.size
+            if fullHeight{
+                return CGSize(width: containerSize.width, height: sceneSize.height)
+            }else{
+                return containerSize
+            }
+        }
         return containerSize
     }
     

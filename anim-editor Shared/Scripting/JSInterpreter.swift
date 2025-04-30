@@ -372,7 +372,55 @@ class JSInterpreter {
            let result = paramsFn.call(withArguments: []),
            result.isObject {
             
-            return result.toDictionary() as? [String: Any] ?? [:]
+            let typeInfoScript = """
+                    (function() {
+                        var result = {};
+                        var params = getParameters();
+                        Object.keys(params).forEach(function(key) {
+                            result[key] = {
+                                value: params[key],
+                                type: typeof params[key]
+                            };
+                        });
+                        return result;
+                    })();
+                    """
+                    
+            let typeInfo = scriptContext.evaluateScript(typeInfoScript)
+            
+            if let typeInfoDict = typeInfo?.toDictionary() as? [String: [String: Any]] {
+                        // Crear un diccionario con los valores corregidos
+                        var correctedParams: [String: Any] = [:]
+                        
+                        for (key, info) in typeInfoDict {
+                            let value = info["value"]
+                            let originalType = info["type"] as? String
+                            
+                            // Caso 1: Detectar booleanos originales
+                            if originalType == "boolean" {
+                                if let numValue = value as? Int {
+                                    // Convertir 1/0 a Bool
+                                    correctedParams[key] = numValue == 1 ? true : false
+                                    print("✅ Convertido parámetro \(key) de Int(\(numValue)) a Bool (era booleano en JS)")
+                                } else {
+                                    // Mantener el valor tal cual si ya es un Bool
+                                    correctedParams[key] = value
+                                }
+                            }
+                            // Caso 2: Todos los demás valores se mantienen igual
+                            else {
+                                correctedParams[key] = value
+                            }
+                        }
+                        
+                        return correctedParams
+                    }
+                    
+                    // Fallback: si algo falla, devolver los parámetros sin procesar
+                    if let result = paramsFn.call(withArguments: []),
+                       result.isObject {
+                        return result.toDictionary() as? [String: Any] ?? [:]
+                    }
         }
         
         return [:]

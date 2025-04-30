@@ -36,9 +36,9 @@ class ScriptPanel: VerticalContainer {
             padding: CGSize(width: 10, height: 8),
             verticalAlignment: .top,
             horizontalAlignment: .left,
-            showBackground: true,
+            showBackground: false,
             backgroundColor: NSColor(red: 7 / 255, green: 7 / 255, blue: 13 / 255, alpha: 1),
-            cornerRadius: 8
+            cornerRadius: 0
         )
         
         self.scriptManager = scriptManager
