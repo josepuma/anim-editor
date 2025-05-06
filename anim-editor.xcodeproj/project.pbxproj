@@ -9,6 +9,24 @@
 /* Begin PBXBuildFile section */
 		5903B7772DB1A25B004C29A7 /* ParticleAPIExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5903B7762DB1A253004C29A7 /* ParticleAPIExport.swift */; };
 		5903B7782DB1A25B004C29A7 /* ParticleAPIExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5903B7762DB1A253004C29A7 /* ParticleAPIExport.swift */; };
+		591736822DCA58A2004A7275 /* OsuHitObjectType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736812DCA58A0004A7275 /* OsuHitObjectType.swift */; };
+		591736832DCA58A2004A7275 /* OsuHitObjectType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736812DCA58A0004A7275 /* OsuHitObjectType.swift */; };
+		591736852DCA58B1004A7275 /* SliderCurveType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736842DCA58B0004A7275 /* SliderCurveType.swift */; };
+		591736862DCA58B1004A7275 /* SliderCurveType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736842DCA58B0004A7275 /* SliderCurveType.swift */; };
+		591736882DCA58C4004A7275 /* OsuPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736872DCA58C2004A7275 /* OsuPoint.swift */; };
+		591736892DCA58C4004A7275 /* OsuPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736872DCA58C2004A7275 /* OsuPoint.swift */; };
+		5917368B2DCA58D5004A7275 /* OsuHitObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5917368A2DCA58D5004A7275 /* OsuHitObject.swift */; };
+		5917368C2DCA58D5004A7275 /* OsuHitObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5917368A2DCA58D5004A7275 /* OsuHitObject.swift */; };
+		5917368E2DCA58E9004A7275 /* OsuCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5917368D2DCA58E6004A7275 /* OsuCircle.swift */; };
+		5917368F2DCA58E9004A7275 /* OsuCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5917368D2DCA58E6004A7275 /* OsuCircle.swift */; };
+		591736912DCA5915004A7275 /* OsuParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736902DCA5912004A7275 /* OsuParser.swift */; };
+		591736922DCA5915004A7275 /* OsuParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736902DCA5912004A7275 /* OsuParser.swift */; };
+		591736942DCA5953004A7275 /* OsuBeatmapManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736932DCA594D004A7275 /* OsuBeatmapManager.swift */; };
+		591736952DCA5953004A7275 /* OsuBeatmapManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736932DCA594D004A7275 /* OsuBeatmapManager.swift */; };
+		591736972DCA5C00004A7275 /* OsuSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736962DCA5BFD004A7275 /* OsuSlider.swift */; };
+		591736982DCA5C00004A7275 /* OsuSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736962DCA5BFD004A7275 /* OsuSlider.swift */; };
+		5917369B2DCA6FD6004A7275 /* HitSoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5917369A2DCA6FD1004A7275 /* HitSoundManager.swift */; };
+		5917369C2DCA6FD6004A7275 /* HitSoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5917369A2DCA6FD1004A7275 /* HitSoundManager.swift */; };
 		595564B82DBBE3F100A5B2F1 /* TextEffects.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */; };
 		595564B92DBBE3F100A5B2F1 /* TextEffects.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */; };
 		596FB9332C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */; };
@@ -110,6 +128,15 @@
 
 /* Begin PBXFileReference section */
 		5903B7762DB1A253004C29A7 /* ParticleAPIExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleAPIExport.swift; sourceTree = "<group>"; };
+		591736812DCA58A0004A7275 /* OsuHitObjectType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsuHitObjectType.swift; sourceTree = "<group>"; };
+		591736842DCA58B0004A7275 /* SliderCurveType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderCurveType.swift; sourceTree = "<group>"; };
+		591736872DCA58C2004A7275 /* OsuPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsuPoint.swift; sourceTree = "<group>"; };
+		5917368A2DCA58D5004A7275 /* OsuHitObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsuHitObject.swift; sourceTree = "<group>"; };
+		5917368D2DCA58E6004A7275 /* OsuCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsuCircle.swift; sourceTree = "<group>"; };
+		591736902DCA5912004A7275 /* OsuParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsuParser.swift; sourceTree = "<group>"; };
+		591736932DCA594D004A7275 /* OsuBeatmapManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsuBeatmapManager.swift; sourceTree = "<group>"; };
+		591736962DCA5BFD004A7275 /* OsuSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsuSlider.swift; sourceTree = "<group>"; };
+		5917369A2DCA6FD1004A7275 /* HitSoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HitSoundManager.swift; sourceTree = "<group>"; };
 		595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TextEffects.fsh; sourceTree = "<group>"; };
 		596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFTAnalyzer.swift; sourceTree = "<group>"; };
 		596FB9352C74532F00E4733C /* AudioFFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFT.swift; sourceTree = "<group>"; };
@@ -191,6 +218,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		591736802DCA5895004A7275 /* Osu */ = {
+			isa = PBXGroup;
+			children = (
+				591736992DCA6FCA004A7275 /* Sound */,
+				591736962DCA5BFD004A7275 /* OsuSlider.swift */,
+				591736932DCA594D004A7275 /* OsuBeatmapManager.swift */,
+				591736902DCA5912004A7275 /* OsuParser.swift */,
+				5917368D2DCA58E6004A7275 /* OsuCircle.swift */,
+				5917368A2DCA58D5004A7275 /* OsuHitObject.swift */,
+				591736872DCA58C2004A7275 /* OsuPoint.swift */,
+				591736842DCA58B0004A7275 /* SliderCurveType.swift */,
+				591736812DCA58A0004A7275 /* OsuHitObjectType.swift */,
+			);
+			path = Osu;
+			sourceTree = "<group>";
+		};
+		591736992DCA6FCA004A7275 /* Sound */ = {
+			isa = PBXGroup;
+			children = (
+				5917369A2DCA6FD1004A7275 /* HitSoundManager.swift */,
+			);
+			path = Sound;
+			sourceTree = "<group>";
+		};
 		595564B62DBBE3D800A5B2F1 /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
@@ -232,6 +283,7 @@
 		59B86FCE2C656448001D0DC1 /* anim-editor Shared */ = {
 			isa = PBXGroup;
 			children = (
+				591736802DCA5895004A7275 /* Osu */,
 				5989E1DD2DBE95E000FA6B71 /* Settings */,
 				59EC38962DB1341500C674C7 /* Scripting */,
 				59FFB4CC2DAC310F0002EC56 /* Assets */,
@@ -473,9 +525,12 @@
 				59BEB0822D24C5960072974F /* InputFieldNone.swift in Sources */,
 				59B86FF62C65644A001D0DC1 /* GameScene.swift in Sources */,
 				59B8702F2C66A533001D0DC1 /* TextInput.swift in Sources */,
+				5917368E2DCA58E9004A7275 /* OsuCircle.swift in Sources */,
 				596FB9362C74532F00E4733C /* AudioFFT.swift in Sources */,
+				591736892DCA58C4004A7275 /* OsuPoint.swift in Sources */,
 				59B870192C6564F6001D0DC1 /* Texture.swift in Sources */,
 				59EC389F2DB1359600C674C7 /* ScriptPanel.swift in Sources */,
+				5917368C2DCA58D5004A7275 /* OsuHitObject.swift in Sources */,
 				59FFB4B82DAB0A770002EC56 /* Grid.swift in Sources */,
 				5989E1E32DBE960D00FA6B71 /* ProjectConfigManager.swift in Sources */,
 				59BEB0772D24B4CE0072974F /* Effect.swift in Sources */,
@@ -483,17 +538,21 @@
 				59B870072C65649D001D0DC1 /* SpriteManager.swift in Sources */,
 				59FFB4B32DAAF2510002EC56 /* Timeline.swift in Sources */,
 				59EC38982DB1341F00C674C7 /* JSInterpreter.swift in Sources */,
+				591736912DCA5915004A7275 /* OsuParser.swift in Sources */,
 				59EC38822DAF619B00C674C7 /* SpriteInfoPanel.swift in Sources */,
 				5989E1DF2DBE95E900FA6B71 /* ProjectConfig.swift in Sources */,
 				59BEB07F2D24B8900072974F /* EffectsTableNode.swift in Sources */,
 				59FFB4C22DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */,
 				59FFB4DA2DAC355B0002EC56 /* IconManager.swift in Sources */,
+				591736982DCA5C00004A7275 /* OsuSlider.swift in Sources */,
 				59B870042C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				596FB9332C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
+				5917369B2DCA6FD6004A7275 /* HitSoundManager.swift in Sources */,
 				59B86FDD2C65644A001D0DC1 /* GameViewController.swift in Sources */,
 				59B8700A2C6564A8001D0DC1 /* Sprite.swift in Sources */,
 				59FFB4E92DAC89FF0002EC56 /* Separator.swift in Sources */,
 				59FFB4E32DAC3D190002EC56 /* HorizontalContainer.swift in Sources */,
+				591736952DCA5953004A7275 /* OsuBeatmapManager.swift in Sources */,
 				59EC38872DB093BD00C674C7 /* ParticleEffect.swift in Sources */,
 				59B86FDB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
 				59B870102C6564BE001D0DC1 /* Easing.swift in Sources */,
@@ -508,10 +567,12 @@
 				59B8700D2C6564B4001D0DC1 /* Origin.swift in Sources */,
 				59EC388E2DB093D600C674C7 /* ParticlePresets.swift in Sources */,
 				5903B7772DB1A25B004C29A7 /* ParticleAPIExport.swift in Sources */,
+				591736862DCA58B1004A7275 /* SliderCurveType.swift in Sources */,
 				59C71A992CD56C3900FDE954 /* Helpers.swift in Sources */,
 				59EC38842DB0939B00C674C7 /* ParticleEmitter.swift in Sources */,
 				59EC38912DB093E300C674C7 /* ParticleManager.swift in Sources */,
 				59B870132C6564CB001D0DC1 /* TweenManager.swift in Sources */,
+				591736822DCA58A2004A7275 /* OsuHitObjectType.swift in Sources */,
 				59EC38A22DB135B000C674C7 /* ScriptParametersPanel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -523,9 +584,12 @@
 				59BEB0832D24C5960072974F /* InputFieldNone.swift in Sources */,
 				59B86FF72C65644A001D0DC1 /* GameScene.swift in Sources */,
 				59B870302C66A533001D0DC1 /* TextInput.swift in Sources */,
+				5917368F2DCA58E9004A7275 /* OsuCircle.swift in Sources */,
 				596FB9372C74532F00E4733C /* AudioFFT.swift in Sources */,
+				591736882DCA58C4004A7275 /* OsuPoint.swift in Sources */,
 				59B8701A2C6564F6001D0DC1 /* Texture.swift in Sources */,
 				59EC389E2DB1359600C674C7 /* ScriptPanel.swift in Sources */,
+				5917368B2DCA58D5004A7275 /* OsuHitObject.swift in Sources */,
 				59FFB4B92DAB0A770002EC56 /* Grid.swift in Sources */,
 				5989E1E22DBE960D00FA6B71 /* ProjectConfigManager.swift in Sources */,
 				59BEB0762D24B4CE0072974F /* Effect.swift in Sources */,
@@ -533,17 +597,21 @@
 				59B870082C65649D001D0DC1 /* SpriteManager.swift in Sources */,
 				59FFB4B22DAAF2510002EC56 /* Timeline.swift in Sources */,
 				59EC38992DB1341F00C674C7 /* JSInterpreter.swift in Sources */,
+				591736922DCA5915004A7275 /* OsuParser.swift in Sources */,
 				59EC38812DAF619B00C674C7 /* SpriteInfoPanel.swift in Sources */,
 				5989E1E02DBE95E900FA6B71 /* ProjectConfig.swift in Sources */,
 				59BEB0802D24B8900072974F /* EffectsTableNode.swift in Sources */,
 				59FFB4C12DAB47D10002EC56 /* TimelinePreviewNode.swift in Sources */,
 				59FFB4D92DAC355B0002EC56 /* IconManager.swift in Sources */,
+				591736972DCA5C00004A7275 /* OsuSlider.swift in Sources */,
 				59B870052C65648E001D0DC1 /* SpriteParser.swift in Sources */,
 				596FB9342C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */,
+				5917369C2DCA6FD6004A7275 /* HitSoundManager.swift in Sources */,
 				59B86FED2C65644A001D0DC1 /* GameViewController.swift in Sources */,
 				59B8700B2C6564A8001D0DC1 /* Sprite.swift in Sources */,
 				59FFB4E82DAC89FF0002EC56 /* Separator.swift in Sources */,
 				59FFB4E22DAC3D190002EC56 /* HorizontalContainer.swift in Sources */,
+				591736942DCA5953004A7275 /* OsuBeatmapManager.swift in Sources */,
 				59EC38882DB093BD00C674C7 /* ParticleEffect.swift in Sources */,
 				59B86FEB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
 				59B870112C6564BE001D0DC1 /* Easing.swift in Sources */,
@@ -558,10 +626,12 @@
 				59B8700E2C6564B4001D0DC1 /* Origin.swift in Sources */,
 				59EC388F2DB093D600C674C7 /* ParticlePresets.swift in Sources */,
 				5903B7782DB1A25B004C29A7 /* ParticleAPIExport.swift in Sources */,
+				591736852DCA58B1004A7275 /* SliderCurveType.swift in Sources */,
 				59C71A982CD56C3900FDE954 /* Helpers.swift in Sources */,
 				59EC38852DB0939B00C674C7 /* ParticleEmitter.swift in Sources */,
 				59EC38922DB093E300C674C7 /* ParticleManager.swift in Sources */,
 				59B870142C6564CB001D0DC1 /* TweenManager.swift in Sources */,
+				591736832DCA58A2004A7275 /* OsuHitObjectType.swift in Sources */,
 				59EC38A12DB135B000C674C7 /* ScriptParametersPanel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

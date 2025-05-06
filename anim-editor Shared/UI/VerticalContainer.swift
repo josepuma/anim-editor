@@ -208,10 +208,6 @@ class VerticalContainer: SKNode {
 
         // Asegurarse de que contentNode esté alineado con la máscara
         contentNode.position = CGPoint(x: 0, y: (containerHeight / 2) - (newHeight / 2) - padding.height * 2)
-        
-        print("altura mascara:", mask.frame.height)
-        print("altura total:", containerHeight)
-        print("altura contenido:", newHeight)
     }
 
 

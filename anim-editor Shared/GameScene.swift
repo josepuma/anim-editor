@@ -28,6 +28,11 @@ class GameScene: SKScene {
     private var particleManager: ParticleManager!
     private var positionButton: Button!
     private var projectConfigManager: ProjectConfigManager?
+    private var osuBeatmapManager: OsuBeatmapManager?
+    
+    private var hitSoundManager: HitSoundManager!
+    private var lastPlayedTime: Int = 0
+    private var playedHitObjects: Set<Int> = []
     
     private var scriptManager: ParticleScriptManager!
     private var scriptPanel: ScriptPanel!
@@ -69,6 +74,8 @@ class GameScene: SKScene {
         // Elimina áreas de seguimiento existentes y añade la nueva
         view.trackingAreas.forEach { view.removeTrackingArea($0) }
         view.addTrackingArea(trackingArea)
+        
+        setupHitSounds()
 
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
@@ -93,10 +100,20 @@ class GameScene: SKScene {
        }
         
         projectConfigManager?.updatePreference(key: "lastOpenedTime", value: Date())
+        
+        
+        
+        let beatmapPath = path + "/beatmap.osu"
+        setupOsuBeatmap(filePath: beatmapPath)
     }
     
     func updateProjectPreference<T>(key: String, value: T) {
         projectConfigManager?.updatePreference(key: key, value: value)
+    }
+    
+    func setupHitSounds() {
+        let soundsPath = path + "/skin" // Ajusta esto a la ruta donde están tus sonidos
+        hitSoundManager = HitSoundManager(soundsPath: soundsPath, parentNode: self)
     }
     
     func setupTimeline() {
@@ -119,14 +136,14 @@ class GameScene: SKScene {
             timelineComponent.setAudioPlayer(player)
             
             // Configurar callback para manejar cambios de tiempo
-            timelineComponent.onTimeChange = { [weak self] newTime in
+            /*timelineComponent.onTimeChange = { [weak self] newTime in
                 // Puedes realizar acciones adicionales cuando el usuario cambia la posición
                 // Por ejemplo, actualizar la posición de los sprites
                 if let self = self, let player = self.audioPlayer {
                     let gameTime = Int(player.currentTime * 1000)
                     self.spriteManager.updateAll(currentTime: gameTime)
                 }
-            }
+            }*/
         }
     }
     
@@ -189,7 +206,7 @@ class GameScene: SKScene {
         scriptPanel = ScriptPanel(scriptManager: scriptManager)
         
         effectsTableNode = EffectsTableNode()
-        effectsTableNode.spriteManager = spriteManager
+        //effectsTableNode.spriteManager = spriteManager
         effectsTableNode.parentScene = self
         effectsTableNode.zPosition = 111111
         effectsTableNode.position = CGPoint(x: self.size.width/2 , y: 0)
@@ -292,9 +309,10 @@ class GameScene: SKScene {
         let createScriptButton = Button(text: "New Script", padding: CGSize(width: 20, height: 8), buttonColor: accent, buttonBorderColor: accent, textColor: .black, fontSize: 12)
         createScriptButton.setIcon(name: "file-code-2", size: 16, color: .black)
         
-        openFolderButton.onPress = {
-            let url = URL(fileURLWithPath: self.path)
-            NSWorkspace.shared.open(url)
+        createNewScriptButton.onPress = {
+
+            /*let url = URL(fileURLWithPath: self.path)
+            NSWorkspace.shared.open(url)*/
         }
         
         let gridOptions = HorizontalContainer(
@@ -444,7 +462,18 @@ class GameScene: SKScene {
         }
    }
     
-    func setupScriptButtons() {
+    
+    func setupOsuBeatmap(filePath: String) {
+        // Inicializar el manager de beatmap con el SpriteManager existente
+        osuBeatmapManager = OsuBeatmapManager(spriteManager: spriteManager, texturesPath: path)
+        
+        // Cargar y renderizar el beatmap
+        if osuBeatmapManager?.loadBeatmap(filePath: filePath) == true {
+            osuBeatmapManager?.renderBeatmap()
+            print("OSU Beatmap cargado correctamente!")
+        } else {
+            print("Error al cargar el OSU Beatmap!")
+        }
     }
     
     func toggleScriptPanelsVisibility(visible: Bool) {
@@ -467,12 +496,17 @@ class GameScene: SKScene {
         super.update(currentTime)
         if audioPlayer != nil{
             let gameTime = Int(audioPlayer.currentTime * 1000) // Convert to milliseconds or your desired unit
+            //audioPlayer.volume = 0
+            //spriteManager.updateAll(currentTime: gameTime)
+            
             
             if let scriptManager = scriptManager {
                 for (_, scriptScene) in scriptManager.getScriptScenes() {
                     scriptScene.update(atTime: gameTime)
                 }
             }
+            
+            checkAndPlayHitSounds(atTime: gameTime)
             
             /*if let hoveredSprite = currentHoveredSprite {
                 if hoveredSprite.isActive(at: gameTime) {
@@ -495,6 +529,56 @@ class GameScene: SKScene {
         }
     }
     
+    private func checkAndPlayHitSounds(atTime gameTime: Int) {
+        // Solo procesar si tenemos un osuBeatmapManager válido
+        guard let beatmapManager = osuBeatmapManager else { return }
+        
+        // Obtener todos los hitObjects
+        let hitObjects = beatmapManager.getHitObjects()
+        
+        // Verificar cada objeto
+        for (index, hitObject) in hitObjects.enumerated() {
+            // Generar un ID único para cada objeto (usando su índice en el array)
+            let objectID = index
+            
+            // Verificar si este objeto está en su tiempo de hit y no ha sonado aún
+            if gameTime >= hitObject.time - 50 && !playedHitObjects.contains(objectID) {
+                // Marcar como reproducido
+                playedHitObjects.insert(objectID)
+                
+                // Reproducir el hitsound correspondiente
+                hitSoundManager.playHitSound(hitsoundType: hitObject.hitsoundType)
+                
+                // Para sliders, también podríamos añadir sonidos en los puntos intermedios
+                if let slider = hitObject as? OsuSlider {
+                    // Programar sonidos adicionales para cada repetición del slider
+                    //scheduleSliderSounds(slider: slider, baseTime: hitObject.time)
+                }
+            }
+        }
+        
+        // Limpiar objetos reproducidos que ya están muy atrás en el tiempo
+        // para evitar que la colección crezca indefinidamente
+        if gameTime - lastPlayedTime > 10000 { // 10 segundos
+            playedHitObjects.removeAll()
+            lastPlayedTime = gameTime
+        }
+    }
+    
+    private func scheduleSliderSounds(slider: OsuSlider, baseTime: Int) {
+        // Para cada repetición del slider, programar un sonido
+        let sliderDuration = 500 * slider.slides // milisegundos por repetición
+        
+        for i in 1...slider.slides {
+            let endTime = baseTime + (sliderDuration / slider.slides) * i
+            
+            // Usar GCD para programar la reproducción del sonido en el tiempo correcto
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(endTime - Int(audioPlayer.currentTime * 1000))) {
+                self.hitSoundManager.playHitSound(hitsoundType: slider.hitsoundType)
+            }
+        }
+    }
+    
     func setupAudio(filePath: String) {
         let url = URL(fileURLWithPath: filePath)
 
@@ -506,7 +590,7 @@ class GameScene: SKScene {
             //audioPlayer.play()
             // Configurar el timeline después de inicializar el audio
             setupTimelineWithPreview()
-            timelineComponent.updatePlayPauseButton(isPlaying: true)
+            timelineComponent.updatePlayPauseButton(isPlaying: audioPlayer.isPlaying)
             
             // Si el control de volumen ya se inicializó, actualizar su valor
             volumeSlider?.setVolume(CGFloat(audioPlayer.volume), animated: false)
