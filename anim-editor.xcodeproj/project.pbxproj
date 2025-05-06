@@ -27,6 +27,8 @@
 		591736982DCA5C00004A7275 /* OsuSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 591736962DCA5BFD004A7275 /* OsuSlider.swift */; };
 		5917369B2DCA6FD6004A7275 /* HitSoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5917369A2DCA6FD1004A7275 /* HitSoundManager.swift */; };
 		5917369C2DCA6FD6004A7275 /* HitSoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5917369A2DCA6FD1004A7275 /* HitSoundManager.swift */; };
+		5917369E2DCA8753004A7275 /* TimingPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5917369D2DCA874F004A7275 /* TimingPoint.swift */; };
+		5917369F2DCA8753004A7275 /* TimingPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5917369D2DCA874F004A7275 /* TimingPoint.swift */; };
 		595564B82DBBE3F100A5B2F1 /* TextEffects.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */; };
 		595564B92DBBE3F100A5B2F1 /* TextEffects.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */; };
 		596FB9332C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */; };
@@ -137,6 +139,7 @@
 		591736932DCA594D004A7275 /* OsuBeatmapManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsuBeatmapManager.swift; sourceTree = "<group>"; };
 		591736962DCA5BFD004A7275 /* OsuSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsuSlider.swift; sourceTree = "<group>"; };
 		5917369A2DCA6FD1004A7275 /* HitSoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HitSoundManager.swift; sourceTree = "<group>"; };
+		5917369D2DCA874F004A7275 /* TimingPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimingPoint.swift; sourceTree = "<group>"; };
 		595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TextEffects.fsh; sourceTree = "<group>"; };
 		596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFTAnalyzer.swift; sourceTree = "<group>"; };
 		596FB9352C74532F00E4733C /* AudioFFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFT.swift; sourceTree = "<group>"; };
@@ -221,6 +224,7 @@
 		591736802DCA5895004A7275 /* Osu */ = {
 			isa = PBXGroup;
 			children = (
+				5917369D2DCA874F004A7275 /* TimingPoint.swift */,
 				591736992DCA6FCA004A7275 /* Sound */,
 				591736962DCA5BFD004A7275 /* OsuSlider.swift */,
 				591736932DCA594D004A7275 /* OsuBeatmapManager.swift */,
@@ -534,6 +538,7 @@
 				59FFB4B82DAB0A770002EC56 /* Grid.swift in Sources */,
 				5989E1E32DBE960D00FA6B71 /* ProjectConfigManager.swift in Sources */,
 				59BEB0772D24B4CE0072974F /* Effect.swift in Sources */,
+				5917369F2DCA8753004A7275 /* TimingPoint.swift in Sources */,
 				59BEB0792D24B4E10072974F /* Rain.swift in Sources */,
 				59B870072C65649D001D0DC1 /* SpriteManager.swift in Sources */,
 				59FFB4B32DAAF2510002EC56 /* Timeline.swift in Sources */,
@@ -593,6 +598,7 @@
 				59FFB4B92DAB0A770002EC56 /* Grid.swift in Sources */,
 				5989E1E22DBE960D00FA6B71 /* ProjectConfigManager.swift in Sources */,
 				59BEB0762D24B4CE0072974F /* Effect.swift in Sources */,
+				5917369E2DCA8753004A7275 /* TimingPoint.swift in Sources */,
 				59BEB07A2D24B4E10072974F /* Rain.swift in Sources */,
 				59B870082C65649D001D0DC1 /* SpriteManager.swift in Sources */,
 				59FFB4B22DAAF2510002EC56 /* Timeline.swift in Sources */,

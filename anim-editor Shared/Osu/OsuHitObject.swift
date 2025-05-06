@@ -15,6 +15,7 @@ class OsuHitObject {
     var comboColorOffset: Int
     var hitsoundType: Int
     var extras: [String: String] = [:]
+    var hitSample: HitSoundManager.HitSampleInfo = HitSoundManager.HitSampleInfo()
     
     init(position: OsuPoint, time: Int, type: OsuHitObjectType, newCombo: Bool, comboColorOffset: Int, hitsoundType: Int) {
         self.position = position

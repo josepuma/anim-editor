@@ -96,6 +96,10 @@ class OsuBeatmapManager {
         return renderer.texture(from: scene) ?? SKTexture()
     }
     
+    func getParser() -> OsuParser? {
+        return parser
+    }
+    
     func loadBeatmap(filePath: String) -> Bool {
         // Crear parser
         parser = OsuParser(

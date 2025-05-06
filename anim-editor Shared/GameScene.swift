@@ -497,7 +497,7 @@ class GameScene: SKScene {
         if audioPlayer != nil{
             let gameTime = Int(audioPlayer.currentTime * 1000) // Convert to milliseconds or your desired unit
             //audioPlayer.volume = 0
-            //spriteManager.updateAll(currentTime: gameTime)
+           
             
             
             if let scriptManager = scriptManager {
@@ -505,6 +505,8 @@ class GameScene: SKScene {
                     scriptScene.update(atTime: gameTime)
                 }
             }
+            
+            spriteManager.updateAll(currentTime: gameTime)
             
             checkAndPlayHitSounds(atTime: gameTime)
             
@@ -529,6 +531,7 @@ class GameScene: SKScene {
         }
     }
     
+    // 2. Simplifica la función checkAndPlayHitSounds para que vuelva a funcionar
     private func checkAndPlayHitSounds(atTime gameTime: Int) {
         // Solo procesar si tenemos un osuBeatmapManager válido
         guard let beatmapManager = osuBeatmapManager else { return }
@@ -538,7 +541,7 @@ class GameScene: SKScene {
         
         // Verificar cada objeto
         for (index, hitObject) in hitObjects.enumerated() {
-            // Generar un ID único para cada objeto (usando su índice en el array)
+            // Generar un ID único para cada objeto
             let objectID = index
             
             // Verificar si este objeto está en su tiempo de hit y no ha sonado aún
@@ -546,35 +549,134 @@ class GameScene: SKScene {
                 // Marcar como reproducido
                 playedHitObjects.insert(objectID)
                 
-                // Reproducir el hitsound correspondiente
+                // Simplemente reproducir el hitsound básico por ahora
                 hitSoundManager.playHitSound(hitsoundType: hitObject.hitsoundType)
                 
-                // Para sliders, también podríamos añadir sonidos en los puntos intermedios
+                // Para sliders, programar sonidos adicionales
                 if let slider = hitObject as? OsuSlider {
-                    // Programar sonidos adicionales para cada repetición del slider
-                    //scheduleSliderSounds(slider: slider, baseTime: hitObject.time)
+                    scheduleSliderSoundsSimple(slider: slider, baseTime: hitObject.time)
                 }
             }
         }
         
-        // Limpiar objetos reproducidos que ya están muy atrás en el tiempo
-        // para evitar que la colección crezca indefinidamente
-        if gameTime - lastPlayedTime > 10000 { // 10 segundos
+        // Limpiar objetos reproducidos que ya están muy atrás
+        if gameTime - lastPlayedTime > 10000 {
             playedHitObjects.removeAll()
             lastPlayedTime = gameTime
         }
     }
-    
-    private func scheduleSliderSounds(slider: OsuSlider, baseTime: Int) {
-        // Para cada repetición del slider, programar un sonido
-        let sliderDuration = 500 * slider.slides // milisegundos por repetición
+
+    // 3. Función simplificada para programar sonidos de slider
+    private func scheduleSliderSoundsSimple(slider: OsuSlider, baseTime: Int) {
+        let sliderDuration = 500 * slider.slides // ms por repetición
         
         for i in 1...slider.slides {
-            let endTime = baseTime + (sliderDuration / slider.slides) * i
+            let repeatTime = baseTime + (sliderDuration / slider.slides) * i
             
-            // Usar GCD para programar la reproducción del sonido en el tiempo correcto
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(endTime - Int(audioPlayer.currentTime * 1000))) {
-                self.hitSoundManager.playHitSound(hitsoundType: slider.hitsoundType)
+            // Calcular cuándo debe sonar en tiempo real
+            let delayInSeconds = Double(repeatTime - Int(audioPlayer.currentTime * 1000)) / 1000.0
+            
+            // Solo programar si el tiempo es positivo
+            if delayInSeconds > 0 {
+                // Crear un ID único para esta repetición
+                let repeatID = Int.max - (slider.time * 100 + i)
+                
+                if !playedHitObjects.contains(repeatID) {
+                    playedHitObjects.insert(repeatID)
+                    
+                    // Programar el sonido
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delayInSeconds) { [weak self] in
+                        guard let self = self else { return }
+                        
+                        // Determinar el sonido a usar
+                        var edgeSound = slider.hitsoundType
+                        
+                        // Si hay sonidos específicos para los bordes, usarlos
+                        if i < slider.edgeSounds.count {
+                            edgeSound = slider.edgeSounds[i]
+                        }
+                        
+                        // Reproducir el sonido
+                        self.hitSoundManager.playHitSound(hitsoundType: edgeSound)
+                    }
+                }
+            }
+        }
+    }
+
+    // Función auxiliar para obtener solo los objetos relevantes en la ventana de tiempo actual
+    private func getRelevantHitObjects(_ hitObjects: [OsuHitObject], currentTime: Int) -> [(Int, OsuHitObject)] {
+        let windowSize = 1000 // 1 segundo de ventana
+        
+        return hitObjects.enumerated().filter { index, hitObject in
+            let timeDifference = abs(hitObject.time - currentTime)
+            return timeDifference < windowSize && !playedHitObjects.contains(index)
+        }
+    }
+
+    private func scheduleSliderRepeats(slider: OsuSlider, baseTime: Int, currentTime: Int) {
+        let sliderDuration = 500 * slider.slides // ms por repetición
+        let sliderEndTime = baseTime + sliderDuration // Tiempo final del slider
+        
+        // Calcular cuántos sonidos ya deberían haberse reproducido
+        let elapsedTime = currentTime - baseTime
+        if elapsedTime < 0 { return } // No ha llegado al tiempo inicial
+        
+        // Para cada borde del slider (número de repeticiones + 1)
+        for i in 0...slider.slides {
+            let edgeTime = baseTime + (sliderDuration / slider.slides) * i
+            
+            // Solo programar para repeticiones futuras
+            if edgeTime > currentTime {
+                // Calcular cuándo debe sonar (en tiempo real)
+                let delayInSeconds = Double(edgeTime - currentTime) / 1000.0
+                
+                // Asignar un ID único para esta repetición
+                let edgeID = Int.max - (slider.time * 100 + i) // Evitar colisiones con IDs normales
+                
+                // Evitar reproducir si ya está programado
+                if !playedHitObjects.contains(edgeID) {
+                    playedHitObjects.insert(edgeID)
+                    
+                    // Usar GCD para programar la reproducción
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delayInSeconds) { [weak self] in
+                        guard let self = self else { return }
+                        
+                        // Determinar el sonido correcto para este borde específico
+                        var edgeSound = slider.hitsoundType
+                        
+                        // Si hay edgeSounds definidos, usar el correspondiente a esta posición
+                        if i < slider.edgeSounds.count {
+                            edgeSound = slider.edgeSounds[i]
+                        } else if i == slider.slides && slider.edgeSounds.count > 0 {
+                            // Para el borde final, si no hay un sonido específico pero hay otros sonidos,
+                            // usar el último disponible
+                            edgeSound = slider.edgeSounds.last ?? slider.hitsoundType
+                        }
+                        
+                        // Si es el último borde y no hay un sonido específico, agregar whistle por defecto
+                        if i == slider.slides && slider.edgeSounds.isEmpty {
+                            // Típicamente los finales de slider tienen whistle (2) o finish (4)
+                            edgeSound = slider.hitsoundType | 2
+                        }
+                        
+                        // Procesar el SampleSet si está disponible (no implementado en este ejemplo)
+                        let sampleSet: HitSoundManager.SoundSampleSet = .normal
+                        if i < slider.edgeSets.count {
+                            // Análisis del formato "normalSet:additionSet"
+                            let setParts = slider.edgeSets[i].split(separator: ":")
+                            if setParts.count > 0 {
+                                // Usar el primer valor como normalSet
+                                let normalSetStr = String(setParts[0])
+                                let normalSet = HitSoundManager.SoundSampleSet.fromString(normalSetStr)
+                                self.hitSoundManager.setDefaultSampleSet(normalSet)
+                            }
+                        }
+                        
+                        // Reproducir el sonido
+                        self.hitSoundManager.playHitSound(hitsoundType: edgeSound)
+                    }
+                }
             }
         }
     }

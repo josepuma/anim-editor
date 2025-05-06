@@ -448,7 +448,7 @@ struct TextStyleConfig {
         addSpriteMethods(to: spriteObj, for: sprite)
         
         // Añadir sprite al manager
-        particleManager.spriteManager.addSprite(sprite)
+        //particleManager.spriteManager.addSprite(sprite)
         
         return spriteObj!
     }

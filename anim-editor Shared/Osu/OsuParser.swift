@@ -17,6 +17,7 @@ class OsuParser {
     
     // Datos parseados
     private var hitObjects: [OsuHitObject] = []
+    private var timingPoints: [TimingPoint] = []
     private var beatmapInfo: [String: String] = [:]
     private var comboNumber: Int = 1
     
@@ -75,7 +76,7 @@ class OsuParser {
                         }
                     }
                     
-                case "General", "Editor", "Metadata", "Difficulty", "Events", "TimingPoints":
+                case "General", "Editor", "Metadata", "Difficulty", "Events":
                     if trimmedLine.contains(":") {
                         let parts = trimmedLine.split(separator: ":", maxSplits: 1)
                         if parts.count == 2 {
@@ -83,6 +84,12 @@ class OsuParser {
                             let value = String(parts[1]).trimmingCharacters(in: .whitespaces)
                             beatmapInfo[key] = value
                         }
+                    }
+                    
+                case "TimingPoints":
+                    if !trimmedLine.contains(":") && trimmedLine.contains(",") {
+                        let timingPoint = TimingPoint(fromString: trimmedLine)
+                        timingPoints.append(timingPoint)
                     }
                     
                 case "HitObjects":
@@ -153,6 +160,9 @@ class OsuParser {
             // Parsear extras si está disponible
             if parts.count > 5 {
                 circle.extras["extras"] = parts[5]
+                if let lastPart = parts.last, lastPart.contains(":") {
+                    circle.hitSample = HitSoundManager.HitSampleInfo(fromString: lastPart)
+                }
             }
             
             hitObjects.append(circle)
@@ -194,6 +204,7 @@ class OsuParser {
             if parts.count > 9 {
                 edgeSets = parts[9].split(separator: "|").map { String($0) }
             }
+        
             
             let slider = OsuSlider(
                 position: position,
@@ -210,8 +221,45 @@ class OsuParser {
                 edgeSets: edgeSets
             )
             
+            if parts.count > 10 { // El último campo después de edgeSets
+                slider.extras["extras"] = parts[10]
+                
+                // Parsear hitSample si está disponible (el último campo)
+                if let lastPart = parts.last, lastPart.contains(":") {
+                    slider.hitSample = HitSoundManager.HitSampleInfo(fromString: lastPart)
+                }
+            }
+            
             hitObjects.append(slider)
         }
+    }
+    
+    func findActiveTimingPoint(at time: Int) -> TimingPoint? {
+        // Timing points están ordenados por tiempo
+        var lastUninheritedPoint: TimingPoint? = nil
+        var closestPoint: TimingPoint? = nil
+        
+        for point in timingPoints {
+            if point.time <= time {
+                closestPoint = point
+                
+                if point.uninherited {
+                    lastUninheritedPoint = point
+                }
+            } else {
+                break // Los timing points posteriores ya no aplican
+            }
+        }
+        
+        // Si el punto más cercano es heredado, necesitamos combinarlo con el último punto no heredado
+        if let closestPoint = closestPoint, !closestPoint.uninherited, let parent = lastUninheritedPoint {
+            var combined = closestPoint
+            // Los puntos heredados usan el beatLength del padre
+            combined.beatLength = parent.beatLength
+            return combined
+        }
+        
+        return closestPoint
     }
     
     func createSprites() {
