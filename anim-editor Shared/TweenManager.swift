@@ -492,6 +492,10 @@ extension TweenManager {
         return moveTweens
     }
     
+    func getScaleVecTweens() -> [Tween<CGPoint>] {
+        return scaleVecTweens
+    }
+    
     func getScaleTweens() -> [Tween<CGFloat>] {
         return scaleTweens
     }
@@ -500,11 +504,28 @@ extension TweenManager {
         return rotateTweens
     }
     
+    func getMoveXTweens() -> [Tween<CGFloat>] {
+        return moveXTweens
+    }
+    
+    func getMoveYTweens() -> [Tween<CGFloat>] {
+        return moveYTweens
+    }
+    
     func getFadeTweens() -> [Tween<CGFloat>] {
         return fadeTweens
     }
     
     func getColorTweens() -> [Tween<SKColor>] {
         return colorTweens
+    }
+    
+    func getBlendModeKeyframes() -> [Keyframe<CGFloat>] {
+        return blendModeKeyframes
+    }
+    
+    // Obtener tweens de blend mode
+    func getBlendModeTweens() -> [Tween<CGFloat>] {
+        return blendModeTweens
     }
 }

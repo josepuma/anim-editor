@@ -75,7 +75,7 @@ class GameScene: SKScene {
         view.trackingAreas.forEach { view.removeTrackingArea($0) }
         view.addTrackingArea(trackingArea)
         
-        setupHitSounds()
+        //setupHitSounds()
 
         let audioFilePath = path + "audio.mp3"
         setupAudio(filePath: audioFilePath)
@@ -103,8 +103,8 @@ class GameScene: SKScene {
         
         
         
-        let beatmapPath = path + "/beatmap.osu"
-        setupOsuBeatmap(filePath: beatmapPath)
+        //let beatmapPath = path + "/beatmap.osu"
+        //setupOsuBeatmap(filePath: beatmapPath)
     }
     
     func updateProjectPreference<T>(key: String, value: T) {
@@ -301,7 +301,7 @@ class GameScene: SKScene {
         let openScriptButton = Button(text: "Open Scripts Folder", padding: CGSize(width: 20, height: 8), buttonColor: accent, buttonBorderColor: accent, textColor: .black, fontSize: 12)
         openScriptButton.setIcon(name: "folder-open", size: 16, color: .black)
         
-        let createNewScriptButton = Button(text: "Open Scripts Folder", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12)
+        let createNewScriptButton = Button(text: "Export to OSB", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: buttonColorText, fontSize: 12)
         
         positionButton = Button(text: "X: 320 - Y: 240", padding: CGSize(width: 20, height: 8), buttonColor: backgroundColorButton, buttonBorderColor: backgroundColorButton, textColor: accent, fontSize: 12)
         positionButton.setIcon(name: "grid-4x4", size: 16, color: accent)
@@ -310,9 +310,18 @@ class GameScene: SKScene {
         createScriptButton.setIcon(name: "file-code-2", size: 16, color: .black)
         
         createNewScriptButton.onPress = {
-
-            /*let url = URL(fileURLWithPath: self.path)
-            NSWorkspace.shared.open(url)*/
+            let exporter = OSBExporter()
+                
+            // Guardar las texturas en una carpeta
+            //let texturesFolder = "\(path)/sprites"
+            //exporter.saveTextures(spriteManager: spriteManager, outputFolder: texturesFolder)
+            
+            // Exportar el archivo .osb
+            let osbPath = "\(self.path)/storyboard.osb"
+            if exporter.exportToOSB(scriptManager: self.scriptManager, outputPath: osbPath) {
+                // Mostrar mensaje de éxito
+                print("Storyboard exportado correctamente")
+            }
         }
         
         let gridOptions = HorizontalContainer(
@@ -506,9 +515,9 @@ class GameScene: SKScene {
                 }
             }
             
-            spriteManager.updateAll(currentTime: gameTime)
+            //spriteManager.updateAll(currentTime: gameTime)
             
-            checkAndPlayHitSounds(atTime: gameTime)
+            //checkAndPlayHitSounds(atTime: gameTime)
             
             /*if let hoveredSprite = currentHoveredSprite {
                 if hoveredSprite.isActive(at: gameTime) {

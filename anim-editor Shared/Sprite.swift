@@ -7,6 +7,8 @@ class Sprite : Equatable {
     private var initialPosition: CGPoint
     private var isHovered = false
     private var isSelected = false
+    private var origin: Origin
+    private var spritePath: String
     
     static func == (lhs: Sprite, rhs: Sprite) -> Bool {
         // Dos sprites son iguales si su nodo es el mismo
@@ -15,6 +17,18 @@ class Sprite : Equatable {
     
     var node: SKSpriteNode {
         return textureNode
+    }
+    
+    var spriteOrigin: Origin {
+        return origin
+    }
+    
+    var position: CGPoint {
+        return initialPosition
+    }
+    
+    var path: String {
+        return spritePath
     }
     
     func isActive(at time: Int) -> Bool {
@@ -26,13 +40,15 @@ class Sprite : Equatable {
         set { zIndexPosition = newValue }
     }
 
-    init(texture: SKTexture, origin : Origin = .centre) {
+    init(texture: SKTexture, origin : Origin = .centre, spritePath: String = "") {
         textureNode = SKSpriteNode(texture: texture)
         textureNode.size = texture.size()
         textureNode.colorBlendFactor = 1
         textureNode.anchorPoint = origin.anchorPoint
         initialPosition = .zero
         tweenManager = TweenManager()
+        self.origin = origin
+        self.spritePath = spritePath
     }
     
     func setInitialPosition(position: CGPoint) {
@@ -188,6 +204,19 @@ extension Sprite {
         }
     }
     
+    func getScaleVecTweens() -> [TweenInfo] {
+        // Implementar acceso a los moveTweens del tweenManager
+        return tweenManager.getScaleVecTweens().map { tween in
+            TweenInfo(
+                startTime: tween.startTime,
+                endTime: tween.endTime,
+                startValue: tween.startValue,
+                endValue: tween.endValue,
+                easing: tween.easing
+            )
+        }
+    }
+    
     func getScaleTweens() -> [TweenInfo] {
         return tweenManager.getScaleTweens().map { tween in
             TweenInfo(
@@ -224,6 +253,30 @@ extension Sprite {
         }
     }
     
+    func getMoveXTweens() -> [TweenInfo] {
+        return tweenManager.getMoveXTweens().map { tween in
+            TweenInfo(
+                startTime: tween.startTime,
+                endTime: tween.endTime,
+                startValue: tween.startValue,
+                endValue: tween.endValue,
+                easing: tween.easing
+            )
+        }
+    }
+    
+    func getMoveYTweens() -> [TweenInfo] {
+        return tweenManager.getMoveYTweens().map { tween in
+            TweenInfo(
+                startTime: tween.startTime,
+                endTime: tween.endTime,
+                startValue: tween.startValue,
+                endValue: tween.endValue,
+                easing: tween.easing
+            )
+        }
+    }
+    
     func getColorTweens() -> [TweenInfo] {
         return tweenManager.getColorTweens().map { tween in
             TweenInfo(
@@ -234,5 +287,9 @@ extension Sprite {
                 easing: tween.easing
             )
         }
+    }
+    
+    func getBlendModeInfo() -> (keyframes: [TweenManager.Keyframe<CGFloat>], tweens: [TweenManager.Tween<CGFloat>]) {
+        return (tweenManager.getBlendModeKeyframes(), tweenManager.getBlendModeTweens())
     }
 }

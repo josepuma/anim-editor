@@ -17,7 +17,7 @@ class ParticleScriptManager {
     // Intérprete JavaScript
     private let interpreter: JSInterpreter
     private var scriptScenes: [String: ScriptScene] = [:]
-    private var scriptExecutionOrder: [String] = []
+    var scriptExecutionOrder: [String] = []
     
     // Directorios de trabajo
     private let scriptsFolder: String

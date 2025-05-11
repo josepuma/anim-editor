@@ -434,7 +434,7 @@ struct TextStyleConfig {
         }
         let originSprite = Origin(rawValue: origin) ?? .centre
         // Crear sprite
-        let sprite = Sprite(texture: texture, origin: originSprite)
+        let sprite = Sprite(texture: texture, origin: originSprite, spritePath: texturePath)
         
         // Añadir a lista de sprites del script
         if let scriptId = interpreter?.currentScriptId {

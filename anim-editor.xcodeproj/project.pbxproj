@@ -35,6 +35,8 @@
 		596FB9342C744C1200E4733C /* AudioFFTAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */; };
 		596FB9362C74532F00E4733C /* AudioFFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9352C74532F00E4733C /* AudioFFT.swift */; };
 		596FB9372C74532F00E4733C /* AudioFFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596FB9352C74532F00E4733C /* AudioFFT.swift */; };
+		597B69782DD0EF1400292448 /* OSBExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 597B69772DD0EF1400292448 /* OSBExporter.swift */; };
+		597B69792DD0EF1400292448 /* OSBExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 597B69772DD0EF1400292448 /* OSBExporter.swift */; };
 		5989E1DB2DBE8E9100FA6B71 /* ScriptScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5989E1DA2DBE8E8F00FA6B71 /* ScriptScene.swift */; };
 		5989E1DC2DBE8E9100FA6B71 /* ScriptScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5989E1DA2DBE8E8F00FA6B71 /* ScriptScene.swift */; };
 		5989E1DF2DBE95E900FA6B71 /* ProjectConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5989E1DE2DBE95E600FA6B71 /* ProjectConfig.swift */; };
@@ -143,6 +145,7 @@
 		595564B72DBBE3E100A5B2F1 /* TextEffects.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TextEffects.fsh; sourceTree = "<group>"; };
 		596FB9322C744C1200E4733C /* AudioFFTAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFTAnalyzer.swift; sourceTree = "<group>"; };
 		596FB9352C74532F00E4733C /* AudioFFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFFT.swift; sourceTree = "<group>"; };
+		597B69772DD0EF1400292448 /* OSBExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSBExporter.swift; sourceTree = "<group>"; };
 		5989E1DA2DBE8E8F00FA6B71 /* ScriptScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptScene.swift; sourceTree = "<group>"; };
 		5989E1DE2DBE95E600FA6B71 /* ProjectConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectConfig.swift; sourceTree = "<group>"; };
 		5989E1E12DBE960600FA6B71 /* ProjectConfigManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectConfigManager.swift; sourceTree = "<group>"; };
@@ -263,6 +266,14 @@
 			path = Audio;
 			sourceTree = "<group>";
 		};
+		597B69762DD0EF0D00292448 /* Exporters */ = {
+			isa = PBXGroup;
+			children = (
+				597B69772DD0EF1400292448 /* OSBExporter.swift */,
+			);
+			path = Exporters;
+			sourceTree = "<group>";
+		};
 		5989E1DD2DBE95E000FA6B71 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
@@ -287,6 +298,7 @@
 		59B86FCE2C656448001D0DC1 /* anim-editor Shared */ = {
 			isa = PBXGroup;
 			children = (
+				597B69762DD0EF0D00292448 /* Exporters */,
 				591736802DCA5895004A7275 /* Osu */,
 				5989E1DD2DBE95E000FA6B71 /* Settings */,
 				59EC38962DB1341500C674C7 /* Scripting */,
@@ -559,6 +571,7 @@
 				59FFB4E32DAC3D190002EC56 /* HorizontalContainer.swift in Sources */,
 				591736952DCA5953004A7275 /* OsuBeatmapManager.swift in Sources */,
 				59EC38872DB093BD00C674C7 /* ParticleEffect.swift in Sources */,
+				597B69782DD0EF1400292448 /* OSBExporter.swift in Sources */,
 				59B86FDB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
 				59B870102C6564BE001D0DC1 /* Easing.swift in Sources */,
 				59FFB4E62DAC4CF50002EC56 /* Text.swift in Sources */,
@@ -619,6 +632,7 @@
 				59FFB4E22DAC3D190002EC56 /* HorizontalContainer.swift in Sources */,
 				591736942DCA5953004A7275 /* OsuBeatmapManager.swift in Sources */,
 				59EC38882DB093BD00C674C7 /* ParticleEffect.swift in Sources */,
+				597B69792DD0EF1400292448 /* OSBExporter.swift in Sources */,
 				59B86FEB2C65644A001D0DC1 /* AppDelegate.swift in Sources */,
 				59B870112C6564BE001D0DC1 /* Easing.swift in Sources */,
 				59FFB4E52DAC4CF50002EC56 /* Text.swift in Sources */,

@@ -27,3 +27,14 @@ enum Origin : String{
         }
     }
 }
+
+extension Origin {
+    // Retorna el nombre del caso con la primera letra en mayúscula
+    var name: String {
+        // Obtener el nombre del caso como string
+        let name = String(describing: self)
+        
+        // Convertir la primera letra a mayúscula
+        return name.prefix(1).uppercased() + name.dropFirst()
+    }
+}
